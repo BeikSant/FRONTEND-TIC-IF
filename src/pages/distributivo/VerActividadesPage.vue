@@ -1,0 +1,171 @@
+<template>
+    <div class="flex flex-center q-ma-none">
+        <q-card class="my-card__distributivo-ver">
+
+            <q-card-section class="card-title-actividades">
+                <div class="flex">
+                    <div class="col q-table__title" inline><b>Actividades del distributivo</b></div>
+                    <q-btn v-if="authStore.rol == 'director'" @click="fixed = true" size="sm"
+                        class="col-1 bton-lista-docente" color="green" style="color:white">Nuevo
+                        Distributivo</q-btn>
+                </div>
+
+            </q-card-section>
+            <q-tabs indicator-color="white" v-model="funSustantivaModel" dense class="bg-primary text-white shadow-2"
+                inline-label>
+                <q-tab v-for="(fs, index) in funcionesSustantivas" :key="index" :label=fs.nombre :name=fs.nombre />
+            </q-tabs>
+
+            <q-tab-panels animated v-model="funSustantivaModel" class="bg-blue-1">
+                <q-tab-panel v-for="(fs, index) in funcionesSustantivas" :key="index" :label=fs.nombre :name=fs.nombre>
+                    <div class="q-pa-md">
+                        <q-table :rows-per-page-options="[5, 10, 0]" class="q-table-table" :pagination="{ rowsPerPage: 10 }"
+                            rows-per-page-label="Resultados por página" :rows=fs.actividadesDistributivo :columns=columns
+                            dense row-key="name" />
+                    </div>
+                </q-tab-panel>
+            </q-tab-panels>
+        </q-card>
+    </div>
+
+    <q-dialog v-model="fixed">
+        <q-card>
+            <q-card-section class="header-crear-docente">
+                <div class="text-h6">Cargar Nuevo Distributivo Docente</div>
+            </q-card-section>
+
+            <q-separator inset color="grey-8" />
+
+            <q-card-section style="max-height: 70vh" class="body-crear-docente">
+                <div class="q-pa-md">
+                    <div class="q-gutter2-sm row items-start">
+                        <q-uploader class="shadow-8" id="archivoExcel" label="Archivos subidos" style="max-width: 400px"
+                            @input="subirExcel" />
+                    </div>
+                </div>
+            </q-card-section>
+
+            <q-separator inset color="grey-8" />
+
+            <q-card-actions class="q-mt-md">
+                <q-btn @click="fixed = false" color="negative">Cerrar</q-btn>
+                <q-btn @click="guardarActividades" color="positive">Aceptar</q-btn>
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
+</template>
+
+<script setup>
+import { api } from 'src/boot/axios'
+import { ref } from 'vue';
+import readXlsxFile from 'read-excel-file';
+import { useQuasar } from 'quasar'
+import distributivo from 'src/controller/distributivo';
+import { useAuthStore } from 'src/stores/auth-stores';
+
+const $q = useQuasar()
+const authStore = useAuthStore()
+const fixed = ref(false);
+const actividadesSubir = [];
+const funSustantivaModel = ref('')  // Es para los q-tabs
+const funcionesSustantivas = ref([])   // Funcines sustantivas con sus actividades del distributivo
+const columns = [
+    { name: 'sigla', align: 'center', label: 'Codificación', field: 'sigla' },
+    //{ name: 'nombre', align: 'center', label: 'Nombre', field: 'nombre' },
+    { name: 'descripcion', align: 'left', label: 'Descripcion', field: 'descripcion', style: 'max-width: 500px; white-space: break-spaces;' },
+]
+
+const obtenerActividades = async () => {
+    await distributivo.obtenerTodasActividades((res) => {
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status != 200) return generateMessage('NO OK', res.message)
+        funcionesSustantivas.value = res.data.actividades.funcionesSustantivas
+        funSustantivaModel.value = funcionesSustantivas.value[0].nombre
+    })
+}
+
+const guardarActividades = async () => {
+    await distributivo.guardarNuevoDistributivo((res) => {
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al cargar las actividades del distributivo')
+        generateMessage('OK', res.data.message)
+        obtenerActividades()
+        fixed.value = false
+    })
+}
+
+async function subirExcel(event) {
+    const file = event.target.files[0]
+    actividadesSubir.value = []
+    await readXlsxFile(file).then((rows) => {
+        let row = {}
+        for (let i = 1; i < rows.length; i++) {
+            if (rows[i][0] != null && rows[i][0] != 'null') {
+                if (i != 1) actividadesSubir.push(row)
+                row = {}
+                row.nombre = rows[i][0]
+                row.actividadesDistributivo = []
+            }
+            row.actividadesDistributivo.push({
+                sigla: rows[i][1],
+                descripcion: rows[i][2]
+            })
+        }
+        actividadesSubir.push(row)
+    })
+}
+
+const generateMessage = (tipo, message) => {
+    if (tipo == 'OK') {
+        $q.notify({
+            color: 'green-5',
+            textColor: 'white',
+            icon: 'mdi-check-bold',
+            message: message
+        })
+    } else {
+        $q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'warning',
+            message: message
+        })
+    }
+}
+
+obtenerActividades()
+
+
+
+</script>
+
+<style lang="scss">
+.bton-lista-docente {
+    background-color: $primary;
+}
+
+.my-custom-toggle {
+    width: 100%;
+}
+
+
+
+.my-card__distributivo-ver {
+    margin: 1rem;
+    width: 100%;
+    height: 100%;
+}
+
+.my-card__distributivo-ver h5 {
+    margin: 10px;
+}
+
+.my-sticky-header-table tr:first-child th {
+    background-color: rgba($color: $primary, $alpha: 0.9);
+}
+
+.card-title-actividades {
+    background-color: $primary;
+    color: white;
+}
+</style>
