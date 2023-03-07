@@ -183,8 +183,8 @@ export default {
 
         const obtenerPerfil = async () => {
             await docente.obtenerPerfilDocente((res) => {
-                if (res.status != 200) return centralErrors.presentarMensaje('NOK', res.message)
-                if (res.status == 401) { centralErrors.presentarMensaje('NOK', res.message); return router.push({ path: '/' }) }
+                if (res.status == 401) { generateMessage('NOK', res.message); return router.push({ path: '/login' }) }
+                if (res.status != 200) return generateMessage('NOK', res.message)
                 perfil.value = {
                     nombre: `${res.data.docente.primerNombre} ${res.data.docente.primerApellido}`,
                     rol: useAuth.rol.toUpperCase()
