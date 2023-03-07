@@ -7,7 +7,7 @@
                     <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
 
                     <q-toolbar-title class="title-main">
-                        <img class="nav-img" alt="Carrera logo" src="public/icons/favicon-512x512.png" style="width: 30px">
+                        <img class="nav-img" alt="Carrera logo" src="~assets/favicon-512x512.png" style="width: 40px">
 
                         <div class="div1 q-ml-md">
                             <b>Carrera de&nbsp;</b>

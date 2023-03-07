@@ -1,44 +1,81 @@
 <template>
     <div class="q-pa-md">
-        <q-table title="Lista de Docentes" :rows="rows" :columns="columns" row-key="name"
-            :rows-per-page-options="[5, 10, 0]">
-            <template v-slot:top>
-                <div class="col q-table__title"><b>Lista de Docentes</b></div>
-                <q-btn @click="formularioCrear()" class="col-1 bton-lista-docente" color="secondary" style="color:white"
-                    icon="mdi-account-plus" />
-            </template>
+        <q-card class="my-card">
+            <q-card-section class="card-title-gestionar">
+                <div class="row justify-between">
+                    <div class="col-9">
+                        <div class="col q-table__title" inline><b>Administrar Docentes</b></div>
+                    </div>
+                    <div class="col-3" align="right">
+                        <q-btn @click="formularioCrear()" size="sm" class="col-1 bton-lista-docente" color="secondary"
+                            style="color:white">NUEVO DOCENTE</q-btn>
+                    </div>
+                </div>
+            </q-card-section>
+            <q-card-section>
+                <q-table title="Lista de Docentes" :rows="rows" :columns="columns" row-key="name"
+                    :rows-per-page-options="[5, 10, 0]">
+                    <template v-slot:top>
+                        <div class="col q-table__title"><b>Lista de Docentes</b></div>
 
-            <template v-slot:header="props">
-                <q-tr :props="props">
-                    <q-th v-for="col in props.cols" :key="col.name" :props="props">
-                        {{ col.label }}
-                    </q-th>
-                    <q-th auto-width>Opciones</q-th>
+                    </template>
 
-                </q-tr>
-            </template>
+                    <template v-slot:header="props">
+                        <q-tr :props="props">
+                            <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                                {{ col.label }}
+                            </q-th>
+                            <q-th auto-width>Opciones</q-th>
 
-            <template v-slot:body="props">
-                <q-tr :props="props">
-                    <q-td v-for="col in props.cols" :key="col.name" :props="props">
-                        <q-btn v-if="col.name == 'estado'" size="sm" :color="col.value ? 'positive' : 'negative'" round
-                            dense :icon="col.value ? 'mdi-check-bold' : 'mdi-close-thick'"
-                            @click="cuadroConfirmacionEstado(props.row)" />
-                        <a v-else>{{ col.value }}</a>
-                    </q-td>
+                        </q-tr>
+                    </template>
 
-                    <q-td align="center" auto-width>
-                        <q-btn size="sm" color="warning" round dense @click="formularioEditar(props.cols[1].value)"
-                            icon="mdi-account-edit" />
-                    </q-td>
-                </q-tr>
-            </template>
-        </q-table>
+                    <template v-slot:body="props">
+                        <q-tr :props="props"
+                            :class="!props.row.estado ? 'bg-red-1 ' : '' || props.row.isActual ? 'bg-indigo-1' : ''">
+                            <q-td v-for="col in props.cols" :key="col.name" :props="props">
+                                <div style="display: inline;" v-if="col.name == 'estado'">
+                                    <q-btn size="sm" :color="col.value ? 'positive' : 'negative'" dense
+                                        :label="col.value ? 'ACTIVO' : 'INACTIVO'"
+                                        @click="!props.row.isActual ? cuadroConfirmacionEstado(props.row) : ''" />
+                                    <q-tooltip v-if="!props.row.isActual" :offset="[10, 10]" class="bg-indigo">
+                                        Cambiar estado cuenta
+                                    </q-tooltip>
+                                </div>
+                                <template v-else-if="col.name == 'rol'">
+                                    <q-select v-if="!props.row.isActual" v-model="props.row.rol" dense
+                                        :options="selectRoles" @update:model-value="cambiarRol(props.row)">
+                                    </q-select>
+                                    <template v-else>
+                                        {{ col.value }}
+                                    </template>
+                                </template>
+                                <template v-else>{{ col.value }}</template>
+                            </q-td>
+
+                            <q-td align="center" auto-width>
+                                <div style="display: inline;">
+                                    <q-btn size="sm" color="warning" round dense @click="formularioEditar(props.row)"
+                                        icon="mdi-account-edit" />
+                                    <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                        Editar docente
+                                    </q-tooltip>
+                                </div>
+                            </q-td>
+                        </q-tr>
+                    </template>
+                </q-table>
+            </q-card-section>
+        </q-card>
+    </div>
+
+    <div class="q-pa-md">
+
     </div>
 
     <q-dialog v-model="formulario">
         <q-card>
-            <q-card-section class="header-crear-docente">
+            <q-card-section class="header-crear-docente card-title-gestionar">
                 <div class="text-h6">{{ titulo_form }}</div>
             </q-card-section>
 
@@ -50,8 +87,7 @@
                         <q-input class="col label-mid" filled v-model="first_name" label="Primer nombre" lazy-rules
                             :rules="[val => val && val.length > 0 || 'Completa este campo']" />
 
-                        <q-input class="col label-mid" filled v-model="second_name" label="Segundo nombre" lazy-rules
-                            :rules="[val => val && val.length > 0 || 'Completa este campo']" />
+                        <q-input class="col label-mid" filled v-model="second_name" label="Segundo nombre" />
                     </div>
 
                     <div class="row">
@@ -67,12 +103,14 @@
                         val => /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i.test(val + '@unl.edu.ec') || 'Formato de email no válido']" />
 
                     <div class="row">
-                        <q-input class="col label-mid" filled v-model="cedula" label="Numero de Cédula" lazy-rules
-                            :rules="[val => val && val.length > 0 || 'Completa este campo', val => val.length == 10 && !isNaN(val) || 'Cédula no correcta']" />
-
-                        <q-select class="col label-mid" filled v-model="carrera" :options="options" label="Carrera"
-                            :rules="[val => val && val.length > 0 || 'Selecciona una carrera']" />
-
+                        <div class="col-6">
+                            <q-input class="col label-mid" filled v-model="cedula" label="Numero de Cédula" lazy-rules
+                                :rules="[val => val && val.length > 0 || 'Completa este campo', val => val.length == 10 && !isNaN(val) || 'Cédula no correcta']" />
+                        </div>
+                        <div class="col-6">
+                            <q-input class="col label-mid" filled v-model="dedicacion" label="Dedicación" lazy-rules
+                                :rules="[val => val && val.length > 0 || 'Completa este campo']" />
+                        </div>
                     </div>
                     <q-separator class="q-separator-crear-docente" />
                     <q-card-actions align="right" class="header-crear-docente">
@@ -126,19 +164,22 @@ const second_surname = ref(null)
 const email = ref(null)
 const cedula = ref(null)
 const carrera = ref(null)
+const dedicacion = ref(null)
 const options = ref([])
 const idEditdocente = ref(null)
+const selectRoles = ['DOCENTE', 'DIRECTOR']
 
 const confirm = ref(false)
 const docenteestado = ref(null)
 
 const Listdocentes = ref(null)
 const columns = [
-    { name: 'nombre', align: 'center', label: 'Nombre', field: 'nombre' },
+    { name: 'nombre', align: 'center', label: 'Nombre', field: 'nombre', style: 'max-width: 200px; white-space: break-spaces;' },
     { name: 'cedula', align: 'center', label: 'Cédula', field: 'cedula' },
     { name: 'correo', align: 'center', label: 'Email', field: 'correo' },
-    { name: 'dedicacion', align: 'center', label: 'Dedicación', field: 'dedicacion' },
-    { name: 'estado', align: 'center', label: "Estado", field: 'estado' },
+    { name: 'dedicacion', align: 'center', label: 'Dedicación', field: 'dedicacion', style: 'max-width: 200px; white-space: break-spaces;' },
+    { name: 'rol', align: 'center', label: 'Rol', field: 'rol' },
+    { name: 'estado', align: 'center', label: "Estado Cuenta", field: 'estado' },
 ]
 const rows = ref([])
 const formulario = ref(false)
@@ -151,11 +192,18 @@ const obtenerDocentes = async () => {
         let docentes = []
         Listdocentes.value = res.data
         for (let i = 0; i < Listdocentes.value.length; i++) {
-            const docente = Listdocentes.value[i].docente
+            const docente = Listdocentes.value[i]
             const nombre = `${docente.primerNombre} ${docente.segundoNombre} ${docente.primerApellido} ${docente.segundoApellido}`
             docentes.push({
+                id: docente._id,
                 nombre: nombre,
-                estado: Listdocentes.value[i].estado,
+                primerNombre: docente.primerNombre,
+                segundoNombre: docente.segundoNombre,
+                primerApellido: docente.primerApellido,
+                segundoApellido: docente.segundoApellido,
+                estado: docente.usuario.estado,
+                isActual: docente.isActual ? true : false,
+                rol: docente.usuario.rol.nombre.toUpperCase(),
                 cedula: docente.cedula,
                 correo: docente.correo,
                 dedicacion: docente.dedicacion
@@ -185,43 +233,24 @@ const editarDocente = async (id, data) => {
     })
 }
 
-const obtenerCarreras = async () => {
-    await carreraController.obtenerCarreras((res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) };
-        if (res.status != 200) return generateMessage('NO OK', res.message)
-        options.value = []
-        res.data.carreras.forEach(carrera => {
-            options.value.push(carrera.nombre)
-        });
-    })
-}
-
 const formularioCrear = async () => {
     await onReset()
-    obtenerCarreras()
     titulo_form.value = "Crear Nuevo Docente"
     formulario.value = true
 }
 
 const formularioEditar = async (docente) => {
     await onReset()
-    for (let i = 0; i < Listdocentes.value.length; i++) {
-        const datosDocente = Listdocentes.value[i].docente
-        if (datosDocente.cedula == docente) {
-            idEditdocente.value = datosDocente._id
-            titulo_form.value = 'Editar Información del Docente'
-            first_name.value = datosDocente.primerNombre
-            second_name.value = datosDocente.segundoNombre
-            first_surname.value = datosDocente.primerApellido
-            second_surname.value = datosDocente.segundoApellido
-            email.value = datosDocente.correo.split('@')[0]
-            cedula.value = datosDocente.cedula
-            carrera.value = datosDocente.carrera.nombre
-            formulario.value = true
-            obtenerCarreras()
-            i = Listdocentes.value.length + 1
-        }
-    }
+    idEditdocente.value = docente.id
+    titulo_form.value = 'Editar Información del Docente'
+    first_name.value = docente.primerNombre
+    second_name.value = docente.segundoNombre
+    first_surname.value = docente.primerApellido
+    second_surname.value = docente.segundoApellido
+    email.value = docente.correo.split('@')[0]
+    cedula.value = docente.cedula
+    dedicacion.value = docente.dedicacion
+    formulario.value = true
 }
 
 const cerrarFormulario = () => {
@@ -230,7 +259,6 @@ const cerrarFormulario = () => {
 }
 
 const cuadroConfirmacionEstado = async (docente) => {
-    console.log(docente)
     confirm.value = true
     docenteestado.value = docente
 }
@@ -253,9 +281,7 @@ const onSubmit = async () => {
         segundoApellido: second_surname.value,
         cedula: cedula.value,
         correo: email.value + '@unl.edu.ec',
-        dedicacion: "Tiempo completo",
-        carrera: "639fa39c916766a2c821055b",
-        rol: "docente"
+        dedicacion: dedicacion.value,
     }
     if (idEditdocente.value == null) return crearDocente(data)
     return editarDocente(idEditdocente.value, data)
@@ -270,7 +296,17 @@ const onReset = () => {
     email.value = null
     cedula.value = null
     carrera.value = null
+    dedicacion.value = null
     idEditdocente.value = null
+}
+
+const cambiarRol = async (docente) => {
+    await user.cambiarRol(docente.id, docente.rol.toLowerCase(), res => {
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status != 200) return generateMessage('NO OK', res.message)
+        generateMessage('OK', 'El rol del docente ha sido cambiado')
+        obtenerDocentes()
+    })
 }
 
 const generateMessage = (tipo, message) => {
@@ -311,5 +347,10 @@ obtenerDocentes()
 
 .btn-cancelar-docente {
     background-color: $negative;
+}
+
+.card-title-gestionar {
+    background-color: $primary;
+    color: white;
 }
 </style>

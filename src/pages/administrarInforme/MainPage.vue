@@ -8,7 +8,8 @@
                     </div>
                 </div>
             </q-card-section>
-            <q-tabs indicator-color="white" v-model="tab" dense class="bg-primary text-white shadow-2" inline-label>
+            <q-tabs indicator-color="white" v-model="tab" dense class="bg-primary text-white shadow-2" inline-label
+                outside-arrows mobile-arrows>
                 <q-tab name="periodoAcademico">Periodo Académico</q-tab>
                 <q-tab name="formatoInforme">Formato Informe</q-tab>
             </q-tabs>
@@ -93,7 +94,8 @@
                                             ACTIVO
                                         </q-badge>
                                         <div v-else>
-                                            <q-btn size="sm" color="negative" dense label="INACTIVO" />
+                                            <q-btn size="sm" color="negative" dense label="INACTIVO"
+                                                @click="dialogUsarFormato = true; formatoUsar = props.row" />
                                             <q-tooltip class="bg-indigo" :offset="[10, 10]">
                                                 Usar este formato
                                             </q-tooltip>
@@ -117,7 +119,7 @@
 
                                     <div style="display: inline;">
                                         <q-btn size="sm" color="negative" round dense
-                                            @click="confirmacionEliminarActividad(props.row)" icon="mdi-delete"
+                                            @click="confirmacionEliminarFormato(props.row)" icon="mdi-delete"
                                             :disabled="!props.row.editable || props.row.estado">
                                         </q-btn>
                                         <q-tooltip v-if="props.row.estado" :offset="[10, 10]">
@@ -138,7 +140,7 @@
             </q-tab-panels>
 
             <q-dialog v-model="formPeriodo.draw" persistent>
-                <q-card style="max-width: 337px">
+                <q-card style="max-width: 400px">
                     <q-card-section class="card-title-gestionar">
                         <div class="text-h6">{{ formPeriodo.titulo }}</div>
                     </q-card-section>
@@ -148,7 +150,7 @@
                     <q-card-section>
 
                         <div class="text-caption q-mb-sm">
-                            Recuerde que al crear un nuevo perido académico, este no podrá ser <b>EDITADO</b> y
+                            Recuerde que al crear un nuevo perido académico, este no podrá ser <b>ELIMINADO</b> y
                             automáticamente
                             se habilitaría un nuevo informe final para todos los docentes
 
@@ -161,12 +163,17 @@
                             <q-input filled v-model="formPeriodo.nombre" label="Nombre del periodo académico" lazy-rules
                                 :rules="[val => val && val.length > 0 || 'Ingrese el nombre del periodo']" />
                             <div class="row">
-                                <q-input v-model="formPeriodo.fechaInicio" filled type="date" hint="Fecha inicio"
-                                    class="q-mr-sm" lazy-rules
-                                    :rules="[val => val && val.length > 0 || 'Ingrese una fecha inicial']" />
-                                <q-input v-model="formPeriodo.fechaFinal" filled type="date"
-                                    hint="Fecha final (indefinido dejar vacío)" lazy-rules
-                                    :rules="[val => isMayorFechaInicial() || 'Debe ser una fecha mayor o igual a la inicial']" />
+                                <div class="col-6">
+                                    <q-input v-model="formPeriodo.fechaInicio" filled type="date" hint="Fecha inicio"
+                                        class="q-mr-sm" lazy-rules
+                                        :rules="[val => val && val.length > 0 || 'Ingrese una fecha inicial']" />
+                                </div>
+                                <div class="col-6">
+                                    <q-input v-model="formPeriodo.fechaFinal" filled type="date"
+                                        hint="Fecha final ('indefinido' dejar vacío)" lazy-rules
+                                        :rules="[val => isMayorFechaInicial() || 'Debe ser una fecha mayor o igual a la inicial']" />
+                                </div>
+
 
                             </div>
                             <q-separator />
@@ -180,68 +187,128 @@
             </q-dialog>
 
             <q-dialog v-model="formFormato.draw" persistent>
-                <q-card style="max-width: 500px">
+                <q-card style="max-width: 550px">
                     <q-card-section class="card-title-gestionar">
                         <div class="text-h6">{{ formFormato.titulo }}</div>
                     </q-card-section>
                     <q-tabs indicator-color="white" v-model="tabFormato" dense class="bg-primary text-white shadow-2"
-                        inline-label>
+                        outside-arrows mobile-arrows inline-label>
                         <q-tab name="informacionGeneral">Información General</q-tab>
-                        <q-tab name="encabezadoTabla">Encabezado de la Tabla</q-tab>
+                        <q-tab name="encabezadoTabla">Datos de la Tabla</q-tab>
                     </q-tabs>
-                    <q-card-section class="q-mb-none q-pb-none">
+                    <q-card-section class="q-mb-none q-pb-none" v-if="!formFormato.isEditar">
                         <q-banner dense class="bg-blue-3 q-py-none" style="font-size: 10px !important;">
-                            <h1 class="text-caption">
-                                <q-icon name="warning" class="q-ml-xs" />
-                                Los campos actuales del formulario
-                                pertecen al formato que está activo
-                            </h1>
+                            <div class="row">
+                                <div class="col-1 self-center">
+                                    <q-icon name="warning" class="q-ml-xs" />
+                                </div>
+                                <div class="col-11">
+                                    <h1 class="text-caption no-margin no-padding">
+                                        Los información de los campos actuales del formulario
+                                        pertecen al formato que actualmente se encuentra activo
+                                    </h1>
+                                </div>
+                            </div>
+
 
                         </q-banner>
-                    </q-card-section>
-
-                    <q-form @submit="guardarFormPeriodo">
-                        <q-card-section style="max-height: 70vh" class="scroll q-pb-none">
-
-                            <q-separator class="q-mb-lg" />
-
-                            <q-input class="q-px-sm q-mb-sm" filled v-model="formatoActivo.nombreFormato"
-                                label="Nombre del formato" lazy-rules
-                                :rules="[val => val && val.length > 0 || 'Ingrese un nombre del periodo']" />
-
-                            <div class="row justify-between q-my-none">
-                                <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled v-model="formatoActivo.facultad"
-                                    label="Campo Facultad" lazy-rules
-                                    :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Facultad\'']" />
-
-                                <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled v-model="formatoActivo.carrera"
-                                    label="Campo Carrera" lazy-rules
-                                    :rules="[val => val && val.length > 0 || ' Ingrese un nombre para \'Carrera\'']" />
-
-                                <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled v-model="formatoActivo.docente"
-                                    label="Campo Docente" lazy-rules
-                                    :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Docente\'']" />
-
-                                <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled v-model="formatoActivo.dedicacion"
-                                    label="Campo Dedicación" lazy-rules
-                                    :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Dedicación\'']" />
-
-                                <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
-                                    v-model="formatoActivo.periodoAcademico" label="Campo Periodo Académico" lazy-rules
-                                    :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Periodo Académico\'']" />
-
-                                <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled v-model="formatoActivo.horasPAO"
-                                    label="Campo Horas PAO" lazy-rules
-                                    :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Horas PAO\'']" />
-
+                        <q-banner dense class="bg-blue-3 q-py-none q-mt-xs" style="font-size: 10px !important;">
+                            <div class="row">
+                                <div class="col-1 self-center">
+                                    <q-icon name="warning" class="q-ml-xs" />
+                                </div>
+                                <div class="col-11">
+                                    <h1 class="text-caption no-margin no-padding">
+                                        Al crear un formato, éste automáticamente quedará activo para generar el informe
+                                        final
+                                    </h1>
+                                </div>
                             </div>
+                        </q-banner>
+                    </q-card-section>
+                    <q-form @submit="guardarFormFormato">
+                        <q-card-section style="max-height: 70vh" class="scroll q-pb-none">
+                            <q-separator class="q-mb-lg" />
+                            <q-tab-panels v-model="tabFormato">
+                                <q-tab-panel name="informacionGeneral" class="q-ma-none q-pa-none">
+                                    <q-input class="q-px-sm q-mb-sm" filled v-model="formFormato.nombreFormato"
+                                        label="Nombre del formato" lazy-rules autogrow
+                                        :rules="[val => val && val.length > 0 || 'Ingrese un nombre del periodo']" />
+
+                                    <div class="row justify-between q-my-none">
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
+                                            v-model="formFormato.facultad" label="Campo Facultad" lazy-rules
+                                            :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Facultad\'']" />
+
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled v-model="formFormato.carrera"
+                                            label="Campo Carrera" lazy-rules
+                                            :rules="[val => val && val.length > 0 || ' Ingrese un nombre para \'Carrera\'']" />
+
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled v-model="formFormato.docente"
+                                            label="Campo Docente" lazy-rules
+                                            :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Docente\'']" />
+
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
+                                            v-model="formFormato.dedicacion" label="Campo Dedicación" lazy-rules
+                                            :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Dedicación\'']" />
+
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
+                                            v-model="formFormato.periodoAcademico" label="Campo Periodo Académico" autogrow
+                                            lazy-rules
+                                            :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Periodo Académico\'']" />
+
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
+                                            v-model="formFormato.totalHoras" label="Campo Total Horas" lazy-rules autogrow
+                                            :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Horas PAO\'']" />
+
+                                    </div>
+                                </q-tab-panel>
+                                <q-tab-panel name="encabezadoTabla" class="q-ma-none q-pa-none">
+
+                                    <div class="row justify-between q-my-none">
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
+                                            v-model="formFormato.funcionesSustantivas" label="Campo Funciones Sustantivas"
+                                            :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Funciones Sustantivas\'']" />
+
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
+                                            v-model="formFormato.actividadesDistributivo"
+                                            label="Campo Actividades del distributivo" lazy-rulesç
+                                            :rules="[val => val && val.length > 0 || ' Ingrese un nombre para \'Actividades del distributivo\'']" />
+
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
+                                            v-model="formFormato.horasPAO" label="Campo Horas del PAO" lazy-rules
+                                            :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Horas del PAO\'']" />
+
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
+                                            v-model="formFormato.actividadesDesarrolladas"
+                                            label="Campo Actividades desarrolladas" lazy-rules
+                                            :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Actividades desarrolladas\'']" />
+
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
+                                            v-model="formFormato.evidencias" label="Campo Evidencias" lazy-rules
+                                            :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Evidencias\'']" />
+
+                                        <q-input class="col-6 col-sm-6 q-px-sm q-mb-md" filled
+                                            v-model="formFormato.observaciones" label="Campo Observaciones" lazy-rules
+                                            :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Observaciones\'']" />
+
+                                    </div>
+                                    <q-input class="q-px-sm q-mb-sm" filled v-model="formFormato.conclusiones"
+                                        label="Campo Conclusiones y/o Recomendaciones" lazy-rules autogrow
+                                        :rules="[val => val && val.length > 0 || 'Ingrese un nombre para \'Conclusiones y/o Recomendaciones\'']" />
+                                </q-tab-panel>
+                            </q-tab-panels>
+
                         </q-card-section>
+
                         <q-separator />
-                        <div class="q-mb-xs q-mt-xs">
+                        <div class="q-my-md q-mx-sm" align="right">
                             <q-btn class="q-mr-sm" label="Cancelar" @click="resetFormFormato()" flat color="negative" />
                             <q-btn label="Guardar" type="submit" color="positive" />
                         </div>
                     </q-form>
+
+
                 </q-card>
             </q-dialog>
 
@@ -255,6 +322,39 @@
                     <q-card-actions align="right">
                         <q-btn flat label="Cancel" color="negative" v-close-popup />
                         <q-btn flat label="Aceptar" color="primary" @click="eliminarPeriodo()" />
+                    </q-card-actions>
+                </q-card>
+            </q-dialog>
+
+
+            <q-dialog v-model="dialogEliminarFormato" persistent>
+                <q-card>
+                    <q-card-section class="row items-center">
+                        <q-avatar icon="warning" color="warning" text-color="white" />
+                        <span class="q-ml-sm">¿Está seguro que desea eliminar el Formato <b>{{ formatoEliminar.nombreFormato
+                            ?
+                            formatoEliminar.nombreFormato : '' }}</b>? </span>
+                    </q-card-section>
+
+                    <q-card-actions align="right">
+                        <q-btn flat label="Cancel" color="negative" v-close-popup />
+                        <q-btn flat label="Aceptar" color="primary" @click="eliminarFormato()" />
+                    </q-card-actions>
+                </q-card>
+            </q-dialog>
+
+            <q-dialog v-model="dialogUsarFormato" persistent>
+                <q-card>
+                    <q-card-section class="row items-center">
+                        <q-avatar icon="warning" color="warning" text-color="white" />
+                        <span class="q-ml-sm">¿Está seguro que desea usar el Formato <b>{{ formatoUsar.nombreFormato
+                            ?
+                            formatoUsar.nombreFormato : '' }}</b> para generar el informe final? </span>
+                    </q-card-section>
+
+                    <q-card-actions align="right">
+                        <q-btn flat label="Cancel" color="negative" v-close-popup />
+                        <q-btn flat label="Aceptar" color="primary" @click="usarFormato()" />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
@@ -274,16 +374,9 @@ import downloadPdf from 'src/utils/downloadPdf';
 const $q = useQuasar()
 const tab = ref('periodoAcademico');
 const tabFormato = ref('informacionGeneral')
-const formatoActivo = ref({
-    nombreFormato: '',
-    facultad: '',
-    carrera: '',
-    docente: '',
-    dedicacion: '',
-    periodoAcademico: '',
-    horasPAO: '',
 
-})
+const formatoActivo = ref(null)
+
 const formPeriodo = ref({
     draw: false,
     titulo: '',
@@ -298,7 +391,7 @@ const formFormato = ref({
 })
 
 const headerPeriodo = [
-    { name: 'nombre', label: 'Nombre', sortable: true, field: 'nombre', align: 'left' },
+    { name: 'nombre', label: 'Nombre', sortable: true, field: 'nombre', align: 'left', style: 'max-width: 120px; white-space: break-spaces;' },
     { name: 'fechaInicio', label: 'Fecha de inicio', sortable: false, field: 'fechaInicio', align: 'center' },
     { name: 'fechaFin', label: 'Fecha Final', sortable: false, field: 'fechaFin', align: 'center' },
     { name: 'estado', label: 'Estado', sortable: false, field: 'estado', align: 'center' },
@@ -314,6 +407,12 @@ const dataFormato = ref([])
 
 const dialogEliminarPeriodo = ref(false)
 const idEliminarPeriodo = ref(null)
+
+const dialogEliminarFormato = ref(false)
+const formatoEliminar = ref(null)
+
+const dialogUsarFormato = ref(false)
+const formatoUsar = ref(null)
 
 async function obtenerTodosPeriodos() {
     await periodoController.obtenerTodosPeriodos((res) => {
@@ -343,18 +442,72 @@ async function obtenerTodosFormatos() {
 }
 
 function formularioFormato() {
+    formFormato.value = formatoActivo.value
     formFormato.value.titulo = 'Crear Nuevo Formato'
     formFormato.value.draw = true
 }
 
 function editarFormatoForm(props) {
-    formFormato.value.titulo = 'Editar Nuevo Formato'
+    formFormato.value = props.row
+    formFormato.value.isEditar = true
+    formFormato.value.titulo = 'Editar Formato'
     formFormato.value.draw = true
 }
 
 function formularioPeriodo() {
     formPeriodo.value.draw = true
     formPeriodo.value.titulo = 'Crear Nuevo Periodo'
+}
+
+async function guardarFormFormato() {
+    const idformato = formFormato.value._id
+    delete formFormato.value.created_at
+    delete formFormato.value.updated_at
+    delete formFormato.value._id
+    if (formFormato.value.isEditar) {
+        console.log("Estas editando", idformato)
+        await formatoController.actualizar(idformato, formFormato.value, res => {
+            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+            if (res.status != 200) return generateMessage('NO OK', res.message)
+            generateMessage('OK', res.data.message)
+            resetFormFormato()
+            obtenerTodosFormatos()
+        })
+    } else {
+        console.log("Estas creando")
+        delete formFormato.value.estado
+        delete formFormato.value.tipo
+        console.log(formFormato.value)
+        await formatoController.crearFormato(formFormato.value, res => {
+            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+            if (res.status != 200) return generateMessage('NO OK', res.message)
+            generateMessage('OK', res.data.message)
+            resetFormFormato()
+            obtenerTodosFormatos()
+        })
+    }
+
+    resetFormFormato()
+}
+
+async function eliminarFormato() {
+    await formatoController.eliminar(formatoEliminar.value._id, res => {
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status != 200) return generateMessage('NO OK', res.message)
+        dialogEliminarFormato.value = false
+        generateMessage('OK', res.data.message)
+        obtenerTodosFormatos()
+    })
+}
+
+async function usarFormato() {
+    await formatoController.cambiarEstado(formatoUsar.value._id, res => {
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status != 200) return generateMessage('NO OK', res.message)
+        dialogUsarFormato.value = false
+        generateMessage('OK', res.data.message)
+        obtenerTodosFormatos()
+    })
 }
 
 async function guardarFormPeriodo() {
@@ -403,6 +556,11 @@ function resetForm() {
 function confirmacionEliminarPeriodo(data) {
     idEliminarPeriodo.value = data._id
     dialogEliminarPeriodo.value = true
+}
+
+function confirmacionEliminarFormato(formato) {
+    formatoEliminar.value = formato
+    dialogEliminarFormato.value = true
 }
 
 async function eliminarPeriodo() {

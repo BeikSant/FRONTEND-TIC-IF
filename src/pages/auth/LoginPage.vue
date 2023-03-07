@@ -54,7 +54,10 @@
                                 @click="isPassword = !isPassword" />
                         </template>
                     </q-input>
-                    <q-btn tag="a" @click="recuperarCuenta()">Recuperar</q-btn>
+                    <div class="q-pt-none q-mt-none" align="right">
+                        <a class="text-caption recuperar-enlace" clickable @click="recuperarCuenta()">¿Olvidaste tu
+                            contraseña?</a>
+                    </div>
                     <div>
                         <q-btn label="Ingresar" type="submit" color="primary" />
                         <q-btn label="Borrar" type="reset" color="primary" flat class="q-ml-sm" />
@@ -111,6 +114,20 @@ p {
 
 .logo-login {
     width: 100%;
+}
+
+.recuperar-enlace {
+    text-decoration: none;
+    color: $primary;
+}
+
+.recuperar-enlace:hover {
+    text-decoration: underline;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.recuperar-enlace:visited {
+    color: $primary;
 }
 
 .header-login {

@@ -27,18 +27,7 @@ export default {
                     [{ texto: 'INVESTIGACIÓN', estilo: 'bodyTable' }, '', '', '', '', ''],
                     [{ texto: 'VINCULACIÓN CON LA SOCIEDAD', estilo: 'bodyTable' }, '', '', '', '', ''],
                     [{ texto: 'GESTIÓN EDUCATIVA', estilo: 'bodyTable' }, '', '', '', '', ''],
-                    [{ colSpan: 3, texto: 'CONCLUSIÓN Y/O RECOMENDACIÓN', estilo: ['headerTable', { color: 'black' }] }, '', '', { colSpan: 3, text: '' }, '', ''],
-                    [{ texto: 'HOLA', enlace: 'https://pdfmake.github.io/docs/0.1/document-definition-object/links/', estilo: ['headerTable', { color: 'black' }] }, '', '', '', '', ''],
-                    [{
-                        texto: [
-                            {
-                                text: 'HOLA \n\n', to: 'https://web.whatsapp.com/'
-                            },
-                            {
-                                text: 'HOLA 2 \n', to: 'http://localhost:9000/informe/administrar'
-                            }
-                        ], estilo: 'bodyTable'
-                    }, '', '', '', '', '']
+                    [{ colSpan: 3, texto: formato.conclusiones, estilo: ['headerTable', { color: 'black' }] }, '', '', { colSpan: 3, text: '' }, '', ''],
                 ]
         }
 

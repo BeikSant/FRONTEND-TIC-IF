@@ -12,7 +12,7 @@
 
             </q-card-section>
             <q-tabs indicator-color="white" v-model="funSustantivaModel" dense class="bg-primary text-white shadow-2"
-                inline-label>
+                inline-label outside-arrows mobile-arrows>
                 <q-tab v-for="(fs, index) in funcionesSustantivas" :key="index" :label=fs.nombre :name=fs.nombre />
             </q-tabs>
 
@@ -85,7 +85,7 @@ const obtenerActividades = async () => {
 }
 
 const guardarActividades = async () => {
-    await distributivo.guardarNuevoDistributivo((res) => {
+    await distributivo.guardarNuevoDistributivo(actividadesSubir, (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al cargar las actividades del distributivo')
         generateMessage('OK', res.data.message)

@@ -73,9 +73,7 @@ const email = ref(null)
 const router = useRouter()
 
 const onSubmit = async () => {
-    console.log(email.value)
     await user.generarTokenRecuperacion(email.value, (res => {
-        console.log(res.status)
         if (res.status != 200 && res.status != 201) {
             return $q.notify({
                 color: 'red-5',

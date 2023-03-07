@@ -17,6 +17,18 @@ export default {
         }
     },
 
+    async cambiarRol(docente, newrol, callback) {
+        try {
+            let res = await api.post(PATH + '/rol/' + docente, { newrol }, configHeader.headers())
+            if (callback) return callback(res)
+            return res
+        } catch (e) {
+            console.log(e)
+            if (callback) return callback(centralErrors.obtenerMensajeError(e))
+            return centralErrors.obtenerMensajeError(e)
+        }
+    },
+
     async cambiarContrasennia(data, callback) {
         try {
             let res = await api.put(PATH + '/changepassword', data, configHeader.headers())

@@ -34,7 +34,6 @@ export default route(function (/* { store, ssrContext } */) {
     const isLogin = to.meta.isLogin
     const useStore = useAuthStore()
     if (to.name == 'CambiarContrasenia') {
-      console.log('Recuperando contraseña', to.params.token)
       const res = await user.verificarToken(to.params.token)
       if (res.status != 200) return next("/inautorizado")
       return next()
@@ -46,7 +45,6 @@ export default route(function (/* { store, ssrContext } */) {
       if (isLogin) return next('/')
       if (requireDirector && useStore.rol == "director") return next()
       if (requireDirector && useStore.rol == "docente") return next("/inautorizado")
-      console.log('No se regenera token')
       return next()
     }
     await useStore.refreshToken()

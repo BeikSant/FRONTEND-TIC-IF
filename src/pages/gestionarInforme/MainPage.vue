@@ -12,7 +12,8 @@
                     </div>
                 </div>
             </q-card-section>
-            <q-tabs indicator-color="white" v-model="tab" dense class="bg-primary text-white shadow-2" inline-label>
+            <q-tabs indicator-color="white" v-model="tab" dense class="bg-primary text-white shadow-2" inline-label
+                outside-arrows mobile-arrows>
                 <q-tab v-for="(fs, index) in actividadesEspecificas" :key="index" :label=fs.nombre :name=fs.nombre />
             </q-tabs>
             <q-tab-panels class="bg-blue-1" v-model="tab" animated>
@@ -45,12 +46,28 @@
                                 </q-td>
 
                                 <q-td align="center" auto-width class="q-pa-md q-gutter-xs">
-                                    <q-btn size="sm" color="positive" round dense icon="mdi-eye-outline"
-                                        @click="mostrarCamposActividad(props.row._id, props.row.nombre)" />
-                                    <q-btn size="sm" color="warning" round dense @click="editarActividadForm(props)"
-                                        icon="mdi-file-document-edit" />
-                                    <q-btn size="sm" color="negative" round dense
-                                        @click="confirmacionEliminarActividad(props.row)" icon="mdi-delete" />
+                                    <div style="display: inline;">
+                                        <q-btn size="sm" color="positive" round dense icon="mdi-folder-edit"
+                                            @click="mostrarCamposActividad(props.row._id, props.row.nombre)" />
+                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                            Gestionar campos actividad
+                                        </q-tooltip>
+                                    </div>
+                                    <div style="display: inline;">
+                                        <q-btn size="sm" color="warning" round dense @click="editarActividadForm(props)"
+                                            icon="mdi-file-document-edit" />
+                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                            Editar información actividad
+                                        </q-tooltip>
+                                    </div>
+                                    <div style="display: inline;">
+                                        <q-btn size="sm" color="negative" round dense
+                                            @click="confirmacionEliminarActividad(props.row)" icon="mdi-delete" />
+                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                            Eliminar actividad
+                                        </q-tooltip>
+                                    </div>
+
                                 </q-td>
                             </q-tr>
                         </template>
@@ -88,7 +105,7 @@
                         <q-item-section>
                             <q-item-label>
                                 <div class="row justify-between items-center">
-                                    <div class="col-1">
+                                    <div class="col-1" v-if="indexEditConclusion != index">
                                         <q-btn flat icon="mdi-chevron-up" color="grey-7" size="xs" round
                                             :disable="index != 0 ? false : true"
                                             @click="cambiarPosicionConclusion(item._id, (index + 1) - 1)"></q-btn>
@@ -96,7 +113,7 @@
                                             :disable="index != (conclusionesRecomendaciones.length - 1) ? false : true"
                                             @click="cambiarPosicionConclusion(item._id, (index + 1) + 1)"></q-btn>
                                     </div>
-                                    <div class="col-1">
+                                    <div class="col-1" v-if="indexEditConclusion != index">
                                         <b>{{ (index + 1) + '. ' }}</b>
                                     </div>
                                     <template v-if="indexEditConclusion != index">
@@ -138,112 +155,174 @@
                         <div class="text-h6">Actividad Especifica: {{ informacionActividad.nombre }}</div>
                     </q-card-section>
 
-                    <q-tabs indicator-color="secondary" v-model="tab_actividad" dense outside-arrows mobile-arrows
-                        class="bg-primary text-white shadow-2" inline-label no-caps>
+                    <q-tabs @update:model-value="onTabChanged" indicator-color="secondary" v-model="tab_actividad" dense
+                        outside-arrows mobile-arrows class="bg-primary text-white shadow-2" inline-label no-caps>
 
                         <q-tab v-for="inf, index in informacionActividad.informacion" :key="index" :name="inf.nombre"
                             :label="inf.nombre" />
 
                     </q-tabs>
-                    <q-card-section style="max-height: 50vh; min-height: 50vh; max-width: 500px;"
+                    <q-card-section style="max-height: 50vh; min-height: 50vh; max-width: 550px;"
                         class="scroll no-margin no-padding">
                         <q-tab-panels v-model="tab_actividad">
 
                             <q-tab-panel v-for="inf, index in informacionActividad.informacion" :key="index"
                                 :name="inf.nombre">
                                 <q-list bordered separator dense>
-                                    <q-item v-for="(item, key) in inf.data" :key="key">
-                                        <q-item-section>
-
-                                            <div class="row justify-between items-center">
-                                                <div class="col-1">
-                                                    <q-btn flat icon="mdi-chevron-up" color="grey-7" size="xs" round
-                                                        :disable="key != 0 ? false : true"
-                                                        @click="cambiarPosicionItem(item, (key + 1) - 1)"></q-btn>
-                                                    <q-btn flat icon="mdi-chevron-down" color="grey-7" size="xs" round
-                                                        :disable="key != inf.data.length - 1 ? false : true"
-                                                        @click="cambiarPosicionItem(item, (key + 1) + 1)"></q-btn>
-                                                </div>
-                                                <div class="col-1">
-                                                    <b>{{ (key + 1) + '. ' }}</b>
-                                                </div>
-                                                <div class="col-8" v-if="item.enlace">{{ item.nombre }}
-                                                    <q-btn tag="a" :href="item.enlace" target="_blank" size="xs"
-                                                        icon="mdi-link" flat color="blue-12"></q-btn>
-                                                </div>
-                                                <div class="col-8 " v-else>{{ item.nombre }}
-                                                </div>
-                                                <div class="col-1">
-                                                    <q-btn color="amber" flat round size="xs"
-                                                        icon="mdi-file-edit-outline" />
-                                                    <q-btn color="red" flat round size="xs" icon="mdi-trash-can-outline"
-                                                        @click="eliminarCamposActividad(item._id)" />
-                                                </div>
-                                            </div>
-                                        </q-item-section>
-                                    </q-item>
                                     <q-item>
                                         <q-item-section>
-
-                                            <q-input bottom-slots v-model="textActividadDesarrollada"
-                                                label="Nueva actividad desarrollada" dense
-                                                :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']"
-                                                v-if="inf.nombre == formatoInforme.actividadesDesarrolladas">
-                                                <template v-slot:append>
-                                                    <q-icon
-                                                        v-if="textActividadDesarrollada !== '' && textActividadDesarrollada != null"
-                                                        name="close" @click="textActividadDesarrollada = null"
-                                                        class="cursor-pointer" />
-                                                    <q-btn @click="guardarCamposActividad(informacionActividad.id)" round
-                                                        dense flat icon="add" />
-                                                </template>
-                                            </q-input>
-
-                                            <q-input bottom-slots v-model="textEvidencia" label="Nueva evidencia" dense
-                                                :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']"
-                                                v-if="inf.nombre == formatoInforme.evidencias">
-                                                <template v-slot:append>
-                                                    <q-icon v-if="textEvidencia !== '' && textEvidencia != null"
-                                                        name="close" @click="textEvidencia = null" class="cursor-pointer" />
-                                                    <q-btn @click="guardarCamposActividad(informacionActividad.id)" round
-                                                        dense flat icon="add" />
-                                                </template>
-                                            </q-input>
-
-                                            <q-form @submit="guardarCamposActividad(informacionActividad.id)" dense
-                                                v-if="inf.nombre == formatoInforme.observaciones">
-                                                <q-input bottom-slots v-model="textObservacion" label="Nueva observación"
-                                                    dense
-                                                    :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']">
+                                            <q-item-label>
+                                                <q-input bottom-slots v-model="textActividadDesarrollada"
+                                                    label="Nueva actividad desarrollada" dense autogrow
+                                                    :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']"
+                                                    v-if="inf.nombre == formatoInforme.actividadesDesarrolladas">
                                                     <template v-slot:append>
-                                                        <q-icon v-if="textObservacion !== '' && textObservacion != null"
-                                                            name="close" @click="textObservacion = null"
+                                                        <q-icon
+                                                            v-if="textActividadDesarrollada !== '' && textActividadDesarrollada != null"
+                                                            name="close" @click="textActividadDesarrollada = null"
                                                             class="cursor-pointer" />
+                                                        <q-btn @click="guardarCamposActividad(informacionActividad.id)"
+                                                            round dense flat icon="add" />
                                                     </template>
                                                 </q-input>
-                                                <div class="row">
-                                                    <div class="col-10">
-                                                        <q-input bottom-slots v-model="enlaceObservacion"
-                                                            label="Enlace (opcional)" hint="Formato http:// o https://"
-                                                            dense
-                                                            :rules="[val => (val == '' || val == null) || (val && val.length > 0 && isUrl(val)) || 'No es un enlace válido']">
-                                                            <template v-slot:append>
-                                                                <q-icon
-                                                                    v-if="enlaceObservacion !== '' && enlaceObservacion != null"
-                                                                    name="close" @click="enlaceObservacion = null"
-                                                                    class="cursor-pointer" />
-                                                            </template>
-                                                        </q-input>
-                                                    </div>
-                                                    <div class="col-2" align="right">
-                                                        <q-btn class="q-mt-md" type="submit" color="grey-7" dense flat round
-                                                            icon="add" />
-                                                    </div>
-                                                </div>
-                                            </q-form>
 
+                                                <q-input bottom-slots v-model="textEvidencia" label="Nueva evidencia" dense
+                                                    :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']"
+                                                    v-if="inf.nombre == formatoInforme.evidencias" autogrow>
+                                                    <template v-slot:append>
+                                                        <q-icon v-if="textEvidencia !== '' && textEvidencia != null"
+                                                            name="close" @click="textEvidencia = null"
+                                                            class="cursor-pointer" />
+                                                        <q-btn @click="guardarCamposActividad(informacionActividad.id)"
+                                                            round dense flat icon="add" />
+                                                    </template>
+                                                </q-input>
+
+                                                <q-form @submit="guardarCamposActividad(informacionActividad.id)" dense
+                                                    v-if="inf.nombre == formatoInforme.observaciones">
+                                                    <q-input bottom-slots v-model="textObservacion" dense
+                                                        label="Nueva observación" autogrow
+                                                        :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']">
+                                                        <template v-slot:append>
+                                                            <q-icon v-if="textObservacion !== '' && textObservacion != null"
+                                                                name="close" @click="textObservacion = null"
+                                                                class="cursor-pointer" />
+                                                        </template>
+                                                    </q-input>
+                                                    <div class="row">
+                                                        <div class="col-10">
+                                                            <q-input bottom-slots v-model="enlaceObservacion"
+                                                                label="Enlace (opcional)" hint="Formato http:// o https://"
+                                                                dense autogrow
+                                                                :rules="[val => (val == '' || val == null) || (val && val.length > 0 && isUrl(val)) || 'No es un enlace válido']">
+                                                                <template v-slot:append>
+                                                                    <q-icon
+                                                                        v-if="enlaceObservacion !== '' && enlaceObservacion != null"
+                                                                        name="close" @click="enlaceObservacion = null"
+                                                                        class="cursor-pointer" />
+                                                                </template>
+                                                            </q-input>
+                                                        </div>
+                                                        <div class="col-2" align="right">
+                                                            <q-btn class="q-mt-md" type="submit" color="grey-7" dense flat
+                                                                round icon="add" />
+                                                        </div>
+                                                    </div>
+                                                </q-form>
+                                            </q-item-label>
                                         </q-item-section>
                                     </q-item>
+                                    <q-item v-for="(item, key) in inf.data" :key="key">
+                                        <q-item-section>
+                                            <q-item-label>
+                                                <div class="row justify-between items-center">
+                                                    <div class="col-1" v-if="itemEditCampo != key">
+                                                        <q-btn flat icon="mdi-chevron-up" color="grey-7" size="xs" round
+                                                            :disable="key != 0 ? false : true"
+                                                            @click="cambiarPosicionItem(item, (key + 1) - 1)"></q-btn>
+                                                        <q-btn flat icon="mdi-chevron-down" color="grey-7" size="xs" round
+                                                            :disable="key != inf.data.length - 1 ? false : true"
+                                                            @click="cambiarPosicionItem(item, (key + 1) + 1)"></q-btn>
+                                                    </div>
+                                                    <div class="col-1" v-if="itemEditCampo != key">
+                                                        <b>{{ (key + 1) + '. ' }}</b>
+                                                    </div>
+                                                    <template v-if="itemEditCampo != key">
+                                                        <div class="col-8" v-if="item.enlace">{{ item.nombre }}
+                                                            <q-btn tag="a" :href="item.enlace" target="_blank" size="xs"
+                                                                icon="mdi-link" flat color="blue-12"></q-btn>
+                                                        </div>
+                                                        <div class="col-8 " v-else>{{ item.nombre }}
+                                                        </div>
+                                                        <div class="col-2" align="right">
+                                                            <q-btn color="amber" flat round size="xs"
+                                                                icon="mdi-file-edit-outline"
+                                                                @click="itemEditCampo = key; textEditCampo = item.nombre; enlaceEditCampo = item.enlace ? item.enlace : null " />
+                                                            <q-btn color="red" flat round size="xs"
+                                                                icon="mdi-trash-can-outline"
+                                                                @click="eliminarCamposActividad(item._id)" />
+                                                        </div>
+                                                    </template>
+                                                    <template v-else>
+                                                        <template v-if="inf.nombre == formatoInforme.observaciones">
+                                                            <div class="col-10">
+                                                                <q-form
+                                                                    @submit="editarCamposActividad(informacionActividad.id)"
+                                                                    dense v-if="inf.nombre == formatoInforme.observaciones">
+                                                                    <q-input bottom-slots v-model="textEditCampo"
+                                                                        label="Editar" dense autogrow
+                                                                        :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']">
+                                                                        <template v-slot:append>
+                                                                            <q-icon
+                                                                                v-if="textEditCampo !== '' && textEditCampo != null"
+                                                                                name="close" @click="textEditCampo = null"
+                                                                                class="cursor-pointer" />
+                                                                        </template>
+                                                                    </q-input>
+                                                                    <q-input bottom-slots v-model="enlaceEditCampo"
+                                                                        label="Enlace (opcional)"
+                                                                        hint="Formato http:// o https://" dense autogrow
+                                                                        :rules="[val => (val == '' || val == null) || (val && val.length > 0 && isUrl(val)) || 'No es un enlace válido']">
+                                                                        <template v-slot:append>
+                                                                            <q-icon
+                                                                                v-if="enlaceEditCampo !== '' && enlaceEditCampo != null"
+                                                                                name="close" @click="enlaceEditCampo = null"
+                                                                                class="cursor-pointer" />
+                                                                        </template>
+                                                                    </q-input>
+
+                                                                </q-form>
+                                                            </div>
+                                                        </template>
+                                                        <template v-else>
+                                                            <div class="col-10">
+                                                                <q-input bottom-slots v-model="textEditCampo"
+                                                                    style="width: 100%;" width="100%" dense autogrow
+                                                                    :rules="[val => val && val.length > 0 || val == null || 'Este campo no puede estar vacio']">
+                                                                    <template v-slot:append>
+                                                                        <q-icon
+                                                                            v-if="textEvidencia !== '' && textEvidencia != null"
+                                                                            name="close" @click="textEvidencia = null"
+                                                                            class="cursor-pointer" />
+                                                                    </template>
+                                                                </q-input>
+                                                            </div>
+                                                        </template>
+
+                                                        <div class="col-2" align="right">
+                                                            <q-btn color="positive" flat round size="sm"
+                                                                icon="mdi-check-bold"
+                                                                @click="editarCamposActividad(item._id)" />
+                                                            <q-btn color="red" flat round size="sm" icon="close"
+                                                                @click="itemEditCampo = null" />
+                                                        </div>
+                                                    </template>
+
+                                                </div>
+                                            </q-item-label>
+                                        </q-item-section>
+                                    </q-item>
+
                                 </q-list>
                             </q-tab-panel>
 
@@ -298,7 +377,7 @@
                     <q-card-section class="row items-center">
                         <q-avatar icon="warning" color="warning" text-color="white" />
                         <span class="q-ml-sm">¿Está seguro en eliminar la actividad especifica
-                            {{ actividadEliminar.nombre }}?</span>
+                            <b>{{ actividadEliminar.nombre }}</b>?</span>
                     </q-card-section>
 
                     <q-card-actions align="right">
@@ -376,8 +455,12 @@ const headers = [
     { name: 'actividadDesarrollada', label: 'Actividades Desarrolladas', sortable: false, field: 'actividadDesarrollada', align: 'center' },
     { name: 'evidencia', label: 'Evidencias', sortable: false, field: 'evidencia', align: 'center' },
     { name: 'observacion', label: 'Observaciones', sortable: false, field: 'observacion', align: 'center' },
-
 ]
+
+
+const textEditCampo = ref('false')
+const itemEditCampo = ref(null)
+const enlaceEditCampo = ref(null)
 
 const obtenerUltimoPeriodo = async () => {
     await periodoController.obtenerUltimoPeriodo((res) => {
@@ -405,7 +488,6 @@ const obtenerConclusionesRecomendaciones = async () => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al obtener las' + informe.value.conclusionesRecomendaciones)
         conclusionesRecomendaciones.value = res.data
-        console.log('COnclusiones y o recomendaciones', res.data)
     }))
 }
 
@@ -609,8 +691,37 @@ async function guardarCamposActividad(id) {
     obtenerCamposActividad(id)
 }
 
+async function editarCamposActividad(idCampo) {
+    if (textEditCampo.value == null || textEditCampo.value == '') return
+    let data = {
+        nombre: textEditCampo.value
+    }
+    let res = null
+    switch (tab_actividad.value) {
+        case formatoInforme.value.actividadesDesarrolladas:
+            res = await desarrolladaController.editarDesarrollada(idCampo, data)
+            break;
+        case formatoInforme.value.evidencias:
+            res = await evidenciaController.editarEvidencia(idCampo, data)
+            break;
+        case formatoInforme.value.observaciones:
+            if (enlaceEditCampo.value != null || enlaceEditCampo.value != '') data.enlace = enlaceEditCampo.value
+            res = await observacionController.editarObservacion(idCampo, data)
+            break;
+    }
+    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+    if (res.status != 200) return generateMessage('NO OK', res.message)
+    generateMessage('OK', 'Item eliminado con éxito')
+    obtenerCamposActividad(informacionActividad.value.id)
+    textEditCampo.value = null
+    itemEditCampo.value = null
+    enlaceEditCampo.value = null
+}
+
 async function eliminarCamposActividad(idCampo) {
-    console.log(idCampo)
+    textEditCampo.value = null
+    itemEditCampo.value = null
+    enlaceEditCampo.value = null
     let res = null
     switch (tab_actividad.value) {
         case formatoInforme.value.actividadesDesarrolladas:
@@ -625,6 +736,7 @@ async function eliminarCamposActividad(idCampo) {
     }
     if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('NO OK', res.message)
+    generateMessage('OK', 'Item eliminado con éxito')
     obtenerCamposActividad(informacionActividad.value.id)
 }
 
@@ -635,6 +747,10 @@ async function mostrarCamposActividad(id, nombre) {
 }
 
 async function obtenerCamposActividad(id, nombre) {
+    textActividadDesarrollada.value = null
+    textEvidencia.value = null
+    textObservacion.value = null
+    enlaceObservacion.value = null
     await evidenciaController.obtenerEvidencias(id, async (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al obtener las evidencias')
@@ -672,6 +788,9 @@ async function cambiarPosicionConclusion(idConclusion, key) {
 }
 
 async function cambiarPosicionItem(item, key) {
+    itemEditCampo.value = null
+    textEditCampo.value = null
+    enlaceEditCampo.value = null
     const data = {
         orden: key,
     }
@@ -700,6 +819,11 @@ function isUrl(s) {
     return regexp.test(s);
 }
 
+function onTabChanged(tab) {
+    textEditCampo.value = ''
+    itemEditCampo.value = null
+}
+
 const generateMessage = (tipo, message) => {
     if (tipo == 'OK') {
         $q.notify({
@@ -720,7 +844,7 @@ const generateMessage = (tipo, message) => {
 
 obtenerFormatoInforme()
 obtenerUltimoPeriodo()
-descargarExcel.descargarInformeExcel()
+//descargarExcel.descargarInformeExcel()
 
 </script>
 
