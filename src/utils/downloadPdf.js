@@ -42,10 +42,10 @@ export default {
 
         pdfMake.fonts = {
             CenturyGothic: {
-                normal: 'http://localhost:9000/fonts/century_gothic/GOTHIC.TTF',
-                bold: 'http://localhost:9000/fonts/century_gothic/GOTHICB.TTF',
-                italic: 'http://localhost:9000/fonts/century_gothic/GOTHICI.TTF',
-                bolditalic: 'http://localhost:9000/fonts/century_gothic/GOTHICBI.TTF',
+                normal: process.env.BASEURL + '/fonts/century_gothic/GOTHIC.TTF',
+                bold: process.env.BASEURL + '/fonts/century_gothic/GOTHICB.TTF',
+                italic: process.env.BASEURL + '/fonts/century_gothic/GOTHICI.TTF',
+                bolditalic: process.env.BASEURL + '/fonts/century_gothic/GOTHICBI.TTF',
             }
         }
 

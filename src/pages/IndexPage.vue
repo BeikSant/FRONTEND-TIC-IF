@@ -7,7 +7,7 @@
           Académico de Docentes</h6>
       </div>
       <div class="logo-app">
-        <img alt="Carrera logo" src="public/icons/favicon-512x512.png" style="width: 200px; height: 200px">
+        <img alt="Carrera logo" src="~assets/favicon-512x512.png" style="width: 200px; height: 200px">
       </div>
     </div>
 
