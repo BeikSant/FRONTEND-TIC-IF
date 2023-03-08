@@ -12,7 +12,6 @@ export default {
             if (callback) return callback(res)
             return res
         } catch (e) {
-            console.log(e)
             if (callback) return callback(centralErrors.obtenerMensajeError(e))
             return centralErrors.obtenerMensajeError(e)
         }
@@ -24,7 +23,6 @@ export default {
             if (callback) return callback(res)
             return res
         } catch (error) {
-            console.log(error)
             if (callback) return callback(centralErrors.obtenerMensajeError(error))
             return centralErrors.obtenerMensajeError(error)
         }
@@ -36,7 +34,6 @@ export default {
             if (callback) return callback(res)
             return res
         } catch (error) {
-            console.log(error)
             if (callback) return callback(centralErrors.obtenerMensajeError(error))
             return centralErrors.obtenerMensajeError(error)
         }
@@ -48,7 +45,6 @@ export default {
             if (callback) return callback(res)
             return res
         } catch (error) {
-            console.log(error)
             if (callback) return callback(centralErrors.obtenerMensajeError(error))
             return centralErrors.obtenerMensajeError(error)
         }

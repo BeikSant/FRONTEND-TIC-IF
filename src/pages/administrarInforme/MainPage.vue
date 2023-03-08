@@ -416,7 +416,8 @@ const formatoUsar = ref(null)
 
 async function obtenerTodosPeriodos() {
     await periodoController.obtenerTodosPeriodos((res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         let periodos = res.data.periodos
         for (let i = 0; i < periodos.length; i++) {
@@ -432,7 +433,8 @@ async function obtenerTodosPeriodos() {
 
 async function obtenerTodosFormatos() {
     await formatoController.obtenerTodosFormato((res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         dataFormato.value = res.data.formatos
         for (let i = 0; i < dataFormato.value.length; i++) {
@@ -465,21 +467,20 @@ async function guardarFormFormato() {
     delete formFormato.value.updated_at
     delete formFormato.value._id
     if (formFormato.value.isEditar) {
-        console.log("Estas editando", idformato)
         await formatoController.actualizar(idformato, formFormato.value, res => {
-            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+            if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
             if (res.status != 200) return generateMessage('NO OK', res.message)
             generateMessage('OK', res.data.message)
             resetFormFormato()
             obtenerTodosFormatos()
         })
     } else {
-        console.log("Estas creando")
         delete formFormato.value.estado
         delete formFormato.value.tipo
-        console.log(formFormato.value)
         await formatoController.crearFormato(formFormato.value, res => {
-            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+            if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
             if (res.status != 200) return generateMessage('NO OK', res.message)
             generateMessage('OK', res.data.message)
             resetFormFormato()
@@ -492,7 +493,8 @@ async function guardarFormFormato() {
 
 async function eliminarFormato() {
     await formatoController.eliminar(formatoEliminar.value._id, res => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         dialogEliminarFormato.value = false
         generateMessage('OK', res.data.message)
@@ -502,7 +504,8 @@ async function eliminarFormato() {
 
 async function usarFormato() {
     await formatoController.cambiarEstado(formatoUsar.value._id, res => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         dialogUsarFormato.value = false
         generateMessage('OK', res.data.message)
@@ -517,7 +520,8 @@ async function guardarFormPeriodo() {
     }
     if (formPeriodo.value.fechaFinal != '') data.fechaFin = new Date(formPeriodo.value.fechaFinal)
     await periodoController.crearPeriodo(data, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         obtenerTodosPeriodos()
         formPeriodo.value.draw = false
@@ -565,7 +569,8 @@ function confirmacionEliminarFormato(formato) {
 
 async function eliminarPeriodo() {
     await periodoController.eliminarPeriodo(idEliminarPeriodo.value, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         obtenerTodosPeriodos()
         return generateMessage('OK', res.data.message)

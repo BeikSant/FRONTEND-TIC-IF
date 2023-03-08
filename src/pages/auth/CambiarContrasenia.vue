@@ -74,9 +74,7 @@ const isPassword = ref(true)
 const router = useRouter()
 
 const cambiarContrasenia = async (token) => {
-    console.log(token, password.value)
     await user.recuperarPassword(token, password.value, (res => {
-        console.log(res.status)
         if (res.status != 200 && res.status != 201) {
             return $q.notify({
                 color: 'red-5',

@@ -38,25 +38,21 @@ export const useAuthStore = defineStore("auth", () => {
             sessionStorage.setItem('user', res.data.rol)
             setTime();
         } catch (e) {
-            console.log(e);
             sessionStorage.removeItem("user");
         }
     }
 
     const setTime = () => {
         setTimeout(() => {
-            console.log("Se refresco el token")
             refreshToken();
         }, expiresIn.value * 1000 - 6000)
     }
 
     const logout = async () => {
         try {
-            console.log("logout")
             await api.get("/user/logout");
             resetStore();
         } catch (error) {
-            console.log(error);
         }
     };
 

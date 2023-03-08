@@ -25,7 +25,6 @@ export default {
                 }
                 return campos
             } catch (error) {
-                console.log(error)
             }
         }
 
@@ -34,7 +33,6 @@ export default {
                 const formato = await formatoController.obtenerInformeActivo()
                 return formato.data
             } catch (error) {
-                console.log(error)
             }
         }
 
@@ -43,7 +41,6 @@ export default {
                 const formato = await formatoController.obtenerPorId(idFormato)
                 return formato.data
             } catch (error) {
-                console.log(error)
             }
         }
 
@@ -54,7 +51,6 @@ export default {
                 const res = await api.get('docente/one', { headers })
                 return res.data.docente
             } catch (error) {
-                console.log(error)
             }
         }
 
@@ -100,17 +96,14 @@ export default {
                 if (i != 0) textConclusion += '\n\n'
                 textConclusion += `\u2022 ${conclusiones.data[i].nombre}`
             }
-            console.log(textConclusion)
             return { body, horas, textConclusion }
         }
 
         let formato = null
         if (idFormato == null) {
-            console.log("No tiene formato o esta generando un nuevo")
             formato = await obtenerFormatoActivo()
             await informeController.asignarFormato(informe, formato._id)
         } else {
-            console.log("En un informe de un periodo pasado")
             formato = await obtenerFormato(idFormato)
         }
         let docente = await obtenerDocente()

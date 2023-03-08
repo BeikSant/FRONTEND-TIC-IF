@@ -72,7 +72,6 @@ export default {
 
                 // Check if the data for this cell is a string that starts with "<a href="
                 if (typeof cell.cell.raw === 'string' && cell.column.raw.dataKey == 5) {
-                    console.log(cell)
                     if (cell.cell.raw.startsWith('<a href=')) {
                         const linkStart = cell.cell.raw.indexOf('"') + 1;
                         const linkEnd = cell.cell.raw.indexOf('"', linkStart);
@@ -81,9 +80,6 @@ export default {
 
                         const linkedText = Autolinker.link(link);
                         cell.cell.text = linkedText;
-
-                        console.log(text)
-                        console.log(link)
                         // Set the link for the cell using doc.autoTableSetLink
                     }
                 }
@@ -103,7 +99,6 @@ export default {
             const formato = await formatoController.obtenerPorId(idFormato)
             return formato.data
         } catch (error) {
-            console.log(error)
         }
     },
 

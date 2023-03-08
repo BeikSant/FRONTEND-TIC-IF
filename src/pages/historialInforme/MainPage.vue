@@ -51,8 +51,11 @@
 import informeController from 'src/controller/informe-controller';
 import { useQuasar } from 'quasar';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import especificaController from 'src/controller/especifica-controller';
 import generarPdf from 'src/utils/generar-pdf';
+
+const router = useRouter()
 
 const $q = useQuasar()
 const header = [
@@ -65,7 +68,7 @@ const dataInformes = ref([])
 
 const obtenerHistorialInformes = async () => {
     await informeController.obtenerTodosInformes((res) => {
-        console.log(res.data)
+        if (res.status != 200) return errorRequest()
         const informes = res.data.informes
         dataInformes.value = []
         for (let i = 0; i < informes.length; i++) {
@@ -84,17 +87,14 @@ const obtenerHistorialInformes = async () => {
 }
 
 async function desacargarPDF(informe) {
-    console.log(informe)
     const actividadesEspecificas = await obtenerActividadesInforme(informe.id)
-    console.log(actividadesEspecificas)
     generarPdf.generarPDF(informe.id, actividadesEspecificas, informe.periodo, informe.idformato)
 }
 
 const obtenerActividadesInforme = async (idInforme) => {
     let fs = []
     await especificaController.obtenerActividadesPorInforme(idInforme, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-        if (res.status != 200) return generateMessage('NO OK', res.message)
+        if (res.status != 200) return errorRequest()
         const actsEsp = res.data.actividadesEspecificas
         for (let i = 0; i < actsEsp.length; i++) {
             let igual = false
@@ -121,6 +121,12 @@ const obtenerActividadesInforme = async (idInforme) => {
 }
 
 obtenerHistorialInformes()
+
+const errorRequest = (res) => {
+    if (res.status == 401) { generateMessage('NO OK', res.message); return router.re('/login') }
+    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+    if (res.status != 200) return generateMessage('NO OK', res.message)
+}
 
 const generateMessage = (tipo, message) => {
     if (tipo == 'OK') {

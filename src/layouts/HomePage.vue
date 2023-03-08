@@ -183,7 +183,8 @@ export default {
 
         const obtenerPerfil = async () => {
             await docente.obtenerPerfilDocente((res) => {
-                if (res.status == 401) { generateMessage('NOK', res.message); return router.push({ path: '/login' }) }
+                if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: 'login' }) }
+                if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
                 if (res.status != 200) return generateMessage('NOK', res.message)
                 perfil.value = {
                     nombre: `${res.data.docente.primerNombre} ${res.data.docente.primerApellido}`,
@@ -232,7 +233,8 @@ export default {
             async onSubmit() {
                 console.log(formPassword.value.password, formPassword.value.new_password)
                 await user.cambiarContrasennia(formPassword.value, (res => {
-                    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+                    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+                    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
                     if (res.status != 200) return generateMessage('NO OK', res.message)
                     generateMessage('OK', res.data.message)
                     this.cerrarFormulario()

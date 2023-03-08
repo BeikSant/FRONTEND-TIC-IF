@@ -465,6 +465,7 @@ const enlaceEditCampo = ref(null)
 const obtenerUltimoPeriodo = async () => {
     await periodoController.obtenerUltimoPeriodo((res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         periodo.value = res.data.periodo
         obtenerInformePorPeriodo()
@@ -474,6 +475,7 @@ const obtenerUltimoPeriodo = async () => {
 const obtenerInformePorPeriodo = async () => {
     await informeController.obtenerInformePeriodo(periodo.value.nombre, async (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         informe.value = res.data.informeFinal
 
@@ -486,6 +488,7 @@ const obtenerInformePorPeriodo = async () => {
 const obtenerConclusionesRecomendaciones = async () => {
     await conclusionRecomendacionController.obtenerPorInforme(informe.value._id, (res => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al obtener las' + informe.value.conclusionesRecomendaciones)
         conclusionesRecomendaciones.value = res.data
     }))
@@ -494,6 +497,7 @@ const obtenerConclusionesRecomendaciones = async () => {
 const obtenerActividadesDistributivo = async () => {  //Obtienes las actividades del distributivo con sus respectivas funciones sustantivas
     await distributivo.obtenerTodasActividades((res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         funcionesSustantivas.value = res.data.actividades.funcionesSustantivas
         for (let i = 0; i < funcionesSustantivas.value.length; i++) {
@@ -506,6 +510,7 @@ const obtenerActividadesDistributivo = async () => {  //Obtienes las actividades
 const obtenerActividadesInforme = async () => {
     await especificaController.obtenerActividadesPorInforme(informe.value._id, (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         const actsEsp = res.data.actividadesEspecificas
         for (let i = 0; i < actividadesEspecificas.value.length; i++) {
@@ -524,6 +529,7 @@ const obtenerActividadesInforme = async () => {
 const obtenerFormatoInforme = async () => {
     await formatoController.obtenerInformeActivo((res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         formatoInforme.value = res.data
         informacionActividad.value.informacion = []
@@ -540,7 +546,8 @@ function confirmacionEliminarActividad(actividad) {
 
 async function eliminarActividad() {
     await especificaController.eliminarActividad(actividadEliminar.value._id, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al eliminar la actividad')
         obtenerActividadesInforme()
         actividadEliminar.value = null
@@ -571,6 +578,7 @@ async function editarConclusionRecomendacion(idConclusion) {
     }
     await conclusionRecomendacionController.editar(idConclusion, data, (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al guardar la información')
         generateMessage('OK', 'Campo editato con éxito')
         textEditConclusion.value = null
@@ -584,6 +592,7 @@ async function eliminarConclusionRecomendacion(idConclusion) {
     indexEditConclusion.value = null
     await conclusionRecomendacionController.eliminar(idConclusion, (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Error al eliminar')
         generateMessage('OK', 'Item eliminado con éxito')
         return obtenerConclusionesRecomendaciones()
@@ -600,6 +609,7 @@ async function guardarConclusionRecomendacion() {
     }
     await conclusionRecomendacionController.crear(data, (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         generateMessage('OK', 'Información guardada con éxito')
         textconclusionesRecomendaciones.value = null
@@ -630,7 +640,8 @@ async function onSubmit() {
     if (editarActividad.value) {
         if (selected.value != actividadEspecificaEditar.value.actividadDistributivo.sigla) actividad.actividadesDistributivo = actividadDis[0]._id
         await especificaController.editarActividad(actividadEspecificaEditar.value._id, actividad, (res) => {
-            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+            if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
             if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al editar la actividad')
             generateMessage('OK', 'Actividad editada con éxito')
             resetForm()
@@ -638,7 +649,8 @@ async function onSubmit() {
         })
     } else {
         await especificaController.crearActividad(informe.value._id, actividadDis[0]._id, actividad, (res) => {
-            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+            if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
             if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al guardar la actividad')
             generateMessage('OK', 'Actividad guardada con éxito')
             resetForm()
@@ -685,7 +697,8 @@ async function guardarCamposActividad(id) {
             enlaceObservacion.value = null
             break;
     }
-    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('NO OK', res.message)
     generateMessage('OK', res.data.message)
     obtenerCamposActividad(id)
@@ -710,6 +723,7 @@ async function editarCamposActividad(idCampo) {
             break;
     }
     if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('NO OK', res.message)
     generateMessage('OK', 'Item eliminado con éxito')
     obtenerCamposActividad(informacionActividad.value.id)
@@ -734,7 +748,8 @@ async function eliminarCamposActividad(idCampo) {
             res = await observacionController.eliminarObservacion(idCampo)
             break;
     }
-    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('NO OK', res.message)
     generateMessage('OK', 'Item eliminado con éxito')
     obtenerCamposActividad(informacionActividad.value.id)
@@ -753,15 +768,18 @@ async function obtenerCamposActividad(id, nombre) {
     enlaceObservacion.value = null
     await evidenciaController.obtenerEvidencias(id, async (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-        if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al obtener las evidencias')
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al gestionar la actividad')
         const evidencias = res.data.evidencias
         await desarrolladaController.obtenerDesarrolladas(id, async (res) => {
             if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-            if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al obtener las actividades desarrolladas')
+            if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+            if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al gestionar la actividad')
             const desarrolladas = res.data.actividadesDesarrolladas
             await observacionController.obtenerObservaciones(id, (res) => {
                 if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-                if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al obtener las observaciones')
+                if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+                if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al gestionar la actividad')
                 const observaciones = res.data.observaciones
                 informacionActividad.value.id = id
                 informacionActividad.value.nombre = nombre
@@ -823,6 +841,13 @@ function onTabChanged(tab) {
     textEditCampo.value = ''
     itemEditCampo.value = null
 }
+
+const errorRequest = (res) => {
+    if (res.status == 401) { generateMessage('NO OK', res.message); return router.re('/login') }
+    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+    if (res.status != 200) return generateMessage('NO OK', res.message)
+}
+
 
 const generateMessage = (tipo, message) => {
     if (tipo == 'OK') {

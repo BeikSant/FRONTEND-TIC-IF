@@ -187,7 +187,8 @@ const router = useRouter()
 
 const obtenerDocentes = async () => {
     await docente.obtenerDocentes((res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) };
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         let docentes = []
         Listdocentes.value = res.data
@@ -215,7 +216,8 @@ const obtenerDocentes = async () => {
 
 const crearDocente = async (data) => {
     await docente.crearDocente(data, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) };
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         generateMessage('OK', res.data.message)
         cerrarFormulario()
@@ -225,7 +227,8 @@ const crearDocente = async (data) => {
 
 const editarDocente = async (id, data) => {
     await docente.editarDocente(id, data, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) };
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         generateMessage('OK', res.data.message)
         cerrarFormulario()
@@ -265,7 +268,8 @@ const cuadroConfirmacionEstado = async (docente) => {
 
 const cambiarEstado = async () => {
     await user.cambiarEstado(docenteestado.value.cedula, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         generateMessage('OK', 'El estado de la cuenta del docente ha sido cambiado')
         confirm.value = false
@@ -302,7 +306,8 @@ const onReset = () => {
 
 const cambiarRol = async (docente) => {
     await user.cambiarRol(docente.id, docente.rol.toLowerCase(), res => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         generateMessage('OK', 'El rol del docente ha sido cambiado')
         obtenerDocentes()

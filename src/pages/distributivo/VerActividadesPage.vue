@@ -77,7 +77,8 @@ const columns = [
 
 const obtenerActividades = async () => {
     await distributivo.obtenerTodasActividades((res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         funcionesSustantivas.value = res.data.actividades.funcionesSustantivas
         funSustantivaModel.value = funcionesSustantivas.value[0].nombre
@@ -86,7 +87,8 @@ const obtenerActividades = async () => {
 
 const guardarActividades = async () => {
     await distributivo.guardarNuevoDistributivo(actividadesSubir, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al cargar las actividades del distributivo')
         generateMessage('OK', res.data.message)
         obtenerActividades()

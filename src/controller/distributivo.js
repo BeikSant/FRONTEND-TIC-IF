@@ -11,7 +11,6 @@ export default {
             if (callback) return callback(res)
             return res
         } catch (e) {
-            console.log(e)
             if (callback) return callback(centralErrors.obtenerMensajeError(e))
             return centralErrors.obtenerMensajeError(e)
         }

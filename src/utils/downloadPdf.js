@@ -38,8 +38,6 @@ export default {
             { texto: formato.observaciones, estilo: 'headerTable' }
         ])
 
-        console.log(bodyTable)
-
         pdfMake.fonts = {
             CenturyGothic: {
                 normal: process.env.BASEURL + '/fonts/century_gothic/GOTHIC.TTF',
