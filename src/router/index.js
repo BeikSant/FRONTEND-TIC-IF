@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie'
 import { route } from 'quasar/wrappers'
 import user from 'src/controller/user'
 import { useAuthStore } from 'src/stores/auth-stores'
@@ -32,7 +33,7 @@ export default route(function (/* { store, ssrContext } */) {
     const requiredAuth = to.meta.auth
     const requireDirector = to.meta.requireDirector
     const isLogin = to.meta.isLogin
-    const useStore = useAuthStore()
+
     if (to.name == 'CambiarContrasenia') {
       const res = await user.verificarToken(to.params.token)
       if (res.status != 200) return next("/inautorizado")
@@ -41,17 +42,13 @@ export default route(function (/* { store, ssrContext } */) {
     }
     if (!requiredAuth && !isLogin) return next()
     //si existe el token en memoria
-    if (useStore.token) {
+    const cookie = Cookies.get('auth-informefinal')
+    if (cookie) {
       if (isLogin) return next('/')
-      if (requireDirector && useStore.rol == "director") return next()
-      if (requireDirector && useStore.rol == "docente") return next("/inautorizado")
-      return next()
-    }
-    await useStore.refreshToken()
-    if (useStore.token) {
-      if (isLogin) return next('/')
-      if (requireDirector && useStore.rol == "director") return next()
-      if (requireDirector && useStore.rol == "docente") return next("/inautorizado")
+      const res = await user.verificarSesion()
+      if (res.status == 401) { Cookies.remove('auth-informefinal'); return next('/login') }
+      if (requireDirector && res.data.rol == "director") return next()
+      if (requireDirector && res.data.rol == "docente") return next("/inautorizado")
       return next()
     } else {
       if (isLogin) return next()

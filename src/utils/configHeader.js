@@ -1,10 +1,10 @@
-import { useAuthStore } from "src/stores/auth-stores"
+
+import Cookies from "js-cookie"
 
 export default {
     headers() {
-        const authStore = useAuthStore()
         return {
-            headers: { Authorization: `Bearer ${authStore.token}` }
+            headers: { Authorization: `Bearer ${Cookies.get('auth-informefinal')}` }
         }
     }
 }

@@ -11,7 +11,7 @@ export default {
                 return { status: e.response.status, message: "Error interno del servidor" }
             }
             if (e.response.status == 401) {
-                return { status: 401, message: "Autorización Requerida" }
+                return { status: 401, message: e.response.data.message }
             }
             if (e.response.status == 403) {
                 return { status: 403, message: "No Autorizado" }

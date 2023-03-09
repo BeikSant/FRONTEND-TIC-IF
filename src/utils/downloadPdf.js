@@ -91,7 +91,7 @@ export default {
                     alignment: 'center',
                     columns: [
                         {
-                            image: await getBase64ImageFromURL('http://localhost:9000/imgs/logoUNL.png'),
+                            image: await getBase64ImageFromURL(process.env.BASEURL + '/imgs/logoUNL.png'),
                             width: 170,
                             height: 60,
                             margin: [-20, 0, 0, 0]

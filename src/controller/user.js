@@ -5,9 +5,31 @@ import configHeader from "src/utils/configHeader"
 const PATH = '/user'
 
 export default {
+
+    async login(data, callback) {
+        try {
+            let res = await api.post(PATH + '/login', data, configHeader.headers())
+            if (callback) return callback(res)
+            return res
+        } catch (e) {
+            if (callback) return callback(centralErrors.obtenerMensajeError(e))
+            return centralErrors.obtenerMensajeError(e)
+        }
+    },
     async cambiarEstado(cedula, callback) {
         try {
             let res = await api.patch(PATH + '/estado/' + cedula, {}, configHeader.headers())
+            if (callback) return callback(res)
+            return res
+        } catch (e) {
+            if (callback) return callback(centralErrors.obtenerMensajeError(e))
+            return centralErrors.obtenerMensajeError(e)
+        }
+    },
+
+    async verificarSesion(callback) {
+        try {
+            let res = await api.get(PATH + '/verifysesion', configHeader.headers())
             if (callback) return callback(res)
             return res
         } catch (e) {

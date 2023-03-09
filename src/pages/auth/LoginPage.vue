@@ -71,22 +71,30 @@
 <script setup>
 import { useQuasar } from 'quasar'
 import { ref } from 'vue'
-import { useAuthStore } from '../../stores/auth-stores'
 import { useRouter } from 'vue-router'
+import userController from 'src/controller/user'
+import Cookies from 'js-cookie'
 const $q = useQuasar()
 const isPassword = ref(true)
 const email = ref(null)
 const password = ref(null)
-const auth = useAuthStore();
 const router = useRouter()
 const onSubmit = async () => {
-    const res = await auth.login(email.value, password.value);
+    const data = {
+        username: email.value,
+        password: password.value
+    }
+    const res = await userController.login(data)
+    console.log(res)
     if (res.status != 200) return $q.notify({
+
         color: 'red-5',
         textColor: 'white',
         icon: 'warning',
         message: res.message
     })
+
+    Cookies.set('auth-informefinal', res.data.token)
     $q.notify({
         color: 'green-5',
         textColor: 'white',

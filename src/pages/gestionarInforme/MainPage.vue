@@ -79,7 +79,7 @@
 
             <!-- CONCLUSIONES Y O RECOMENDACIONES-->
             <div class="card-title-gestionar q-pa-md">
-                <b>{{ formatoInforme.conclusiones }}</b>
+                <b>{{ formatoInforme.conclusiones ? formatoInforme.conclusiones : "" }}</b>
             </div>
             <q-card-section class="q-px-lg bg-blue-1">
 
@@ -88,7 +88,8 @@
                         <q-item-section caption>
                             <q-item-label>
                                 <q-input bottom-slots v-model="textconclusionesRecomendaciones"
-                                    :label="`Agregar ${formatoInforme.conclusiones}`" dense type="text" autogrow
+                                    :label="`Agregar ${formatoInforme.conclusiones ? formatoInforme.conclusiones : ''}`"
+                                    dense type="text" autogrow
                                     :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']">
                                     <template v-slot:append>
                                         <q-icon
@@ -464,7 +465,7 @@ const enlaceEditCampo = ref(null)
 
 const obtenerUltimoPeriodo = async () => {
     await periodoController.obtenerUltimoPeriodo((res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         periodo.value = res.data.periodo
@@ -474,7 +475,7 @@ const obtenerUltimoPeriodo = async () => {
 
 const obtenerInformePorPeriodo = async () => {
     await informeController.obtenerInformePeriodo(periodo.value.nombre, async (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         informe.value = res.data.informeFinal
@@ -487,7 +488,7 @@ const obtenerInformePorPeriodo = async () => {
 
 const obtenerConclusionesRecomendaciones = async () => {
     await conclusionRecomendacionController.obtenerPorInforme(informe.value._id, (res => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al obtener las' + informe.value.conclusionesRecomendaciones)
         conclusionesRecomendaciones.value = res.data
@@ -496,7 +497,7 @@ const obtenerConclusionesRecomendaciones = async () => {
 
 const obtenerActividadesDistributivo = async () => {  //Obtienes las actividades del distributivo con sus respectivas funciones sustantivas
     await distributivo.obtenerTodasActividades((res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         funcionesSustantivas.value = res.data.actividades.funcionesSustantivas
@@ -509,7 +510,7 @@ const obtenerActividadesDistributivo = async () => {  //Obtienes las actividades
 
 const obtenerActividadesInforme = async () => {
     await especificaController.obtenerActividadesPorInforme(informe.value._id, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         const actsEsp = res.data.actividadesEspecificas
@@ -528,7 +529,7 @@ const obtenerActividadesInforme = async () => {
 
 const obtenerFormatoInforme = async () => {
     await formatoController.obtenerInformeActivo((res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         formatoInforme.value = res.data
@@ -577,7 +578,7 @@ async function editarConclusionRecomendacion(idConclusion) {
         nombre: textEditConclusion.value
     }
     await conclusionRecomendacionController.editar(idConclusion, data, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al guardar la información')
         generateMessage('OK', 'Campo editato con éxito')
@@ -591,7 +592,7 @@ async function eliminarConclusionRecomendacion(idConclusion) {
     textEditConclusion.value = null
     indexEditConclusion.value = null
     await conclusionRecomendacionController.eliminar(idConclusion, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Error al eliminar')
         generateMessage('OK', 'Item eliminado con éxito')
@@ -608,7 +609,7 @@ async function guardarConclusionRecomendacion() {
         informe: informe.value._id
     }
     await conclusionRecomendacionController.crear(data, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         generateMessage('OK', 'Información guardada con éxito')
@@ -722,7 +723,7 @@ async function editarCamposActividad(idCampo) {
             res = await observacionController.editarObservacion(idCampo, data)
             break;
     }
-    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
     if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('NO OK', res.message)
     generateMessage('OK', 'Item eliminado con éxito')
@@ -767,17 +768,17 @@ async function obtenerCamposActividad(id, nombre) {
     textObservacion.value = null
     enlaceObservacion.value = null
     await evidenciaController.obtenerEvidencias(id, async (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al gestionar la actividad')
         const evidencias = res.data.evidencias
         await desarrolladaController.obtenerDesarrolladas(id, async (res) => {
-            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+            if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
             if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
             if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al gestionar la actividad')
             const desarrolladas = res.data.actividadesDesarrolladas
             await observacionController.obtenerObservaciones(id, (res) => {
-                if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+                if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
                 if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
                 if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al gestionar la actividad')
                 const observaciones = res.data.observaciones

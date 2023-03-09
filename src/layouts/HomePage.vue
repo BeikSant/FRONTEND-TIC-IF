@@ -121,10 +121,9 @@
 import { ref } from 'vue'
 import { useAuthStore } from 'src/stores/auth-stores'
 import { useRouter } from 'vue-router'
-import centralErrors from 'src/utils/centralErrors';
 import docente from 'src/controller/docente';
 import user from 'src/controller/user';
-import { useQuasar } from 'quasar';
+import { Cookies, useQuasar } from 'quasar';
 
 const linksList = [
     {
@@ -178,18 +177,19 @@ export default {
         const router = useRouter()
         const leftDrawerOpen = ref(false)
         const useAuth = useAuthStore()
-        const isDirector = useAuth.rol == "director" ? ref(true) : ref(false)
+        const isDirector = ref(false)
         const perfil = ref({})
 
         const obtenerPerfil = async () => {
             await docente.obtenerPerfilDocente((res) => {
-                if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: 'login' }) }
+                if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
                 if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
                 if (res.status != 200) return generateMessage('NOK', res.message)
                 perfil.value = {
                     nombre: `${res.data.docente.primerNombre} ${res.data.docente.primerApellido}`,
-                    rol: useAuth.rol.toUpperCase()
+                    rol: res.data.docente.usuario.rol.nombre.toUpperCase()
                 }
+                isDirector.value = perfil.value.rol == 'DIRECTOR' ? true : false
             })
         }
         const generateMessage = (tipo, message) => {
@@ -226,7 +226,7 @@ export default {
                 leftDrawerOpen.value = !leftDrawerOpen.value
             },
             async logout() {
-                await useAuth.logout()
+                Cookies.remove('auth-informefinal')
                 return router.push({ path: '/login' });
             },
             async onSubmit() {

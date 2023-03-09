@@ -5,6 +5,7 @@ import formatoController from "src/controller/formato-controller";
 import observacionController from "src/controller/observacion-controller";
 import { useAuthStore } from "src/stores/auth-stores";
 import informeController from "src/controller/informe-controller";
+import docenteCotroller from 'src/controller/docente';
 import downloadPdf from "./downloadPdf";
 import conclusionRecomendacionController from 'src/controller/conclusionRecomendacion.controller';
 
@@ -46,9 +47,7 @@ export default {
 
         async function obtenerDocente() {
             try {
-                const authStore = useAuthStore()
-                const headers = { Authorization: `Bearer ${authStore.token}` }
-                const res = await api.get('docente/one', { headers })
+                const res = await docenteCotroller.obtenerPerfilDocente()
                 return res.data.docente
             } catch (error) {
             }
