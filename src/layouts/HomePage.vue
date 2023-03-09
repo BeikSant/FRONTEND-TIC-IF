@@ -226,12 +226,10 @@ export default {
                 leftDrawerOpen.value = !leftDrawerOpen.value
             },
             async logout() {
-                console.log("Salir")
                 await useAuth.logout()
                 return router.push({ path: '/login' });
             },
             async onSubmit() {
-                console.log(formPassword.value.password, formPassword.value.new_password)
                 await user.cambiarContrasennia(formPassword.value, (res => {
                     if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
                     if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
