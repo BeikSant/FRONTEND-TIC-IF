@@ -105,7 +105,7 @@
             <q-card-section class="q-px-lg bg-blue-1" style="min-height: 150px">
                 <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
                     <div v-show="isRecomendaciones" class="no-padding no-margin">
-                        <template v-if="conclusionesRecomendaciones.length == 0">
+                        <template v-if="tab.length == 0">
                             <div align="center" class="q-pt-xl">
                                 <b>NADA QUE MOSTRAR</b>
                             </div>
