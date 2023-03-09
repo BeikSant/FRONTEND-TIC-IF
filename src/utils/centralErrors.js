@@ -1,5 +1,3 @@
-import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
 
 export default {
     obtenerMensajeError(e) {

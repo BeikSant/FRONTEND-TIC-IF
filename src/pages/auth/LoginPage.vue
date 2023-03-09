@@ -85,7 +85,6 @@ const onSubmit = async () => {
         password: password.value
     }
     const res = await userController.login(data)
-    console.log(res)
     if (res.status != 200) return $q.notify({
 
         color: 'red-5',

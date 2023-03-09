@@ -106,7 +106,7 @@ const obtenerActividades = async () => {
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         funcionesSustantivas.value = res.data.actividades.funcionesSustantivas
-        funSustantivaModel.value = funcionesSustantivas.value[0].nombre
+        if (funSustantivaModel.value.length != 0) funSustantivaModel.value = funcionesSustantivas.value[0].nombre
     })
 
     isData.value = true

@@ -537,7 +537,7 @@ const obtenerConclusionesRecomendaciones = async () => {
 }
 
 const obtenerActividadesDistributivo = async () => {  //Obtienes las actividades del distributivo con sus respectivas funciones sustantivas
-    await distributivo.obtenerTodasActividades((res) => {
+    await distributivo.obtenerTodasActividades(async (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) { generateMessage('NO OK', res.message); visible.value = false; return isDataTable.value = true }
@@ -545,8 +545,10 @@ const obtenerActividadesDistributivo = async () => {  //Obtienes las actividades
         for (let i = 0; i < funcionesSustantivas.value.length; i++) {
             actividadesEspecificas.value.push({ nombre: funcionesSustantivas.value[i].nombre, actividadesEspecificas: [] }) // Aqui se coloca la funcion sustantivas las actividad del distributivo que tiene
         }
-        tab.value = actividadesEspecificas.value[0].nombre
+        if (actividadesEspecificas.value.length != 0) tab.value = actividadesEspecificas.value[0].nombre
     })
+    visible.value = false
+    isDataTable.value = true
 }
 
 const obtenerActividadesInforme = async () => {
