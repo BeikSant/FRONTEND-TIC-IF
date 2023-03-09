@@ -7,14 +7,14 @@
                         <div class="col q-table__title" inline><b>Administrar Docentes</b></div>
                     </div>
                     <div class="col-3" align="right">
-                        <q-btn @click="formularioCrear()" size="sm" class="col-1 bton-lista-docente" color="secondary"
-                            style="color:white">NUEVO DOCENTE</q-btn>
+                        <q-btn :disabled="loading" @click="formularioCrear()" size="sm" class="col-1 bton-lista-docente"
+                            color="secondary" style="color:white">NUEVO DOCENTE</q-btn>
                     </div>
                 </div>
             </q-card-section>
-            <q-card-section>
+            <q-card-section class="bg-blue-1">
                 <q-table title="Lista de Docentes" :rows="rows" :columns="columns" row-key="name"
-                    :rows-per-page-options="[5, 10, 0]">
+                    :rows-per-page-options="[5, 10, 0]" :loading="loading">
                     <template v-slot:top>
                         <div class="col q-table__title"><b>Lista de Docentes</b></div>
 
@@ -159,6 +159,7 @@ const $q = useQuasar()
 const titulo_form = ref(null)
 const first_name = ref(null)
 const second_name = ref(null)
+const loading = ref(true)
 const first_surname = ref(null)
 const second_surname = ref(null)
 const email = ref(null)
@@ -186,6 +187,7 @@ const formulario = ref(false)
 const router = useRouter()
 
 const obtenerDocentes = async () => {
+    loading.value = true
     await docente.obtenerDocentes((res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
@@ -212,6 +214,7 @@ const obtenerDocentes = async () => {
         }
         rows.value = docentes
     })
+    loading.value = false
 }
 
 const crearDocente = async (data) => {

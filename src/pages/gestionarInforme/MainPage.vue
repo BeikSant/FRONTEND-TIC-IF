@@ -8,143 +8,178 @@
                         <div class="col q-table__title" inline><b>Gestión del Informe Final</b></div>
                     </div>
                     <div class="col-3" align="right">
-                        <q-btn size="sm" color="positive" @click="descargarPDF()">Descargar Informe</q-btn>
+                        <q-btn :disabled="tab.length == 0 && conclusionesRecomendaciones.length == 0" size="sm"
+                            color="positive" @click="descargarPDF()">Descargar Informe</q-btn>
                     </div>
                 </div>
             </q-card-section>
-            <q-tabs indicator-color="white" v-model="tab" dense class="bg-primary text-white shadow-2" inline-label
-                outside-arrows mobile-arrows>
-                <q-tab v-for="(fs, index) in actividadesEspecificas" :key="index" :label=fs.nombre :name=fs.nombre />
-            </q-tabs>
-            <q-tab-panels class="bg-blue-1" v-model="tab" animated>
-                <q-tab-panel v-for="funs, index in actividadesEspecificas" :key="index" :name="funs.nombre">
-
-                    <q-table dense :columns="headers" :rows="funs.actividadesEspecificas" row-key="name"
-                        :no-data-label="'No existen actividades específicas'" :key="'table-' + index"
-                        :pagination="{ rowsPerPage: 10 }" :rows-per-page-options="[5, 10, 0]"
-                        rows-per-page-label="Resultados por página">
-                        <template v-slot:top>
-                            <div class="col q-table__title"><b>Actividades de: {{ tab }}</b></div>
-                            <q-btn @click="nuevaActividadForm" size="sm" class="col-2 bton-lista-docente" color="blue-7"
-                                style="color:white">Nueva Actividad</q-btn>
+            <q-card-section class="bg-blue-1 no-padding no-margin" style="min-height: 150px">
+                <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
+                    <div v-show="isDataTable" class="no-padding no-margin">
+                        <template v-if="tab.length == 0">
+                            <div align="center" class="q-pt-xl">
+                                <b>NADA QUE MOSTRAR</b>
+                            </div>
                         </template>
+                        <template v-else>
+                            <q-tabs indicator-color="white" v-model="tab" dense class="bg-primary text-white shadow-2"
+                                inline-label outside-arrows mobile-arrows>
+                                <q-tab v-for="(fs, index) in actividadesEspecificas" :key="index" :label=fs.nombre
+                                    :name=fs.nombre />
+                            </q-tabs>
+                            <q-tab-panels class="bg-blue-1" v-model="tab" animated>
+                                <q-tab-panel v-for="funs, index in actividadesEspecificas" :key="index" :name="funs.nombre">
+
+                                    <q-table dense :columns="headers" :rows="funs.actividadesEspecificas" row-key="name"
+                                        :no-data-label="'No existen actividades específicas'" :key="'table-' + index"
+                                        :pagination="{ rowsPerPage: 10 }" :rows-per-page-options="[5, 10, 0]"
+                                        rows-per-page-label="Resultados por página">
+                                        <template v-slot:top>
+                                            <div class="col q-table__title"><b>Actividades de: {{ tab }}</b></div>
+                                            <q-btn @click="nuevaActividadForm" size="sm" class="col-2 bton-lista-docente"
+                                                color="blue-7" style="color:white">Nueva Actividad</q-btn>
+                                        </template>
 
 
-                        <template v-slot:header="props">
-                            <q-tr :props="props">
-                                <q-th v-for="col in props.cols" :key="col.name" :props="props">
-                                    {{ col.label }}
-                                </q-th>
-                                <q-th auto-width>Acciones</q-th>
-                            </q-tr>
+                                        <template v-slot:header="props">
+                                            <q-tr :props="props">
+                                                <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                                                    {{ col.label }}
+                                                </q-th>
+                                                <q-th auto-width>Acciones</q-th>
+                                            </q-tr>
+                                        </template>
+
+                                        <template v-slot:body="props">
+                                            <q-tr :props="props">
+                                                <q-td v-for="col in props.cols" :key="col.name" :props="props">
+                                                    {{ col.value }}
+                                                </q-td>
+
+                                                <q-td align="center" auto-width class="q-pa-md q-gutter-xs">
+                                                    <div style="display: inline;">
+                                                        <q-btn size="sm" color="positive" round dense icon="mdi-folder-edit"
+                                                            @click="mostrarCamposActividad(props.row._id, props.row.nombre)" />
+                                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                                            Gestionar campos actividad
+                                                        </q-tooltip>
+                                                    </div>
+                                                    <div style="display: inline;">
+                                                        <q-btn size="sm" color="warning" round dense
+                                                            @click="editarActividadForm(props)"
+                                                            icon="mdi-file-document-edit" />
+                                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                                            Editar información actividad
+                                                        </q-tooltip>
+                                                    </div>
+                                                    <div style="display: inline;">
+                                                        <q-btn size="sm" color="negative" round dense
+                                                            @click="confirmacionEliminarActividad(props.row)"
+                                                            icon="mdi-delete" />
+                                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                                            Eliminar actividad
+                                                        </q-tooltip>
+                                                    </div>
+
+                                                </q-td>
+                                            </q-tr>
+                                        </template>
+
+                                    </q-table>
+
+                                </q-tab-panel>
+                            </q-tab-panels>
+
                         </template>
+                    </div>
 
-                        <template v-slot:body="props">
-                            <q-tr :props="props">
-                                <q-td v-for="col in props.cols" :key="col.name" :props="props">
-                                    {{ col.value }}
-                                </q-td>
-
-                                <q-td align="center" auto-width class="q-pa-md q-gutter-xs">
-                                    <div style="display: inline;">
-                                        <q-btn size="sm" color="positive" round dense icon="mdi-folder-edit"
-                                            @click="mostrarCamposActividad(props.row._id, props.row.nombre)" />
-                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
-                                            Gestionar campos actividad
-                                        </q-tooltip>
-                                    </div>
-                                    <div style="display: inline;">
-                                        <q-btn size="sm" color="warning" round dense @click="editarActividadForm(props)"
-                                            icon="mdi-file-document-edit" />
-                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
-                                            Editar información actividad
-                                        </q-tooltip>
-                                    </div>
-                                    <div style="display: inline;">
-                                        <q-btn size="sm" color="negative" round dense
-                                            @click="confirmacionEliminarActividad(props.row)" icon="mdi-delete" />
-                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
-                                            Eliminar actividad
-                                        </q-tooltip>
-                                    </div>
-
-                                </q-td>
-                            </q-tr>
-                        </template>
-
-                    </q-table>
-
-                </q-tab-panel>
-            </q-tab-panels>
+                </transition>
+                <q-inner-loading :showing="visible" label="Cargando información..." label-class="text-teal"
+                    label-style="font-size: 1.1em" />
+            </q-card-section>
 
             <!-- CONCLUSIONES Y O RECOMENDACIONES-->
             <div class="card-title-gestionar q-pa-md">
                 <b>{{ formatoInforme.conclusiones ? formatoInforme.conclusiones : "" }}</b>
             </div>
-            <q-card-section class="q-px-lg bg-blue-1">
+            <q-card-section class="q-px-lg bg-blue-1" style="min-height: 150px">
+                <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
+                    <div v-show="isRecomendaciones" class="no-padding no-margin">
+                        <template v-if="conclusionesRecomendaciones.length == 0">
+                            <div align="center" class="q-pt-xl">
+                                <b>NADA QUE MOSTRAR</b>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <q-list bordered separator dense class="bg-white">
+                                <q-item>
+                                    <q-item-section caption>
+                                        <q-item-label>
+                                            <q-input bottom-slots v-model="textconclusionesRecomendaciones"
+                                                :label="`Agregar ${formatoInforme.conclusiones ? formatoInforme.conclusiones : ''}`"
+                                                dense type="text" autogrow
+                                                :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']">
+                                                <template v-slot:append>
+                                                    <q-icon
+                                                        v-if="textconclusionesRecomendaciones !== '' && textconclusionesRecomendaciones != null"
+                                                        name="close" @click="textconclusionesRecomendaciones = null"
+                                                        class="cursor-pointer" />
+                                                    <q-btn round dense flat icon="add"
+                                                        @click="guardarConclusionRecomendacion" />
+                                                </template>
+                                            </q-input>
+                                        </q-item-label>
+                                    </q-item-section>
+                                </q-item>
+                                <q-item v-for="item, index in conclusionesRecomendaciones" :key="index">
+                                    <q-item-section>
+                                        <q-item-label>
+                                            <div class="row justify-between items-center">
+                                                <div class="col-1" v-if="indexEditConclusion != index">
+                                                    <q-btn flat icon="mdi-chevron-up" color="grey-7" size="xs" round
+                                                        :disable="index != 0 ? false : true"
+                                                        @click="cambiarPosicionConclusion(item._id, (index + 1) - 1)"></q-btn>
+                                                    <q-btn flat icon="mdi-chevron-down" color="grey-7" size="xs" round
+                                                        :disable="index != (conclusionesRecomendaciones.length - 1) ? false : true"
+                                                        @click="cambiarPosicionConclusion(item._id, (index + 1) + 1)"></q-btn>
+                                                </div>
+                                                <div class="col-1" v-if="indexEditConclusion != index">
+                                                    <b>{{ (index + 1) + '. ' }}</b>
+                                                </div>
+                                                <template v-if="indexEditConclusion != index">
+                                                    <div class="col-9">{{ item.nombre }}</div>
+                                                    <div class="col-1">
+                                                        <q-btn color="amber" flat round size="sm"
+                                                            icon="mdi-file-edit-outline"
+                                                            @click="indexEditConclusion = index; textEditConclusion = item.nombre" />
+                                                        <q-btn color="red" flat round size="sm" icon="mdi-trash-can-outline"
+                                                            @click="eliminarConclusionRecomendacion(item._id)" />
+                                                    </div>
+                                                </template>
+                                                <template v-else>
+                                                    <div class="col-9">
+                                                        <q-input bottom-slots v-model="textEditConclusion" :label="`Editar`"
+                                                            dense autogrow
+                                                            :rules="[val => val && val.length > 0 || val == null || 'Este campo no puede estar vacío']" />
+                                                    </div>
+                                                    <div class="col-1">
+                                                        <q-btn color="positive" flat round size="sm" icon="mdi-check-bold"
+                                                            @click="editarConclusionRecomendacion(item._id)" />
+                                                        <q-btn color="red" flat round size="sm" icon="close"
+                                                            @click="indexEditConclusion = null" />
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </q-item-label>
+                                    </q-item-section>
+                                </q-item>
 
-                <q-list bordered separator dense class="bg-white">
-                    <q-item>
-                        <q-item-section caption>
-                            <q-item-label>
-                                <q-input bottom-slots v-model="textconclusionesRecomendaciones"
-                                    :label="`Agregar ${formatoInforme.conclusiones ? formatoInforme.conclusiones : ''}`"
-                                    dense type="text" autogrow
-                                    :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']">
-                                    <template v-slot:append>
-                                        <q-icon
-                                            v-if="textconclusionesRecomendaciones !== '' && textconclusionesRecomendaciones != null"
-                                            name="close" @click="textconclusionesRecomendaciones = null"
-                                            class="cursor-pointer" />
-                                        <q-btn round dense flat icon="add" @click="guardarConclusionRecomendacion" />
-                                    </template>
-                                </q-input>
-                            </q-item-label>
-                        </q-item-section>
-                    </q-item>
-                    <q-item v-for="item, index in conclusionesRecomendaciones" :key="index">
-                        <q-item-section>
-                            <q-item-label>
-                                <div class="row justify-between items-center">
-                                    <div class="col-1" v-if="indexEditConclusion != index">
-                                        <q-btn flat icon="mdi-chevron-up" color="grey-7" size="xs" round
-                                            :disable="index != 0 ? false : true"
-                                            @click="cambiarPosicionConclusion(item._id, (index + 1) - 1)"></q-btn>
-                                        <q-btn flat icon="mdi-chevron-down" color="grey-7" size="xs" round
-                                            :disable="index != (conclusionesRecomendaciones.length - 1) ? false : true"
-                                            @click="cambiarPosicionConclusion(item._id, (index + 1) + 1)"></q-btn>
-                                    </div>
-                                    <div class="col-1" v-if="indexEditConclusion != index">
-                                        <b>{{ (index + 1) + '. ' }}</b>
-                                    </div>
-                                    <template v-if="indexEditConclusion != index">
-                                        <div class="col-9">{{ item.nombre }}</div>
-                                        <div class="col-1">
-                                            <q-btn color="amber" flat round size="sm" icon="mdi-file-edit-outline"
-                                                @click="indexEditConclusion = index; textEditConclusion = item.nombre" />
-                                            <q-btn color="red" flat round size="sm" icon="mdi-trash-can-outline"
-                                                @click="eliminarConclusionRecomendacion(item._id)" />
-                                        </div>
-                                    </template>
-                                    <template v-else>
-                                        <div class="col-9">
-                                            <q-input bottom-slots v-model="textEditConclusion" :label="`Editar`" dense
-                                                autogrow
-                                                :rules="[val => val && val.length > 0 || val == null || 'Este campo no puede estar vacío']" />
-                                        </div>
-                                        <div class="col-1">
-                                            <q-btn color="positive" flat round size="sm" icon="mdi-check-bold"
-                                                @click="editarConclusionRecomendacion(item._id)" />
-                                            <q-btn color="red" flat round size="sm" icon="close"
-                                                @click="indexEditConclusion = null" />
-                                        </div>
-                                    </template>
-                                </div>
-                            </q-item-label>
-                        </q-item-section>
-                    </q-item>
-
-                </q-list>
+                            </q-list>
+                        </template>
+                    </div>
+                </transition>
+                <q-inner-loading :showing="visibleConclusiones" label="Cargando información..." label-class="text-teal"
+                    label-style="font-size: 1.1em" />
 
             </q-card-section>
 
@@ -430,6 +465,10 @@ const informacionActividad = ref({
 
 const tab_actividad = ref('actividadesdesarrolladas')
 
+const isDataTable = ref(false)
+const isRecomendaciones = ref(false)
+const visibleConclusiones = ref(true)
+const visible = ref(true)
 
 const actividadEspecificaEditar = ref(null)
 const actividadEliminar = ref(null)
@@ -448,7 +487,7 @@ const periodo = ref({ estado: false })  //Para inicializar el template
 const informe = ref(null)
 const funcionesSustantivas = ref([])
 const actividadesEspecificas = ref([])
-const tab = ref(null)
+const tab = ref([])
 const form_actividad = ref(false)
 const headers = [
     { name: 'nombre', label: 'Nombre', sortable: true, field: 'nombre', align: 'left' },
@@ -467,7 +506,7 @@ const obtenerUltimoPeriodo = async () => {
     await periodoController.obtenerUltimoPeriodo((res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-        if (res.status != 200) return generateMessage('NO OK', res.message)
+        if (res.status != 200) { generateMessage('NO OK', res.message); visible.value = false; return isDataTable.value = true }
         periodo.value = res.data.periodo
         obtenerInformePorPeriodo()
     })
@@ -477,9 +516,8 @@ const obtenerInformePorPeriodo = async () => {
     await informeController.obtenerInformePeriodo(periodo.value.nombre, async (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-        if (res.status != 200) return generateMessage('NO OK', res.message)
+        if (res.status != 200) { generateMessage('NO OK', res.message); visible.value = false; return isDataTable.value = true }
         informe.value = res.data.informeFinal
-
         await obtenerActividadesDistributivo()
         obtenerConclusionesRecomendaciones()
         obtenerActividadesInforme()
@@ -493,13 +531,16 @@ const obtenerConclusionesRecomendaciones = async () => {
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al obtener las' + informe.value.conclusionesRecomendaciones)
         conclusionesRecomendaciones.value = res.data
     }))
+    isRecomendaciones.value = true
+    visibleConclusiones.value = false
+
 }
 
 const obtenerActividadesDistributivo = async () => {  //Obtienes las actividades del distributivo con sus respectivas funciones sustantivas
     await distributivo.obtenerTodasActividades((res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-        if (res.status != 200) return generateMessage('NO OK', res.message)
+        if (res.status != 200) { generateMessage('NO OK', res.message); visible.value = false; return isDataTable.value = true }
         funcionesSustantivas.value = res.data.actividades.funcionesSustantivas
         for (let i = 0; i < funcionesSustantivas.value.length; i++) {
             actividadesEspecificas.value.push({ nombre: funcionesSustantivas.value[i].nombre, actividadesEspecificas: [] }) // Aqui se coloca la funcion sustantivas las actividad del distributivo que tiene
@@ -512,7 +553,7 @@ const obtenerActividadesInforme = async () => {
     await especificaController.obtenerActividadesPorInforme(informe.value._id, (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-        if (res.status != 200) return generateMessage('NO OK', res.message)
+        if (res.status != 200) { generateMessage('NO OK', res.message); visible.value = false; return isDataTable.value = true }
         const actsEsp = res.data.actividadesEspecificas
         for (let i = 0; i < actividadesEspecificas.value.length; i++) {
             actividadesEspecificas.value[i].actividadesEspecificas = []
@@ -524,6 +565,9 @@ const obtenerActividadesInforme = async () => {
             }
         }
     })
+    isDataTable.value = true
+    visible.value = false
+
 }
 
 

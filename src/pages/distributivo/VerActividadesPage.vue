@@ -1,30 +1,49 @@
 <template>
     <div class="flex flex-center q-ma-none">
-        <q-card class="my-card__distributivo-ver">
+        <q-card class="my-card__distributivo-ver relative-position">
 
             <q-card-section class="card-title-actividades">
                 <div class="flex">
                     <div class="col q-table__title" inline><b>Actividades del distributivo</b></div>
-                    <q-btn v-if="authStore.rol == 'director'" @click="fixed = true" size="sm"
+                    <q-btn :disabled="visible" v-if="docente == 'director'" @click="fixed = true" size="sm"
                         class="col-1 bton-lista-docente" color="green" style="color:white">Nuevo
                         Distributivo</q-btn>
                 </div>
 
-            </q-card-section>
-            <q-tabs indicator-color="white" v-model="funSustantivaModel" dense class="bg-primary text-white shadow-2"
-                inline-label outside-arrows mobile-arrows>
-                <q-tab v-for="(fs, index) in funcionesSustantivas" :key="index" :label=fs.nombre :name=fs.nombre />
-            </q-tabs>
 
-            <q-tab-panels animated v-model="funSustantivaModel" class="bg-blue-1">
-                <q-tab-panel v-for="(fs, index) in funcionesSustantivas" :key="index" :label=fs.nombre :name=fs.nombre>
-                    <div class="q-pa-md">
-                        <q-table :rows-per-page-options="[5, 10, 0]" class="q-table-table" :pagination="{ rowsPerPage: 10 }"
-                            rows-per-page-label="Resultados por página" :rows=fs.actividadesDistributivo :columns=columns
-                            dense row-key="name" />
+            </q-card-section>
+            <q-card-section class="no-padding no-margin bg-blue-1" style="min-height: 300px;">
+                <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
+                    <div v-show="isData" class="no-padding no-margin">
+                        <template v-if="funSustantivaModel.length == 0">
+                            <div align="center" class="q-pt-xl">
+                                <b>NADA QUE MOSTRAR</b>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <q-tabs indicator-color="white" v-model="funSustantivaModel" dense
+                                class="bg-primary text-white shadow-2" inline-label outside-arrows mobile-arrows>
+                                <q-tab v-for="(fs, index) in funcionesSustantivas" :key="index" :label=fs.nombre
+                                    :name=fs.nombre />
+                            </q-tabs>
+
+                            <q-tab-panels animated v-model="funSustantivaModel" class="bg-blue-1">
+                                <q-tab-panel v-for="(fs, index) in funcionesSustantivas" :key="index" :label=fs.nombre
+                                    :name=fs.nombre>
+                                    <div class="q-pa-md">
+                                        <q-table :rows-per-page-options="[5, 10, 0]" class="q-table-table"
+                                            :pagination="{ rowsPerPage: 10 }" rows-per-page-label="Resultados por página"
+                                            :rows=fs.actividadesDistributivo :columns=columns dense row-key="name" />
+                                    </div>
+                                </q-tab-panel>
+                            </q-tab-panels>
+
+                        </template>
                     </div>
-                </q-tab-panel>
-            </q-tab-panels>
+                </transition>
+                <q-inner-loading :showing="visible" label="Cargando información..." label-class="text-teal"
+                    label-style="font-size: 1.1em" />
+            </q-card-section>
         </q-card>
     </div>
 
@@ -56,18 +75,19 @@
 </template>
 
 <script setup>
-import { api } from 'src/boot/axios'
 import { ref } from 'vue';
 import readXlsxFile from 'read-excel-file';
-import { useQuasar } from 'quasar'
+import docenteController from 'src/controller/docente';
 import distributivo from 'src/controller/distributivo';
-import { useAuthStore } from 'src/stores/auth-stores';
+import { useQuasar } from 'quasar';
 
 const $q = useQuasar()
-const authStore = useAuthStore()
+const docente = ref('docente')
 const fixed = ref(false);
+const visible = ref(true)
+const isData = ref(false)
 const actividadesSubir = [];
-const funSustantivaModel = ref('')  // Es para los q-tabs
+const funSustantivaModel = ref([])  // Es para los q-tabs
 const funcionesSustantivas = ref([])   // Funcines sustantivas con sus actividades del distributivo
 const columns = [
     { name: 'sigla', align: 'center', label: 'Codificación', field: 'sigla' },
@@ -75,14 +95,24 @@ const columns = [
     { name: 'descripcion', align: 'left', label: 'Descripcion', field: 'descripcion', style: 'max-width: 500px; white-space: break-spaces;' },
 ]
 
+const obtenerDocente = async () => {
+    const res = await docenteController.obtenerPerfilDocente()
+    if (res.status == 200) docente.value = res.data.docente.usuario.rol.nombre
+}
+
 const obtenerActividades = async () => {
-    await distributivo.obtenerTodasActividades((res) => {
+    await distributivo.obtenerTodasActividades(async (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         funcionesSustantivas.value = res.data.actividades.funcionesSustantivas
         funSustantivaModel.value = funcionesSustantivas.value[0].nombre
     })
+
+    isData.value = true
+    visible.value = false
+
+
 }
 
 const guardarActividades = async () => {
@@ -136,7 +166,7 @@ const generateMessage = (tipo, message) => {
 }
 
 obtenerActividades()
-
+obtenerDocente()
 
 
 </script>
