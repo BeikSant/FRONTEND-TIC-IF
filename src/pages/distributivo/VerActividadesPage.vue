@@ -48,23 +48,34 @@
     </div>
 
     <q-dialog v-model="fixed">
-        <q-card>
-            <q-card-section class="header-crear-docente">
-                <div class="text-h6">Cargar Nuevo Distributivo Docente</div>
-            </q-card-section>
-
-            <q-separator inset color="grey-8" />
-
-            <q-card-section style="max-height: 70vh" class="body-crear-docente">
-                <div class="q-pa-md">
-                    <div class="q-gutter2-sm row items-start">
-                        <q-uploader class="shadow-8" id="archivoExcel" label="Archivos subidos" style="max-width: 400px"
-                            @input="subirExcel" />
+        <q-card style="width: 400px;">
+            <q-card-section class="header-crear-docente card-title-actividades">
+                <div class="row">
+                    <div class="col-9 self-center"><b>Cargar Nuevo Distributivo Docente</b></div>
+                    <div class="col-2 q-mr-ms">
+                        <q-btn target="_blank" :href="baseURL + '/documents/Formatodistributivo.xlsx'" color="orange"
+                            size="sm">Descargar
+                            Formato</q-btn>
                     </div>
                 </div>
             </q-card-section>
 
-            <q-separator inset color="grey-8" />
+            <q-card-section style="max-height: 70vh" class="body-crear-docente">
+                <div style="text-align: justify;">
+                    Para cargar todo el distributivo de docentes, debe usar el formato que se puede obtener al dar click
+                    en el <b>Botón Naranja</b>; y la <b>CODIFICACIÓN</b> debe ser igual al de la
+                    planificación de carga horaria docente del <b>SIAAF</b> (por ejemplo: '<b>AD 1</b>').
+                </div>
+                <div class="q-pa-md">
+                    <div class="q-gutter2-sm row items-start">
+                        <q-uploader accept=".xlsx" class="shadow-8" id="archivoExcel" label="Archivos subidos"
+                            style="max-width: 400px" @input="subirExcel" />
+                    </div>
+                </div>
+
+            </q-card-section>
+
+            <q-separator></q-separator>
 
             <q-card-actions class="q-mt-md">
                 <q-btn @click="fixed = false" color="negative">Cerrar</q-btn>
@@ -83,6 +94,7 @@ import { useQuasar } from 'quasar';
 
 const $q = useQuasar()
 const docente = ref('docente')
+const baseURL = process.env.BASEURL
 const fixed = ref(false);
 const visible = ref(true)
 const isData = ref(false)
@@ -113,7 +125,8 @@ const obtenerActividades = async () => {
 }
 
 const guardarActividades = async () => {
-    await distributivo.guardarNuevoDistributivo(actividadesSubir, (res) => {
+    if (actividadesSubir.value.length == 0) { generateMessage('NO OK', 'No se ha podido obtener la información del archivo'); return fixed.value = false }
+    await distributivo.guardarNuevoDistributivo(actividadesSubir.value, (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al cargar las actividades del distributivo')
@@ -130,7 +143,7 @@ async function subirExcel(event) {
         let row = {}
         for (let i = 1; i < rows.length; i++) {
             if (rows[i][0] != null && rows[i][0] != 'null') {
-                if (i != 1) actividadesSubir.push(row)
+                if (i != 1) actividadesSubir.value.push(row)
                 row = {}
                 row.nombre = rows[i][0]
                 row.actividadesDistributivo = []
@@ -140,7 +153,7 @@ async function subirExcel(event) {
                 descripcion: rows[i][2]
             })
         }
-        actividadesSubir.push(row)
+        actividadesSubir.value.push(row)
     })
 }
 

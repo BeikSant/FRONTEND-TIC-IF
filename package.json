@@ -24,6 +24,7 @@
     "express": "^4.18.2",
     "js-cookie": "^3.0.1",
     "jspdf-autotable": "^3.5.28",
+    "pdfjs-dist": "^3.4.120",
     "pdfmake": "^0.2.7",
     "pinia": "^2.0.11",
     "primevue": "^3.23.0",

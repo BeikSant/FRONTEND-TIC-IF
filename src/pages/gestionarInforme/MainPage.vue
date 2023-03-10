@@ -373,37 +373,42 @@
             </q-dialog>
 
             <q-dialog v-model="form_actividad">
-                <q-card style="max-width: 400px">
+                <q-card style="min-width: 350px; max-width: 400px">
                     <q-card-section class="card-title-gestionar">
-                        <div class="text-h6">{{ titulo_form }}<b>{{ tab }}</b></div>
+                        <div class="text-h6">{{ titulo_form }}<b v-if="!editarActividad">{{ tab }}</b></div>
                     </q-card-section>
 
                     <q-separator />
+                    <q-form @submit="onSubmit" class="q-gutter-md">
+                        <q-card-section style="max-height: 50vh" class="scroll">
 
-                    <q-card-section>
-                        <q-form @submit="onSubmit" class="q-gutter-md">
-
-                            <q-select filled v-model="selected" :options="selectActividades"
-                                label="Actividad del Distributivo"
-                                :rules="[val => val && val.length > 0 || 'Seleccione una actividad del distributivo']" />
+                            <div class="row">
+                                <div class="col-7 q-pr-xs">
+                                    <q-select filled v-model="selected" :options="selectActividades"
+                                        label="Actividad del Distributivo"
+                                        :rules="[val => val && val.length > 0 || 'Seleccione una actividad del distributivo']" />
+                                </div>
+                                <div class="col-5">
+                                    <q-input filled type="number" v-model="horas_actividad" label="Horas" lazy-rules :rules="[
+                                        val => val !== null && val !== '' || 'Ingrese el número de horas planificadas',
+                                        val => val > 0 || 'Ingrese el número de horas planificadas'
+                                    ]" />
+                                </div>
+                            </div>
 
                             <q-input filled v-model="nombre_actividad" label="Nombre de la actividad especifica"
-                                :hint="selected + '-' + nombre_actividad.replace(/\s+/g, '_')" lazy-rules
+                                :hint="selected + ' - ' + nombre_actividad" lazy-rules autogrow
                                 :rules="[val => val && val.length > 0 || 'Ingrese el nombre de la actividad']" />
 
-                            <q-input filled type="number" v-model="horas_actividad" label="Horas" lazy-rules :rules="[
-                                val => val !== null && val !== '' || 'Ingrese el número de horas planificadas',
-                                val => val > 0 || 'Ingrese el número de horas planificadas'
-                            ]" />
-
-                            <q-separator />
+                        </q-card-section>
+                        <q-separator />
+                        <q-card-section>
                             <div>
                                 <q-btn label="Cancelar" @click="resetForm" flat color="negative" class="q-ml-sm" />
                                 <q-btn label="Guardar" type="submit" color="positive" />
                             </div>
-                        </q-form>
-                    </q-card-section>
-
+                        </q-card-section>
+                    </q-form>
 
                 </q-card>
             </q-dialog>
@@ -422,12 +427,74 @@
                     </q-card-actions>
                 </q-card>
             </q-dialog>
+
+            <q-dialog v-model="noActividades" persistent="">
+                <q-card style="width: 450px">
+                    <q-card-section class="card-title-gestionar">
+                        <div class="text-h6"><b>Cargar planificación de carga horaria docente</b></div>
+                    </q-card-section>
+                    <q-card-section v-if="isCargarActividades">
+                        <div class="text-h6">Actividades obtenidas</div>
+                        <q-list dense bordered separator>
+                            <q-item v-for="item, index in actividadesPDF" :key="index" v-ripple>
+                                <q-item-section>
+                                    <q-item-label caption>{{ item.nombre }}
+                                    </q-item-label>
+                                </q-item-section>
+                            </q-item>
+                        </q-list>
+
+                    </q-card-section>
+                    <q-card-section v-else class="q-pa-xs">
+                        <q-banner dense class="bg-blue-3 q-pa-none q-ma-xs" style="font-size: 10px !important;">
+                            <div class="row">
+                                <div class="col-1 self-center">
+                                    <q-icon name="warning" class="q-ml-xs" />
+                                </div>
+                                <div class="col-10" style="text-align: justify;">
+                                    <h1 class="text-caption">
+                                        Se recomienda cargar la planificación de carga horaria docente del SIAAF para
+                                        empezar a gestionar el
+                                        informe
+                                        final.
+                                    </h1>
+                                </div>
+                            </div>
+                        </q-banner>
+                        <q-banner dense class="bg-blue-3 q-pa-none q-ma-xs" style="font-size: 10px !important;">
+                            <div class="row">
+                                <div class="col-1 self-center">
+                                    <q-icon name="warning" class="q-ml-xs" />
+                                </div>
+                                <div class="col-10" style="text-align: justify;">
+                                    <h1 class="text-caption">
+                                        Antes de subir el archivo .pdf verificar que la codificación de las actividades del
+                                        distributo
+                                        coincida con las de su planificación de carga horaria docente (ej: 'AD 1').
+                                    </h1>
+                                </div>
+                            </div>
+                        </q-banner>
+                        <div class="column items-center">
+                            <q-uploader style="width: 100%;" label="Cargar planificación de carga horaria docente"
+                                accept=".pdf" @input="obtenerDatosPdf" />
+
+                        </div>
+                    </q-card-section>
+                    <q-separator></q-separator>
+                    <q-card-actions align="right">
+                        <q-btn :disabled="loaderUpload" flat label="Cerrar" color="negative" v-close-popup
+                            @click="confirm_delete = false" />
+                        <q-btn :loading="loaderUpload" v-if="uploadOk" @click="guardarActividadesPDF"
+                            color="positive">Guardar</q-btn>
+                    </q-card-actions>
+                </q-card>
+            </q-dialog>
         </q-card>
     </div>
 </template>
 
 <script setup>
-import { api } from 'src/boot/axios';
 import { ref } from 'vue';
 import { useQuasar } from 'quasar';
 import generarPDF from 'src/utils/generar-pdf';
@@ -441,7 +508,12 @@ import evidenciaController from 'src/controller/evidencia-controller';
 import observacionController from 'src/controller/observacion-controller';
 import desarrolladaController from 'src/controller/desarrollada-controller';
 import conclusionRecomendacionController from 'src/controller/conclusionRecomendacion.controller';
-import descargarExcel from 'src/utils/descargarExcel';
+import planificacionDocente from 'src/utils/planificacionDocente'
+
+const uploadOk = ref(false)
+const loaderUpload = ref(false)
+const isCargarActividades = ref(false)
+const actividadesPDF = ref([])
 
 const router = useRouter()
 const modalVerActividadEspecifica = ref(false)
@@ -470,6 +542,8 @@ const isRecomendaciones = ref(false)
 const visibleConclusiones = ref(true)
 const visible = ref(true)
 
+const noActividades = ref(false) //Cuando el usuario tiene actividades del distributivo
+
 const actividadEspecificaEditar = ref(null)
 const actividadEliminar = ref(null)
 const confirm_delete = ref(false)
@@ -490,7 +564,7 @@ const actividadesEspecificas = ref([])
 const tab = ref([])
 const form_actividad = ref(false)
 const headers = [
-    { name: 'nombre', label: 'Nombre', sortable: true, field: 'nombre', align: 'left' },
+    { name: 'nombre', label: 'Nombre', sortable: true, field: 'nombre', align: 'left', style: 'max-width: 250px; white-space: break-spaces;' },
     { name: 'horas', label: 'Horas', sortable: false, field: 'horas', align: 'center' },
     { name: 'actividadDesarrollada', label: 'Actividades Desarrolladas', sortable: false, field: 'actividadDesarrollada', align: 'center' },
     { name: 'evidencia', label: 'Evidencias', sortable: false, field: 'evidencia', align: 'center' },
@@ -543,7 +617,7 @@ const obtenerActividadesDistributivo = async () => {  //Obtienes las actividades
         if (res.status != 200) { generateMessage('NO OK', res.message); visible.value = false; return isDataTable.value = true }
         funcionesSustantivas.value = res.data.actividades.funcionesSustantivas
         for (let i = 0; i < funcionesSustantivas.value.length; i++) {
-            actividadesEspecificas.value.push({ nombre: funcionesSustantivas.value[i].nombre, actividadesEspecificas: [] }) // Aqui se coloca la funcion sustantivas las actividad del distributivo que tiene
+            actividadesEspecificas.value.push({ nombre: funcionesSustantivas.value[i].nombre, actividadesEspecificas: [] }) // Aqui se coloca la funcion sustantivas y las actividad del distributivo que tiene
         }
         if (actividadesEspecificas.value.length != 0) tab.value = actividadesEspecificas.value[0].nombre
     })
@@ -557,6 +631,8 @@ const obtenerActividadesInforme = async () => {
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) { generateMessage('NO OK', res.message); visible.value = false; return isDataTable.value = true }
         const actsEsp = res.data.actividadesEspecificas
+        if (actsEsp.length == 0) noActividades.value = true
+        if (actsEsp.length > 0) noActividades.value = false
         for (let i = 0; i < actividadesEspecificas.value.length; i++) {
             actividadesEspecificas.value[i].actividadesEspecificas = []
         }
@@ -669,17 +745,16 @@ async function editarActividadForm(valor) {
     selectedActividadDistributivo()
     titulo_form.value = 'Editar actividad específica'
     editarActividad.value = true
-    selected.value = valor.row.nombre.split('-')[0]
-    nombre_actividad.value = valor.row.nombre.substring(selected.value.length + 1, valor.row.nombre.length).split('_').join(' ')
+    selected.value = valor.row.nombre.split(' - ')[0]
+    nombre_actividad.value = valor.row.nombre.substring(selected.value.length + 3, valor.row.nombre.length)
     horas_actividad.value = valor.row.horas
     form_actividad.value = true
     actividadEspecificaEditar.value = valor.row
-
 }
 
 async function onSubmit() {
     const actividad = {
-        nombre: selected.value + '-' + nombre_actividad.value.replace(/\s+/g, '_'),
+        nombre: selected.value + ' - ' + nombre_actividad.value,
         horas: +horas_actividad.value
     }
     const fs = funcionesSustantivas.value.filter((fun) => fun.nombre == tab.value)
@@ -872,6 +947,36 @@ async function cambiarPosicionItem(item, key) {
             break;
     }
     await obtenerCamposActividad(informacionActividad.value.id)
+}
+
+async function obtenerDatosPdf(event) {
+    const file = event.target.files[0]
+    console.log(file)
+    uploadOk.value = true
+    loaderUpload.value = true
+    actividadesPDF.value = await planificacionDocente.obtenerActividadPdf(file)
+    if (actividadesPDF.value.length == 0) {
+        uploadOk.value = false
+        return generateMessage('NO OK', 'No se encontró ninguna actividad')
+    }
+    loaderUpload.value = false
+    isCargarActividades.value = true
+}
+
+async function guardarActividadesPDF() {
+    for (let i = 0; i < actividadesPDF.value.length; i++) {
+        const actividad = {
+            nombre: actividadesPDF.value[i].nombre,
+            horas: actividadesPDF.value[i].horas
+        }
+        await especificaController.crearActividad(informe.value._id, actividadesPDF.value[i].actividadDistributivo, actividad, (res) => {
+            if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al guardar la actividad' + actividadesPDF.value[i].nombre.split(' - ')[0])
+        })
+    }
+    obtenerActividadesInforme()
+    noActividades.value = false
+
+
 }
 
 function descargarPDF() {
