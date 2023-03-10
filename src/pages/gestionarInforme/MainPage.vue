@@ -434,7 +434,7 @@
                         <div class="text-h6"><b>Cargar planificación de carga horaria docente</b></div>
                     </q-card-section>
                     <q-card-section v-if="isCargarActividades">
-                        <div class="text-h6">Actividades obtenidas</div>
+                        <div class="text-h6">Actividades obtenidas:</div>
                         <q-list dense bordered separator>
                             <q-item v-for="item, index in actividadesPDF" :key="index" v-ripple>
                                 <q-item-section>
