@@ -5,7 +5,8 @@
             <q-card-section class="card-title-gestionar">
                 <div class="row justify-between">
                     <div class="col-9">
-                        <div class="col q-table__title" inline><b>Gestión del Informe Final</b></div>
+                        <div class="col q-table__title" inline><b>Gestión del Informe Final: <b>{{ periodo.nombre }}</b></b>
+                        </div>
                     </div>
                     <div class="col-3" align="right">
                         <q-btn :disabled="tab.length == 0 && conclusionesRecomendaciones.length == 0" size="sm"

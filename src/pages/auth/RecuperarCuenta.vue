@@ -39,7 +39,12 @@
                     <h6 class="q-ma-none q-pa-md"><b>RECUPERAR CONTRASEÑA</b></h6>
                 </div>
             </div>
+
             <q-separator class="no-marggin no-padding"></q-separator>
+            <div class="q-pt-none q-mt-md q-ml-md" align="left">
+                <a class="text-caption recuperar-enlace" clickable @click="irLogin()">Ir al inicio de
+                    sesión</a>
+            </div>
             <div class="q-pa-md">
                 <q-form @submit="onSubmit" class="q-gutter-md">
                     <div class="q-mb-none q-pb-none">
@@ -98,6 +103,10 @@ const onSubmit = async () => {
             })
         }
     }))
+}
+
+function irLogin() {
+    return router.push({ path: "/login" })
 }
 
 </script>

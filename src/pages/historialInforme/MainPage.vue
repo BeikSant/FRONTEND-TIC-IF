@@ -32,8 +32,6 @@
                                 {{ col.value }}
                             </q-td>
                             <q-td align="center" auto-width class="q-pa-md q-gutter-xs">
-                                <q-btn size="sm" color="orange" round dense @click="confirmacionEliminarPeriodo(props.row)"
-                                    icon="mdi-eye-outline" />
                                 <q-btn size="sm" color="positive" round dense icon="mdi-download"
                                     @click="desacargarPDF(props.row)" />
                             </q-td>
@@ -60,7 +58,7 @@ const router = useRouter()
 const $q = useQuasar()
 const header = [
     { name: 'periodo', label: 'Periodo', sortable: true, field: 'periodo', align: 'left' },
-    { name: 'informe', label: 'Informe', sortable: true, field: 'informe', align: 'center', style: 'max-width: 400px; white-space: break-spaces;' },
+    { name: 'informe', label: 'Informe', sortable: true, field: 'informe', align: 'left', style: 'max-width: 400px; white-space: break-spaces;' },
     { name: 'fechaInicio', label: 'Fecha Inicial', sortable: false, field: 'fechaInicio', align: 'center' },
     { name: 'fechaFin', label: 'Fecha Final', sortable: false, field: 'fechaFin', align: 'center' },
 ]
@@ -94,14 +92,15 @@ async function desacargarPDF(informe) {
 const obtenerActividadesInforme = async (idInforme) => {
     let fs = []
     await especificaController.obtenerActividadesPorInforme(idInforme, (res) => {
-        if (res.status != 200) return errorRequest()
+        if (res.status != 200) return errorRequest(res)
         const actsEsp = res.data.actividadesEspecificas
         for (let i = 0; i < actsEsp.length; i++) {
             let igual = false
+            if (i == 0 || !igual) fs.push({ nombre: actsEsp[i].actividadDistributivo.funcionSustantiva.nombre, actividadesEspecificas: [] })
             for (let j = 0; j < fs.length; j++) {
                 if (fs[j].nombre == actsEsp[i].actividadDistributivo.funcionSustantiva.nombre) igual = true
             }
-            if (i == 0 || !igual) fs.push({ nombre: actsEsp[i].actividadDistributivo.funcionSustantiva.nombre, actividadesEspecificas: [] })
+
         }
         for (let i = 0; i < actsEsp.length; i++) {
             for (let j = 0; j < fs.length; j++) {
@@ -109,8 +108,6 @@ const obtenerActividadesInforme = async (idInforme) => {
                     == fs[j].nombre) fs[j].actividadesEspecificas.push(actsEsp[i])
             }
         }
-
-
     })
     function SortArray(x, y) {
         if (x.nombre < y.nombre) { return -1; }
@@ -125,7 +122,7 @@ obtenerHistorialInformes()
 const errorRequest = (res) => {
     if (res.status == 401) { generateMessage('NO OK', res.message); return router.re('/login') }
     if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('NO OK', res.message)
+    if (res.status != 200) generateMessage('NO OK', res.message)
 }
 
 const generateMessage = (tipo, message) => {
