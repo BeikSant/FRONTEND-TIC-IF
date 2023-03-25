@@ -3,11 +3,15 @@
         <q-card class="my-card__distributivo-ver relative-position">
 
             <q-card-section class="card-title-actividades">
-                <div class="flex">
-                    <div class="col q-table__title" inline><b>Actividades del distributivo</b></div>
-                    <q-btn :disabled="visible" v-if="docente == 'director'" @click="fixed = true" size="sm"
-                        class="col-1 bton-lista-docente" color="green" style="color:white">Nuevo
-                        Distributivo</q-btn>
+                <div class="row">
+
+                    <div class="col-9 q-table__title" inline><b>Actividades del distributivo</b></div>
+                    <div class="col-3" align="rigth">
+                        <q-btn :disabled="visible" v-if="docente == 'director'" @click="fixed = true" size="sm"
+                            class="col-1" color="green" style="color:white">Nuevo
+                            Distributivo</q-btn>
+                    </div>
+
                 </div>
 
 

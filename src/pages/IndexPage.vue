@@ -15,10 +15,8 @@
 </template>
 
 <script setup>
-import { useAuthStore } from 'src/stores/auth-stores';
-import { defineComponent } from 'vue'
 
-const userAuth = useAuthStore()
+console.log("Hola Mundo")
 
 </script>
 

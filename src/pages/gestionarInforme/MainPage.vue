@@ -187,9 +187,9 @@
             <!-- DIALOG DE CAMPOS ACTIVIDAD ESPECIFICA-->
 
             <q-dialog v-model="modalVerActividadEspecifica" persistent>
-                <q-card style="max-width: 700px">
+                <q-card style="max-width: 500px">
                     <q-card-section class="card-title-gestionar">
-                        <div class="text-h6">Actividad Especifica: {{ informacionActividad.nombre }}</div>
+                        <div class="text-h6">Actividad Especifica: <b>{{ informacionActividad.nombre }}</b></div>
                     </q-card-section>
 
                     <q-tabs @update:model-value="onTabChanged" indicator-color="secondary" v-model="tab_actividad" dense
@@ -447,7 +447,13 @@
 
                     </q-card-section>
                     <q-card-section v-else class="q-pa-xs">
-                        <q-banner dense class="bg-blue-3 q-pa-none q-ma-xs" style="font-size: 10px !important;">
+                        <div class="column items-center">
+
+                            <q-uploader color="blue-4" text-color="black" style="width: 98%;"
+                                label="Subir Aquí el Documento" accept=".pdf" @input="obtenerDatosPdf" />
+
+                        </div>
+                        <q-banner dense class="bg-orange-3 q-pa-none q-ma-xs" style="font-size: 10px !important;">
                             <div class="row">
                                 <div class="col-1 self-center">
                                     <q-icon name="warning" class="q-ml-xs" />
@@ -462,7 +468,7 @@
                                 </div>
                             </div>
                         </q-banner>
-                        <q-banner dense class="bg-blue-3 q-pa-none q-ma-xs" style="font-size: 10px !important;">
+                        <q-banner dense class="bg-orange-3 q-pa-none q-ma-xs" style="font-size: 10px !important;">
                             <div class="row">
                                 <div class="col-1 self-center">
                                     <q-icon name="warning" class="q-ml-xs" />
@@ -476,11 +482,7 @@
                                 </div>
                             </div>
                         </q-banner>
-                        <div class="column items-center">
-                            <q-uploader style="width: 100%;" label="Cargar planificación de carga horaria docente"
-                                accept=".pdf" @input="obtenerDatosPdf" />
 
-                        </div>
                     </q-card-section>
                     <q-separator></q-separator>
                     <q-card-actions align="right">
@@ -525,6 +527,8 @@ const textObservacion = ref(null)
 const enlaceObservacion = ref(null)
 const indexEditConclusion = ref(null)
 const textEditConclusion = ref('')
+
+const fileUp = ref(null)
 
 const conclusionesRecomendaciones = ref([])
 
@@ -952,15 +956,14 @@ async function cambiarPosicionItem(item, key) {
 
 async function obtenerDatosPdf(event) {
     const file = event.target.files[0]
-    console.log(file)
     uploadOk.value = true
     loaderUpload.value = true
     actividadesPDF.value = await planificacionDocente.obtenerActividadPdf(file)
+    loaderUpload.value = false
     if (actividadesPDF.value.length == 0) {
         uploadOk.value = false
         return generateMessage('NO OK', 'No se encontró ninguna actividad')
     }
-    loaderUpload.value = false
     isCargarActividades.value = true
 }
 

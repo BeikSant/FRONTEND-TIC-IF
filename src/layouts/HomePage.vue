@@ -69,6 +69,9 @@
                     </div>
                 </q-list>
             </q-drawer>
+            <q-page-container>
+                <router-view />
+            </q-page-container>
             <q-dialog v-model="showCambiarContrasennia" persistent>
                 <q-card style="max-width: 500px; min-width: 300px;">
                     <q-card-section class="card-title">
@@ -109,9 +112,7 @@
                     </q-card-section>
                 </q-card>
             </q-dialog>
-            <q-page-container>
-                <router-view />
-            </q-page-container>
+
         </q-layout>
 
     </Suspense>
@@ -131,6 +132,12 @@ const linksList = [
         icon: 'mdi-home',
         requireDirector: false,
         to: '/'
+    },
+    {
+        title: 'Administrar docentes',
+        icon: 'mdi-account-cog',
+        requireDirector: true,
+        to: '/docente'
     },
     {
         title: 'Administrar informe final',
@@ -155,12 +162,6 @@ const linksList = [
         icon: 'mdi-clipboard-text-multiple',
         requireDirector: false,
         to: '/informe/historial'
-    },
-    {
-        title: 'Administrar docentes',
-        icon: 'mdi-account-cog',
-        requireDirector: true,
-        to: '/docente'
     },
 ]
 export default {
@@ -226,7 +227,7 @@ export default {
                 leftDrawerOpen.value = !leftDrawerOpen.value
             },
             async logout() {
-                Cookies.remove('auth-informefinal')
+                await Cookies.remove('auth-informefinal')
                 return router.push({ path: '/login' });
             },
             async onSubmit() {

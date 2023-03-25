@@ -18,8 +18,6 @@ export default {
                     const { actividadesCompletas, actividadesObligatorias } = await obtenerInformacion(data)
                     const funcionesSustantivas = await obtenerActividadesDistributivo()
                     res = compararActividades(funcionesSustantivas, actividadesCompletas, actividadesObligatorias)
-                    console.log(funcionesSustantivas)
-                    console.log(actividadesCompletas, actividadesObligatorias)
                     resolve(res)
                 } catch (error) {
                     reject([])
@@ -84,7 +82,6 @@ async function getItems(src) {
             items.push(item.str);
         })
     }
-    //console.log(items);
     return items;
 }
 

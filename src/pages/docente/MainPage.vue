@@ -8,7 +8,7 @@
                     </div>
                     <div class="col-3" align="right">
                         <q-btn :disabled="loading" @click="formularioCrear()" size="sm" class="col-1 bton-lista-docente"
-                            color="secondary" style="color:white">NUEVO DOCENTE</q-btn>
+                            color="secondary" style="color:white">AGREGAR DOCENTE</q-btn>
                     </div>
                 </div>
             </q-card-section>
@@ -219,6 +219,7 @@ const obtenerDocentes = async () => {
 
 const crearDocente = async (data) => {
     await docente.crearDocente(data, (res) => {
+        console.log(res)
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
@@ -241,7 +242,7 @@ const editarDocente = async (id, data) => {
 
 const formularioCrear = async () => {
     await onReset()
-    titulo_form.value = "Crear Nuevo Docente"
+    titulo_form.value = "Agregar Nuevo Docente"
     formulario.value = true
 }
 
