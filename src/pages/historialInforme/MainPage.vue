@@ -96,11 +96,10 @@ const obtenerActividadesInforme = async (idInforme) => {
         const actsEsp = res.data.actividadesEspecificas
         for (let i = 0; i < actsEsp.length; i++) {
             let igual = false
-            if (i == 0 || !igual) fs.push({ nombre: actsEsp[i].actividadDistributivo.funcionSustantiva.nombre, actividadesEspecificas: [] })
             for (let j = 0; j < fs.length; j++) {
                 if (fs[j].nombre == actsEsp[i].actividadDistributivo.funcionSustantiva.nombre) igual = true
             }
-
+            if (i == 0 || !igual) fs.push({ nombre: actsEsp[i].actividadDistributivo.funcionSustantiva.nombre, actividadesEspecificas: [] })
         }
         for (let i = 0; i < actsEsp.length; i++) {
             for (let j = 0; j < fs.length; j++) {

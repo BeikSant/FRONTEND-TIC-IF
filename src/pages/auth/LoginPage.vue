@@ -93,7 +93,7 @@ const onSubmit = async () => {
         message: res.message
     })
 
-    Cookies.set('auth-informefinal', res.data.token)
+    Cookies.set('auth-informefinal', res.data.token, { path: '/' })
     $q.notify({
         color: 'green-5',
         textColor: 'white',

@@ -473,7 +473,6 @@ function formularioPeriodo() {
 }
 
 function formularioEditarPeriodo(periodo) {
-    console.log(periodo)
     formPeriodo.value.draw = true
     formPeriodo.value.editar = true
     formPeriodo.value.titulo = 'Editar Periodo Académico'
@@ -551,14 +550,12 @@ async function usarFormato() {
 }
 
 async function guardarFormPeriodo() {
-    console.log(formPeriodo.value)
     const data = {
         nombre: formPeriodo.value.nombre,
         fechaInicio: new Date(formPeriodo.value.fechaInicio + ' 14:00:00'),
         fechaFin: ''
     }
     if (formPeriodo.value.fechaFinal != '') data.fechaFin = new Date(formPeriodo.value.fechaFinal + ' 14:00:00')
-    console.log(data)
     let res = null
     if (formPeriodo.value.editar) {
         res = await periodoController.editar(formPeriodo.value.id, data)

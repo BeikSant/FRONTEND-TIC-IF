@@ -223,7 +223,6 @@ export default {
                 if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
                 if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
                 if (res.status != 200) return generateMessage('NOK', res.message)
-                console.log(res.data)
                 perfil.value = {
                     dedicacion: res.data.docente.dedicacion,
                     nombre: `${res.data.docente.primerNombre} ${res.data.docente.primerApellido}`,
@@ -268,8 +267,8 @@ export default {
             toggleLeftDrawer() {
                 leftDrawerOpen.value = !leftDrawerOpen.value
             },
-            logout() {
-                if (Cookies.get("auth-informefinal")) Cookies.remove('auth-informefinal')
+            async logout() {
+                if (Cookies.get("auth-informefinal")) await Cookies.remove('auth-informefinal', { path: '/' })
                 return router.push({ path: '/login' });
             },
 

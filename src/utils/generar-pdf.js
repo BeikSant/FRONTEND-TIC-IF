@@ -3,7 +3,6 @@ import desarrolladaController from "src/controller/desarrollada-controller";
 import evidenciaController from "src/controller/evidencia-controller";
 import formatoController from "src/controller/formato-controller";
 import observacionController from "src/controller/observacion-controller";
-import { useAuthStore } from "src/stores/auth-stores";
 import informeController from "src/controller/informe-controller";
 import docenteCotroller from 'src/controller/docente';
 import downloadPdf from "./downloadPdf";
