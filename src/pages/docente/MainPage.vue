@@ -44,7 +44,7 @@
                                 </div>
                                 <template v-else-if="col.name == 'rol'">
                                     <q-select v-if="!props.row.isActual" v-model="props.row.rol" dense
-                                        :options="selectRoles" @update:model-value="cambiarRol(props.row)">
+                                        :options="selectRoles" @update:model-value="confirmRol(props.row)">
                                     </q-select>
                                     <template v-else>
                                         {{ col.value }}
@@ -98,13 +98,14 @@
                             :rules="[val => val && val.length > 0 || 'Completa este campo']" />
                     </div>
                     <q-input filled v-model="email" class="col label-mid" suffix="@unl.edu.ec" label="Correo institucional"
-                        lazy-rules
+                        lazy-rules :disable="idEditdocente != null"
                         :rules="[val => val && val.length > 0 || 'Completa este campo',
                         val => /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i.test(val + '@unl.edu.ec') || 'Formato de email no válido']" />
 
                     <div class="row">
                         <div class="col-6">
-                            <q-input class="col label-mid" filled v-model="cedula" label="Numero de Cédula" lazy-rules
+                            <q-input class="col label-mid" filled v-model="cedula" label="Numero de Cédula"
+                                :disable="idEditdocente != null" lazy-rules
                                 :rules="[val => val && val.length > 0 || 'Completa este campo', val => val.length == 10 && !isNaN(val) || 'Cédula no correcta']" />
                         </div>
                         <div class="col-6">
@@ -144,6 +145,28 @@
             </q-card-actions>
         </q-card>
     </q-dialog>
+
+    <q-dialog v-model="confirm_rol" persistent>
+        <q-card style="max-width: 400px;">
+            <q-card-section class="row items-center">
+                <div class="row">
+                    <div class="col-2">
+                        <q-avatar icon="warning" color="warning" text-color="white" />
+                    </div>
+                    <div class="col-10 q-pt-xs">
+                        <span>¿Está seguro de cambiar el rol del docente: <b>{{
+                            docenterol.nombre }}</b> de <b>{{ docenterol.rol }}</b> a <b>{{ docenterol.rolnuevo }}</b>
+                        </span>
+                    </div>
+                </div>
+            </q-card-section>
+
+            <q-card-actions align="right">
+                <q-btn flat label="Cancel" color="negative" v-close-popup @click="confirm_rol = false" />
+                <q-btn flat label="Aceptar" color="primary" @click="cambiarRol()" />
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
 </template>
 
 <script setup>
@@ -166,12 +189,13 @@ const email = ref(null)
 const cedula = ref(null)
 const carrera = ref(null)
 const dedicacion = ref(null)
-const options = ref([])
 const idEditdocente = ref(null)
 const selectRoles = ['DOCENTE', 'DIRECTOR']
 
 const confirm = ref(false)
+const confirm_rol = ref(false)
 const docenteestado = ref(null)
+const docenterol = ref(null)
 
 const Listdocentes = ref(null)
 const columns = [
@@ -219,7 +243,6 @@ const obtenerDocentes = async () => {
 
 const crearDocente = async (data) => {
     await docente.crearDocente(data, (res) => {
-        console.log(res)
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
@@ -268,6 +291,7 @@ const cerrarFormulario = () => {
 const cuadroConfirmacionEstado = async (docente) => {
     confirm.value = true
     docenteestado.value = docente
+
 }
 
 const cambiarEstado = async () => {
@@ -282,16 +306,18 @@ const cambiarEstado = async () => {
 }
 
 const onSubmit = async () => {
-    const data = {
+    let data = {
         primerNombre: first_name.value,
         segundoNombre: second_name.value,
         primerApellido: first_surname.value,
         segundoApellido: second_surname.value,
-        cedula: cedula.value,
-        correo: email.value + '@unl.edu.ec',
         dedicacion: dedicacion.value,
     }
-    if (idEditdocente.value == null) return crearDocente(data)
+    if (idEditdocente.value == null) {
+        data.cedula = cedula.value
+        data.correo = email.value + '@unl.edu.ec'
+        return crearDocente(data)
+    }
     return editarDocente(idEditdocente.value, data)
 }
 
@@ -308,12 +334,21 @@ const onReset = () => {
     idEditdocente.value = null
 }
 
-const cambiarRol = async (docente) => {
-    await user.cambiarRol(docente.id, docente.rol.toLowerCase(), res => {
+const confirmRol = async (docente) => {
+    docenterol.value = docente
+    docenterol.value.rolnuevo = docenterol.value.rol
+    docenterol.value.rol = selectRoles.filter(value => value != docenterol.value.rolnuevo)[0]
+    confirm_rol.value = true
+}
+
+const cambiarRol = async () => {
+    await user.cambiarRol(docenterol.value.id, docenterol.value.rolnuevo.toLowerCase(), res => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
         generateMessage('OK', 'El rol del docente ha sido cambiado')
+        confirm_rol.value = false
+        docenterol.value = null
         obtenerDocentes()
     })
 }

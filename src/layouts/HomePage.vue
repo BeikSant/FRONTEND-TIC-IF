@@ -25,6 +25,15 @@
                         <q-btn dense flat round icon="mdi-account">
                             <q-menu fit>
                                 <q-list style="min-width: 100px; width: 200px;">
+                                    <q-item clickable
+                                        @click="showEditarDedicación = true; editDedicacion = perfil.dedicacion">
+                                        <q-item-section class="col-2">
+                                            <q-icon name="mdi-account-edit" />
+                                        </q-item-section>
+                                        <q-item-section class="col">
+                                            <q-item-label>Cambiar dedicación</q-item-label>
+                                        </q-item-section>
+                                    </q-item>
                                     <q-item clickable @click="showCambiarContrasennia = true">
                                         <q-item-section class="col-2">
                                             <q-icon name="mdi-key" />
@@ -34,7 +43,7 @@
                                         </q-item-section>
                                     </q-item>
                                     <q-separator />
-                                    <q-item clickable @click="logout">
+                                    <q-item clickable @click="logout()">
                                         <q-item-section class="col-2">
                                             <q-icon name="mdi-login-variant" />
                                         </q-item-section>
@@ -113,6 +122,33 @@
                 </q-card>
             </q-dialog>
 
+            <q-dialog v-model="showEditarDedicación" persistent>
+                <q-card style="max-width: 500px; min-width: 300px;">
+                    <q-card-section class="card-title">
+                        <div class="text-h6">Cambiar dedicación</div>
+                    </q-card-section>
+
+                    <q-separator class="q-separator-crear-docente" />
+
+                    <q-card-section style="max-height: 70vh" class="scroll body-crear-docente">
+                        <q-form @submit="cambiarDedicacion()" @reset="cerrarFormulario()" class="q-gutter-x-md">
+
+                            <q-input dense class="col label-mid q-mb-md" filled v-model="editDedicacion"
+                                label="Dedicación Actual" lazy-rules
+                                :rules="[val => val && val.length > 0 || 'Ingrese su dedicación actual']"
+                                hint="Ingrese su dedicación actual" type="text" />
+
+                            <q-separator class="q-separator-crear-docente" />
+                            <q-card-actions align="right" class="q-mb-none q-pb-none">
+                                <q-btn type="reset" label="Cancelar" color="negative" />
+                                <q-btn type="submit" color="positive" label="Guardar" />
+                            </q-card-actions>
+                        </q-form>
+
+                    </q-card-section>
+                </q-card>
+            </q-dialog>
+
         </q-layout>
 
     </Suspense>
@@ -120,10 +156,10 @@
 
 <script>
 import { ref } from 'vue'
-import { useAuthStore } from 'src/stores/auth-stores'
 import { useRouter } from 'vue-router'
 import docente from 'src/controller/docente';
 import user from 'src/controller/user';
+import docenteController from 'src/controller/docente';
 import { Cookies, useQuasar } from 'quasar';
 
 const linksList = [
@@ -173,11 +209,12 @@ export default {
         })
         const isPassword = ref(true)
         const isNewPassword = ref(true)
-
+        const showEditarDedicación = ref(false)
         const showCambiarContrasennia = ref(false)
         const router = useRouter()
+        const editDedicacion = ref('')
         const leftDrawerOpen = ref(false)
-        const useAuth = useAuthStore()
+        let idDocente = null
         const isDirector = ref(false)
         const perfil = ref({})
 
@@ -186,10 +223,13 @@ export default {
                 if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
                 if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
                 if (res.status != 200) return generateMessage('NOK', res.message)
+                console.log(res.data)
                 perfil.value = {
+                    dedicacion: res.data.docente.dedicacion,
                     nombre: `${res.data.docente.primerNombre} ${res.data.docente.primerApellido}`,
                     rol: res.data.docente.usuario.rol.nombre.toUpperCase()
                 }
+                idDocente = res.data.docente._id
                 isDirector.value = perfil.value.rol == 'DIRECTOR' ? true : false
             })
         }
@@ -223,13 +263,28 @@ export default {
             isNewPassword,
             formPassword,
             showCambiarContrasennia,
+            editDedicacion,
+            showEditarDedicación,
             toggleLeftDrawer() {
                 leftDrawerOpen.value = !leftDrawerOpen.value
             },
-            async logout() {
-                await Cookies.remove('auth-informefinal')
+            logout() {
+                if (Cookies.get("auth-informefinal")) Cookies.remove('auth-informefinal')
                 return router.push({ path: '/login' });
             },
+
+            async cambiarDedicacion() {
+                await docenteController.editarDedicacion(idDocente, editDedicacion.value, res => {
+                    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+                    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+                    if (res.status != 200) return generateMessage('NO OK', res.message)
+                    generateMessage('OK', res.data.message)
+                    perfil.value.dedicacion = editDedicacion.value
+                    showEditarDedicación.value = false
+                })
+
+            },
+
             async onSubmit() {
                 await user.cambiarContrasennia(formPassword.value, (res => {
                     if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
@@ -247,6 +302,9 @@ export default {
                     password: '',
                     new_password: ''
                 }
+                showEditarDedicación.value = false
+                editDedicacion.value = ''
+
             }
         }
     }

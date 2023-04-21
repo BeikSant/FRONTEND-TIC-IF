@@ -10,8 +10,8 @@
             </q-card-section>
             <q-tabs indicator-color="white" v-model="tab" dense class="bg-primary text-white shadow-2" inline-label
                 outside-arrows mobile-arrows>
-                <q-tab name="periodoAcademico">Periodo Académico</q-tab>
-                <q-tab name="formatoInforme">Formato Informe</q-tab>
+                <q-tab name="periodoAcademico">Periodos Académicos</q-tab>
+                <q-tab name="formatoInforme">Formatos Informe</q-tab>
             </q-tabs>
             <q-tab-panels class="bg-blue-1" v-model="tab" animated>
                 <q-tab-panel name="periodoAcademico">
@@ -47,6 +47,13 @@
                                 </q-td>
 
                                 <q-td align="center" auto-width class="q-pa-md q-gutter-xs">
+                                    <div style="display: inline;" v-if="props.row.estado">
+                                        <q-btn size="sm" color="warning" round dense
+                                            @click="formularioEditarPeriodo(props.row)" icon="mdi-file-document-edit" />
+                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                            Editar periodo
+                                        </q-tooltip>
+                                    </div>
                                     <div style="display: inline;">
                                         <q-btn size="sm" color="negative" round dense
                                             @click="confirmacionEliminarPeriodo(props.row)" icon="mdi-delete"
@@ -149,7 +156,7 @@
 
                     <q-card-section>
 
-                        <div class="text-caption q-mb-sm">
+                        <div class="text-caption q-mb-sm" v-if="!formPeriodo.editar">
                             Recuerde que al crear un nuevo perido académico, este no podrá ser <b>ELIMINADO</b> y
                             automáticamente
                             se habilitaría un nuevo informe final para todos los docentes
@@ -227,7 +234,7 @@
                         </q-banner>
                     </q-card-section>
                     <q-form @submit="guardarFormFormato">
-                        <q-card-section style="max-height: 70vh" class="scroll q-pb-none">
+                        <q-card-section style="max-height:53vh" class="scroll q-pb-none">
                             <q-separator class="q-mb-lg" />
                             <q-tab-panels v-model="tabFormato">
                                 <q-tab-panel name="informacionGeneral" class="q-ma-none q-pa-none">
@@ -302,10 +309,12 @@
                         </q-card-section>
 
                         <q-separator />
-                        <div class="q-my-md q-mx-sm" align="right">
-                            <q-btn class="q-mr-sm" label="Cancelar" @click="resetFormFormato()" flat color="negative" />
-                            <q-btn label="Guardar" type="submit" color="positive" />
-                        </div>
+                        <q-card-section>
+                            <div class="q-my-none q-mx-sm" align="right">
+                                <q-btn class="q-mr-sm" label="Cancelar" @click="resetFormFormato()" flat color="negative" />
+                                <q-btn label="Guardar" type="submit" color="positive" />
+                            </div>
+                        </q-card-section>
                     </q-form>
 
 
@@ -344,7 +353,7 @@
             </q-dialog>
 
             <q-dialog v-model="dialogUsarFormato" persistent>
-                <q-card>
+                <q-card style="max-width: 420px">
                     <q-card-section class="row items-center">
                         <q-avatar icon="warning" color="warning" text-color="white" />
                         <span class="q-ml-sm">¿Está seguro que desea usar el Formato <b>{{ formatoUsar.nombreFormato
@@ -379,6 +388,7 @@ const formatoActivo = ref(null)
 
 const formPeriodo = ref({
     draw: false,
+    editar: false,
     titulo: '',
     nombre: '',
     fechaInicio: '',
@@ -422,7 +432,7 @@ async function obtenerTodosPeriodos() {
         let periodos = res.data.periodos
         for (let i = 0; i < periodos.length; i++) {
             periodos[i].fechaInicio = new Date(periodos[i].fechaInicio).toLocaleDateString()
-            periodos[i].fechaFin ?
+            periodos[i].fechaFin && periodos.fechaFin != '' ?
                 periodos[i].fechaFin = new Date(periodos[i].fechaFin).toLocaleDateString() :
                 periodos[i].fechaFin = 'NO DEFINIDO'
 
@@ -459,6 +469,33 @@ function editarFormatoForm(props) {
 function formularioPeriodo() {
     formPeriodo.value.draw = true
     formPeriodo.value.titulo = 'Crear Nuevo Periodo'
+    formPeriodo.value.editar = false
+}
+
+function formularioEditarPeriodo(periodo) {
+    console.log(periodo)
+    formPeriodo.value.draw = true
+    formPeriodo.value.editar = true
+    formPeriodo.value.titulo = 'Editar Periodo Académico'
+    formPeriodo.value.id = periodo._id
+    formPeriodo.value.nombre = periodo.nombre
+    const fechaInicioOriginal = periodo.fechaInicio;
+    const partesFecha = fechaInicioOriginal.split('/');
+    const fechaInicioFormateada = partesFecha[2] + '-' + (partesFecha[1] < 10 ? '0' + partesFecha[1] : partesFecha[1]) + '-' + (
+        partesFecha[0] < 10 ? '0' + partesFecha[0] : partesFecha[0]
+    );
+    formPeriodo.value.fechaInicio = fechaInicioFormateada
+    if (periodo.fechaFin != 'NO DEFINIDO') {
+        const fechaFinOriginal = periodo.fechaFin;
+        const partesFechaFin = fechaFinOriginal.split('/');
+        const fechaFinFormateada = partesFechaFin[2] + '-' + (partesFechaFin[1] < 10 ? '0' + partesFechaFin[1] : partesFechaFin[1]) + '-' + (
+            partesFechaFin[0] < 10 ? '0' + partesFechaFin[0] : partesFechaFin[0]
+        );
+        formPeriodo.value.fechaFinal = fechaFinFormateada
+    } else {
+        formPeriodo.value.fechaFinal = ''
+    }
+
 }
 
 async function guardarFormFormato() {
@@ -514,19 +551,26 @@ async function usarFormato() {
 }
 
 async function guardarFormPeriodo() {
+    console.log(formPeriodo.value)
     const data = {
         nombre: formPeriodo.value.nombre,
-        fechaInicio: new Date(formPeriodo.value.fechaInicio)
+        fechaInicio: new Date(formPeriodo.value.fechaInicio + ' 14:00:00'),
+        fechaFin: ''
     }
-    if (formPeriodo.value.fechaFinal != '') data.fechaFin = new Date(formPeriodo.value.fechaFinal)
-    await periodoController.crearPeriodo(data, (res) => {
-        if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
-        if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-        if (res.status != 200) return generateMessage('NO OK', res.message)
-        obtenerTodosPeriodos()
-        formPeriodo.value.draw = false
-        generateMessage('OK', res.data.message)
-    })
+    if (formPeriodo.value.fechaFinal != '') data.fechaFin = new Date(formPeriodo.value.fechaFinal + ' 14:00:00')
+    console.log(data)
+    let res = null
+    if (formPeriodo.value.editar) {
+        res = await periodoController.editar(formPeriodo.value.id, data)
+    } else {
+        res = await periodoController.crearPeriodo(data)
+    }
+    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
+    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
+    if (res.status != 200) return generateMessage('NO OK', res.message)
+    obtenerTodosPeriodos()
+    formPeriodo.value.draw = false
+    generateMessage('OK', res.data.message)
 }
 
 function isMayorFechaInicial() {
@@ -550,6 +594,7 @@ function resetFormFormato() {
 function resetForm() {
     formPeriodo.value = {
         draw: false,
+        editable: false,
         titulo: '',
         nombre: '',
         fechaInicio: '',

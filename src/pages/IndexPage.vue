@@ -3,7 +3,7 @@
     <div class="contorno-dentro">
       <div class=" info-app">
         <h6><b style="font-style: italic;">BIENVENIDO</b> al Sistema de Gestión del Informe
-          Final de Cumplimiento
+          Final de Cumplimiento de Trabajo
           Académico de Docentes</h6>
       </div>
       <div class="logo-app">
@@ -15,9 +15,6 @@
 </template>
 
 <script setup>
-
-console.log("Hola Mundo")
-
 </script>
 
 <style>

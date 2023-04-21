@@ -47,6 +47,17 @@ export default {
             if (callback) return callback(centralErrors.obtenerMensajeError(e))
             return centralErrors.obtenerMensajeError(e)
         }
-    }
+    },
+
+    async editarDedicacion(id, dedicacion, callback) {
+        try {
+            let res = await api.patch(PATH + `/dedicacion/${id}`, { dedicacion }, configHeader.headers())
+            if (callback) return callback(res)
+            return res
+        } catch (e) {
+            if (callback) return callback(centralErrors.obtenerMensajeError(e))
+            return centralErrors.obtenerMensajeError(e)
+        }
+    },
 
 } 

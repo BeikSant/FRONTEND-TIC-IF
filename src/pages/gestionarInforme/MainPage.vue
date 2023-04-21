@@ -154,7 +154,7 @@
                                                             icon="mdi-file-edit-outline"
                                                             @click="indexEditConclusion = index; textEditConclusion = item.nombre" />
                                                         <q-btn color="red" flat round size="sm" icon="mdi-trash-can-outline"
-                                                            @click="eliminarConclusionRecomendacion(item._id)" />
+                                                            @click="confirmacionDeleteConclusion(item._id)" />
                                                     </div>
                                                 </template>
                                                 <template v-else>
@@ -429,6 +429,21 @@
                 </q-card>
             </q-dialog>
 
+            <q-dialog v-model="confirm_delete_conclusion" persistent>
+                <q-card>
+                    <q-card-section class="row items-center">
+                        <q-avatar icon="warning" color="warning" text-color="white" />
+                        <span class="q-ml-sm">¿Está seguro en eliminar la conclusión y/o recomendación?</span>
+                    </q-card-section>
+
+                    <q-card-actions align="right">
+                        <q-btn flat label="Cancel" color="negative" v-close-popup
+                            @click="confirm_delete_conclusion = false" />
+                        <q-btn flat label="Si" color="primary" @click="eliminarConclusionRecomendacion()" />
+                    </q-card-actions>
+                </q-card>
+            </q-dialog>
+
             <q-dialog v-model="noActividades" persistent="">
                 <q-card style="width: 450px">
                     <q-card-section class="card-title-gestionar">
@@ -531,6 +546,8 @@ const textEditConclusion = ref('')
 const fileUp = ref(null)
 
 const conclusionesRecomendaciones = ref([])
+const confirm_delete_conclusion = ref(false)
+const conclusion_delete = ref(null)
 
 const informacionActividad = ref({
     id: null,
@@ -708,21 +725,28 @@ async function editarConclusionRecomendacion(idConclusion) {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al guardar la información')
-        generateMessage('OK', 'Campo editato con éxito')
+        generateMessage('OK', 'Campo editado con éxito')
         textEditConclusion.value = null
         indexEditConclusion.value = null
         return obtenerConclusionesRecomendaciones()
     })
 }
 
-async function eliminarConclusionRecomendacion(idConclusion) {
+async function confirmacionDeleteConclusion(idConclusion) {
+    confirm_delete_conclusion.value = true
+    conclusion_delete.value = idConclusion
+}
+
+async function eliminarConclusionRecomendacion() {
     textEditConclusion.value = null
     indexEditConclusion.value = null
-    await conclusionRecomendacionController.eliminar(idConclusion, (res) => {
+    await conclusionRecomendacionController.eliminar(conclusion_delete.value, (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Error al eliminar')
         generateMessage('OK', 'Item eliminado con éxito')
+        confirm_delete_conclusion.value = false
+        conclusion_delete.value = null
         return obtenerConclusionesRecomendaciones()
     })
 }
@@ -828,7 +852,7 @@ async function guardarCamposActividad(id) {
     if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('NO OK', res.message)
     generateMessage('OK', res.data.message)
-    obtenerCamposActividad(id)
+    obtenerCamposActividad(id, informacionActividad.value.nombre)
 }
 
 async function editarCamposActividad(idCampo) {
@@ -852,8 +876,8 @@ async function editarCamposActividad(idCampo) {
     if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
     if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('NO OK', res.message)
-    generateMessage('OK', 'Item eliminado con éxito')
-    obtenerCamposActividad(informacionActividad.value.id)
+    generateMessage('OK', 'Campo editado con éxito')
+    obtenerCamposActividad(informacionActividad.value.id, informacionActividad.value.nombre)
     textEditCampo.value = null
     itemEditCampo.value = null
     enlaceEditCampo.value = null
@@ -879,7 +903,7 @@ async function eliminarCamposActividad(idCampo) {
     if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('NO OK', res.message)
     generateMessage('OK', 'Item eliminado con éxito')
-    obtenerCamposActividad(informacionActividad.value.id)
+    obtenerCamposActividad(informacionActividad.value.id, informacionActividad.value.nombre)
 }
 
 async function mostrarCamposActividad(id, nombre) {
@@ -951,7 +975,7 @@ async function cambiarPosicionItem(item, key) {
             await observacionController.editarObservacion(item._id, data)
             break;
     }
-    await obtenerCamposActividad(informacionActividad.value.id)
+    await obtenerCamposActividad(informacionActividad.value.id, informacionActividad.value.nombre)
 }
 
 async function obtenerDatosPdf(event) {

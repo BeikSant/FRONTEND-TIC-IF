@@ -47,5 +47,17 @@ export default {
             if (callback) return callback(centralErrors.obtenerMensajeError(e))
             return centralErrors.obtenerMensajeError(e)
         }
+    },
+    async editar(id, data, callback) {
+        try {
+            let res = await api.put(PATH + `/${id}`, data, configHeader.headers())
+            if (callback) return callback(res)
+            return res
+        } catch (e) {
+            if (callback) return callback(centralErrors.obtenerMensajeError(e))
+            return centralErrors.obtenerMensajeError(e)
+        }
     }
+
+
 }
