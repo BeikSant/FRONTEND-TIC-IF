@@ -103,12 +103,7 @@
                         val => /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i.test(val + '@unl.edu.ec') || 'Formato de email no válido']" />
 
                     <div class="row">
-                        <div class="col-6">
-                            <q-input class="col label-mid" filled v-model="cedula" label="Numero de Cédula"
-                                :disable="idEditdocente != null" lazy-rules
-                                :rules="[val => val && val.length > 0 || 'Completa este campo', val => val.length == 10 && !isNaN(val) || 'Cédula no correcta']" />
-                        </div>
-                        <div class="col-6">
+                        <div class="col">
                             <q-input class="col label-mid" filled v-model="dedicacion" label="Dedicación" lazy-rules
                                 :rules="[val => val && val.length > 0 || 'Completa este campo']" />
                         </div>
@@ -186,7 +181,6 @@ const loading = ref(true)
 const first_surname = ref(null)
 const second_surname = ref(null)
 const email = ref(null)
-const cedula = ref(null)
 const carrera = ref(null)
 const dedicacion = ref(null)
 const idEditdocente = ref(null)
@@ -200,7 +194,6 @@ const docenterol = ref(null)
 const Listdocentes = ref(null)
 const columns = [
     { name: 'nombre', align: 'center', label: 'Nombre', field: 'nombre', style: 'max-width: 200px; white-space: break-spaces;' },
-    { name: 'cedula', align: 'center', label: 'Cédula', field: 'cedula' },
     { name: 'correo', align: 'center', label: 'Email', field: 'correo' },
     { name: 'dedicacion', align: 'center', label: 'Dedicación', field: 'dedicacion', style: 'max-width: 200px; white-space: break-spaces;' },
     { name: 'rol', align: 'center', label: 'Rol', field: 'rol' },
@@ -231,7 +224,6 @@ const obtenerDocentes = async () => {
                 estado: docente.usuario.estado,
                 isActual: docente.isActual ? true : false,
                 rol: docente.usuario.rol.nombre.toUpperCase(),
-                cedula: docente.cedula,
                 correo: docente.correo,
                 dedicacion: docente.dedicacion
             })
@@ -278,7 +270,6 @@ const formularioEditar = async (docente) => {
     first_surname.value = docente.primerApellido
     second_surname.value = docente.segundoApellido
     email.value = docente.correo.split('@')[0]
-    cedula.value = docente.cedula
     dedicacion.value = docente.dedicacion
     formulario.value = true
 }
@@ -295,7 +286,7 @@ const cuadroConfirmacionEstado = async (docente) => {
 }
 
 const cambiarEstado = async () => {
-    await user.cambiarEstado(docenteestado.value.cedula, (res) => {
+    await user.cambiarEstado(docenteestado.value.id, (res) => {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', res.message)
@@ -314,7 +305,6 @@ const onSubmit = async () => {
         dedicacion: dedicacion.value,
     }
     if (idEditdocente.value == null) {
-        data.cedula = cedula.value
         data.correo = email.value + '@unl.edu.ec'
         return crearDocente(data)
     }
@@ -328,7 +318,6 @@ const onReset = () => {
     first_surname.value = null
     second_surname.value = null
     email.value = null
-    cedula.value = null
     carrera.value = null
     dedicacion.value = null
     idEditdocente.value = null
