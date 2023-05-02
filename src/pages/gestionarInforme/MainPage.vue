@@ -132,7 +132,7 @@
                                         </q-item-label>
                                     </q-item-section>
                                 </q-item>
-                                <q-item v-for="item, index in conclusionesRecomendaciones" :key="index">
+                                <q-item v-for="item, index in     conclusionesRecomendaciones    " :key="index">
                                     <q-item-section>
                                         <q-item-label>
                                             <div class="row justify-between items-center">
@@ -154,20 +154,20 @@
                                                             icon="mdi-file-edit-outline"
                                                             @click="indexEditConclusion = index; textEditConclusion = item.nombre" />
                                                         <q-btn color="red" flat round size="sm" icon="mdi-trash-can-outline"
-                                                            @click="confirmacionDeleteConclusion(item._id)" />
+                                                            @click=" confirmacionDeleteConclusion(item._id) " />
                                                     </div>
                                                 </template>
                                                 <template v-else>
                                                     <div class="col-9">
-                                                        <q-input bottom-slots v-model="textEditConclusion" :label="`Editar`"
-                                                            dense autogrow
-                                                            :rules="[val => val && val.length > 0 || val == null || 'Este campo no puede estar vacío']" />
+                                                        <q-input bottom-slots v-model=" textEditConclusion "
+                                                            :label=" `Editar` " dense autogrow
+                                                            :rules=" [val => val && val.length > 0 || val == null || 'Este campo no puede estar vacío'] " />
                                                     </div>
                                                     <div class="col-1">
                                                         <q-btn color="positive" flat round size="sm" icon="mdi-check-bold"
-                                                            @click="editarConclusionRecomendacion(item._id)" />
+                                                            @click=" editarConclusionRecomendacion(item._id) " />
                                                         <q-btn color="red" flat round size="sm" icon="close"
-                                                            @click="indexEditConclusion = null" />
+                                                            @click=" indexEditConclusion = null " />
                                                     </div>
                                                 </template>
                                             </div>
@@ -179,83 +179,85 @@
                         </template>
                     </div>
                 </transition>
-                <q-inner-loading :showing="visibleConclusiones" label="Cargando información..." label-class="text-teal"
+                <q-inner-loading :showing=" visibleConclusiones " label="Cargando información..." label-class="text-teal"
                     label-style="font-size: 1.1em" />
 
             </q-card-section>
 
             <!-- DIALOG DE CAMPOS ACTIVIDAD ESPECIFICA-->
 
-            <q-dialog v-model="modalVerActividadEspecifica" persistent>
+            <q-dialog v-model=" modalVerActividadEspecifica " persistent>
                 <q-card style="max-width: 500px">
                     <q-card-section class="card-title-gestionar">
                         <div class="text-h6">Actividad Especifica: <b>{{ informacionActividad.nombre }}</b></div>
                     </q-card-section>
 
-                    <q-tabs @update:model-value="onTabChanged" indicator-color="secondary" v-model="tab_actividad" dense
+                    <q-tabs @update:model-value=" onTabChanged " indicator-color="secondary" v-model=" tab_actividad " dense
                         outside-arrows mobile-arrows class="bg-primary text-white shadow-2" inline-label no-caps>
 
-                        <q-tab v-for="inf, index in informacionActividad.informacion" :key="index" :name="inf.nombre"
-                            :label="inf.nombre" />
+                        <q-tab v-for="    inf, index     in     informacionActividad.informacion    " :key=" index "
+                            :name=" inf.nombre " :label=" inf.nombre " />
 
                     </q-tabs>
                     <q-card-section style="max-height: 50vh; min-height: 50vh; max-width: 550px;"
                         class="scroll no-margin no-padding">
-                        <q-tab-panels v-model="tab_actividad">
+                        <q-tab-panels v-model=" tab_actividad ">
 
-                            <q-tab-panel v-for="inf, index in informacionActividad.informacion" :key="index"
-                                :name="inf.nombre">
+                            <q-tab-panel v-for="    inf, index     in     informacionActividad.informacion    " :key=" index "
+                                :name=" inf.nombre ">
                                 <q-list bordered separator dense>
                                     <q-item>
                                         <q-item-section>
                                             <q-item-label>
-                                                <q-input bottom-slots v-model="textActividadDesarrollada"
+                                                <q-input bottom-slots v-model=" textActividadDesarrollada "
                                                     label="Nueva actividad desarrollada" dense autogrow
-                                                    :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']"
-                                                    v-if="inf.nombre == formatoInforme.actividadesDesarrolladas">
+                                                    :rules=" [val => val && val.length > 0 || val == null || 'Complete este campo'] "
+                                                    v-if=" inf.nombre == formatoInforme.actividadesDesarrolladas ">
                                                     <template v-slot:append>
                                                         <q-icon
-                                                            v-if="textActividadDesarrollada !== '' && textActividadDesarrollada != null"
-                                                            name="close" @click="textActividadDesarrollada = null"
+                                                            v-if=" textActividadDesarrollada !== '' && textActividadDesarrollada != null "
+                                                            name="close" @click=" textActividadDesarrollada = null "
                                                             class="cursor-pointer" />
-                                                        <q-btn @click="guardarCamposActividad(informacionActividad.id)"
+                                                        <q-btn @click=" guardarCamposActividad(informacionActividad.id) "
                                                             round dense flat icon="add" />
                                                     </template>
                                                 </q-input>
 
-                                                <q-input bottom-slots v-model="textEvidencia" label="Nueva evidencia" dense
-                                                    :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']"
-                                                    v-if="inf.nombre == formatoInforme.evidencias" autogrow>
+                                                <q-input bottom-slots v-model=" textEvidencia " label="Nueva evidencia"
+                                                    dense
+                                                    :rules=" [val => val && val.length > 0 || val == null || 'Complete este campo'] "
+                                                    v-if=" inf.nombre == formatoInforme.evidencias " autogrow>
                                                     <template v-slot:append>
-                                                        <q-icon v-if="textEvidencia !== '' && textEvidencia != null"
-                                                            name="close" @click="textEvidencia = null"
+                                                        <q-icon v-if=" textEvidencia !== '' && textEvidencia != null "
+                                                            name="close" @click=" textEvidencia = null "
                                                             class="cursor-pointer" />
-                                                        <q-btn @click="guardarCamposActividad(informacionActividad.id)"
+                                                        <q-btn @click=" guardarCamposActividad(informacionActividad.id) "
                                                             round dense flat icon="add" />
                                                     </template>
                                                 </q-input>
 
-                                                <q-form @submit="guardarCamposActividad(informacionActividad.id)" dense
-                                                    v-if="inf.nombre == formatoInforme.observaciones">
-                                                    <q-input bottom-slots v-model="textObservacion" dense
+                                                <q-form @submit=" guardarCamposActividad(informacionActividad.id) " dense
+                                                    v-if=" inf.nombre == formatoInforme.observaciones ">
+                                                    <q-input bottom-slots v-model=" textObservacion " dense
                                                         label="Nueva observación" autogrow
-                                                        :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']">
+                                                        :rules=" [val => val && val.length > 0 || val == null || 'Complete este campo'] ">
                                                         <template v-slot:append>
-                                                            <q-icon v-if="textObservacion !== '' && textObservacion != null"
-                                                                name="close" @click="textObservacion = null"
+                                                            <q-icon
+                                                                v-if=" textObservacion !== '' && textObservacion != null "
+                                                                name="close" @click=" textObservacion = null "
                                                                 class="cursor-pointer" />
                                                         </template>
                                                     </q-input>
                                                     <div class="row">
                                                         <div class="col-10">
-                                                            <q-input bottom-slots v-model="enlaceObservacion"
+                                                            <q-input bottom-slots v-model=" enlaceObservacion "
                                                                 label="Enlace (opcional)" hint="Formato http:// o https://"
                                                                 dense autogrow
-                                                                :rules="[val => (val == '' || val == null) || (val && val.length > 0 && isUrl(val)) || 'No es un enlace válido']">
+                                                                :rules=" [val => (val == '' || val == null) || (val && val.length > 0 && isUrl(val)) || 'No es un enlace válido'] ">
                                                                 <template v-slot:append>
                                                                     <q-icon
-                                                                        v-if="enlaceObservacion !== '' && enlaceObservacion != null"
-                                                                        name="close" @click="enlaceObservacion = null"
+                                                                        v-if=" enlaceObservacion !== '' && enlaceObservacion != null "
+                                                                        name="close" @click=" enlaceObservacion = null "
                                                                         class="cursor-pointer" />
                                                                 </template>
                                                             </q-input>
@@ -269,24 +271,24 @@
                                             </q-item-label>
                                         </q-item-section>
                                     </q-item>
-                                    <q-item v-for="(item, key) in inf.data" :key="key">
+                                    <q-item v-for="(    item, key    ) in     inf.data    " :key=" key ">
                                         <q-item-section>
                                             <q-item-label>
                                                 <div class="row justify-between items-center">
-                                                    <div class="col-1" v-if="itemEditCampo != key">
+                                                    <div class="col-1" v-if=" itemEditCampo != key ">
                                                         <q-btn flat icon="mdi-chevron-up" color="grey-7" size="xs" round
-                                                            :disable="key != 0 ? false : true"
-                                                            @click="cambiarPosicionItem(item, (key + 1) - 1)"></q-btn>
+                                                            :disable=" key != 0 ? false : true "
+                                                            @click=" cambiarPosicionItem(item, (key + 1) - 1) "></q-btn>
                                                         <q-btn flat icon="mdi-chevron-down" color="grey-7" size="xs" round
-                                                            :disable="key != inf.data.length - 1 ? false : true"
-                                                            @click="cambiarPosicionItem(item, (key + 1) + 1)"></q-btn>
+                                                            :disable=" key != inf.data.length - 1 ? false : true "
+                                                            @click=" cambiarPosicionItem(item, (key + 1) + 1) "></q-btn>
                                                     </div>
-                                                    <div class="col-1" v-if="itemEditCampo != key">
+                                                    <div class="col-1" v-if=" itemEditCampo != key ">
                                                         <b>{{ (key + 1) + '. ' }}</b>
                                                     </div>
-                                                    <template v-if="itemEditCampo != key">
-                                                        <div class="col-8" v-if="item.enlace">{{ item.nombre }}
-                                                            <q-btn tag="a" :href="item.enlace" target="_blank" size="xs"
+                                                    <template v-if=" itemEditCampo != key ">
+                                                        <div class="col-8" v-if=" item.enlace ">{{ item.nombre }}
+                                                            <q-btn tag="a" :href=" item.enlace " target="_blank" size="xs"
                                                                 icon="mdi-link" flat color="blue-12"></q-btn>
                                                         </div>
                                                         <div class="col-8 " v-else>{{ item.nombre }}
@@ -294,36 +296,38 @@
                                                         <div class="col-2" align="right">
                                                             <q-btn color="amber" flat round size="xs"
                                                                 icon="mdi-file-edit-outline"
-                                                                @click="itemEditCampo = key; textEditCampo = item.nombre; enlaceEditCampo = item.enlace ? item.enlace : null " />
+                                                                @click=" itemEditCampo = key; textEditCampo = item.nombre; enlaceEditCampo = item.enlace ? item.enlace : null " />
                                                             <q-btn color="red" flat round size="xs"
                                                                 icon="mdi-trash-can-outline"
-                                                                @click="eliminarCamposActividad(item._id)" />
+                                                                @click=" eliminarCamposActividad(item._id) " />
                                                         </div>
                                                     </template>
                                                     <template v-else>
-                                                        <template v-if="inf.nombre == formatoInforme.observaciones">
+                                                        <template v-if=" inf.nombre == formatoInforme.observaciones ">
                                                             <div class="col-10">
                                                                 <q-form
-                                                                    @submit="editarCamposActividad(informacionActividad.id)"
-                                                                    dense v-if="inf.nombre == formatoInforme.observaciones">
-                                                                    <q-input bottom-slots v-model="textEditCampo"
+                                                                    @submit=" editarCamposActividad(informacionActividad.id) "
+                                                                    dense
+                                                                    v-if=" inf.nombre == formatoInforme.observaciones ">
+                                                                    <q-input bottom-slots v-model=" textEditCampo "
                                                                         label="Editar" dense autogrow
-                                                                        :rules="[val => val && val.length > 0 || val == null || 'Complete este campo']">
+                                                                        :rules=" [val => val && val.length > 0 || val == null || 'Complete este campo'] ">
                                                                         <template v-slot:append>
                                                                             <q-icon
-                                                                                v-if="textEditCampo !== '' && textEditCampo != null"
-                                                                                name="close" @click="textEditCampo = null"
+                                                                                v-if=" textEditCampo !== '' && textEditCampo != null "
+                                                                                name="close" @click=" textEditCampo = null "
                                                                                 class="cursor-pointer" />
                                                                         </template>
                                                                     </q-input>
-                                                                    <q-input bottom-slots v-model="enlaceEditCampo"
+                                                                    <q-input bottom-slots v-model=" enlaceEditCampo "
                                                                         label="Enlace (opcional)"
                                                                         hint="Formato http:// o https://" dense autogrow
-                                                                        :rules="[val => (val == '' || val == null) || (val && val.length > 0 && isUrl(val)) || 'No es un enlace válido']">
+                                                                        :rules=" [val => (val == '' || val == null) || (val && val.length > 0 && isUrl(val)) || 'No es un enlace válido'] ">
                                                                         <template v-slot:append>
                                                                             <q-icon
-                                                                                v-if="enlaceEditCampo !== '' && enlaceEditCampo != null"
-                                                                                name="close" @click="enlaceEditCampo = null"
+                                                                                v-if=" enlaceEditCampo !== '' && enlaceEditCampo != null "
+                                                                                name="close"
+                                                                                @click=" enlaceEditCampo = null "
                                                                                 class="cursor-pointer" />
                                                                         </template>
                                                                     </q-input>
@@ -333,13 +337,13 @@
                                                         </template>
                                                         <template v-else>
                                                             <div class="col-10">
-                                                                <q-input bottom-slots v-model="textEditCampo"
+                                                                <q-input bottom-slots v-model=" textEditCampo "
                                                                     style="width: 100%;" width="100%" dense autogrow
-                                                                    :rules="[val => val && val.length > 0 || val == null || 'Este campo no puede estar vacio']">
+                                                                    :rules=" [val => val && val.length > 0 || val == null || 'Este campo no puede estar vacio'] ">
                                                                     <template v-slot:append>
                                                                         <q-icon
-                                                                            v-if="textEvidencia !== '' && textEvidencia != null"
-                                                                            name="close" @click="textEvidencia = null"
+                                                                            v-if=" textEvidencia !== '' && textEvidencia != null "
+                                                                            name="close" @click=" textEvidencia = null "
                                                                             class="cursor-pointer" />
                                                                     </template>
                                                                 </q-input>
@@ -349,9 +353,9 @@
                                                         <div class="col-2" align="right">
                                                             <q-btn color="positive" flat round size="sm"
                                                                 icon="mdi-check-bold"
-                                                                @click="editarCamposActividad(item._id)" />
+                                                                @click=" editarCamposActividad(item._id) " />
                                                             <q-btn color="red" flat round size="sm" icon="close"
-                                                                @click="itemEditCampo = null" />
+                                                                @click=" itemEditCampo = null " />
                                                         </div>
                                                     </template>
 
@@ -367,45 +371,48 @@
                     </q-card-section>
                     <q-separator></q-separator>
                     <q-card-actions align="right">
-                        <q-btn flat label="Cerrar" color="negative" v-close-popup @click="obtenerActividadesInforme()" />
+                        <q-btn flat label="Cerrar" color="negative" v-close-popup @click=" obtenerActividadesInforme() " />
                     </q-card-actions>
                 </q-card>
 
             </q-dialog>
 
-            <q-dialog v-model="form_actividad">
+            <q-dialog v-model=" form_actividad ">
                 <q-card style="min-width: 350px; max-width: 400px">
                     <q-card-section class="card-title-gestionar">
-                        <div class="text-h6">{{ titulo_form }}<b v-if="!editarActividad">{{ tab }}</b></div>
+                        <div class="text-h6">{{ titulo_form }}<b v-if=" !editarActividad ">{{ tab }}</b></div>
                     </q-card-section>
 
                     <q-separator />
-                    <q-form @submit="onSubmit" class="q-gutter-md">
+                    <q-form @submit=" onSubmit " class="q-gutter-md">
                         <q-card-section style="max-height: 50vh" class="scroll">
 
                             <div class="row">
                                 <div class="col-7 q-pr-xs">
-                                    <q-select filled v-model="selected" :options="selectActividades"
+                                    <q-select filled v-model=" selected " :options=" selectActividades "
                                         label="Actividad del Distributivo"
-                                        :rules="[val => val && val.length > 0 || 'Seleccione una actividad del distributivo']" />
+                                        :rules=" [val => val && val.length > 0 || 'Seleccione una actividad del distributivo'] " />
                                 </div>
                                 <div class="col-5">
-                                    <q-input filled type="number" v-model="horas_actividad" label="Horas" lazy-rules :rules="[
-                                        val => val !== null && val !== '' || 'Ingrese el número de horas planificadas',
-                                        val => val > 0 || 'Ingrese el número de horas planificadas'
-                                    ]" />
+                                    <q-input filled type="number" v-model=" horas_actividad " label="Horas" lazy-rules
+                                        :rules="
+                                            [
+                                                val => val !== null && val !== '' || 'Ingrese el número de horas planificadas',
+                                                val => val > 0 || 'Ingrese el número de horas planificadas'
+                                            ]
+                                        " />
                                 </div>
                             </div>
 
-                            <q-input filled v-model="nombre_actividad" label="Nombre de la actividad especifica"
-                                :hint="selected + ' - ' + nombre_actividad" lazy-rules autogrow
-                                :rules="[val => val && val.length > 0 || 'Ingrese el nombre de la actividad']" />
+                            <q-input filled v-model=" nombre_actividad " label="Nombre de la actividad especifica"
+                                :hint=" selected + ' - ' + nombre_actividad " lazy-rules autogrow
+                                :rules=" [val => val && val.length > 0 || 'Ingrese el nombre de la actividad'] " />
 
                         </q-card-section>
                         <q-separator />
                         <q-card-section>
                             <div>
-                                <q-btn label="Cancelar" @click="resetForm" flat color="negative" class="q-ml-sm" />
+                                <q-btn label="Cancelar" @click=" resetForm " flat color="negative" class="q-ml-sm" />
                                 <q-btn label="Guardar" type="submit" color="positive" />
                             </div>
                         </q-card-section>
@@ -414,7 +421,7 @@
                 </q-card>
             </q-dialog>
 
-            <q-dialog v-model="confirm_delete" persistent>
+            <q-dialog v-model=" confirm_delete " persistent>
                 <q-card>
                     <q-card-section class="row items-center">
                         <q-avatar icon="warning" color="warning" text-color="white" />
@@ -423,13 +430,13 @@
                     </q-card-section>
 
                     <q-card-actions align="right">
-                        <q-btn flat label="Cancel" color="negative" v-close-popup @click="confirm_delete = false" />
-                        <q-btn flat label="Aceptar" color="primary" @click="eliminarActividad()" />
+                        <q-btn flat label="Cancel" color="negative" v-close-popup @click=" confirm_delete = false " />
+                        <q-btn flat label="Aceptar" color="primary" @click=" eliminarActividad() " />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
 
-            <q-dialog v-model="confirm_delete_conclusion" persistent>
+            <q-dialog v-model=" confirm_delete_conclusion " persistent>
                 <q-card>
                     <q-card-section class="row items-center">
                         <q-avatar icon="warning" color="warning" text-color="white" />
@@ -438,21 +445,21 @@
 
                     <q-card-actions align="right">
                         <q-btn flat label="Cancel" color="negative" v-close-popup
-                            @click="confirm_delete_conclusion = false" />
-                        <q-btn flat label="Si" color="primary" @click="eliminarConclusionRecomendacion()" />
+                            @click=" confirm_delete_conclusion = false " />
+                        <q-btn flat label="Si" color="primary" @click=" eliminarConclusionRecomendacion() " />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
 
-            <q-dialog v-model="noActividades" persistent="">
+            <q-dialog v-model=" noActividades " persistent="">
                 <q-card style="width: 450px">
                     <q-card-section class="card-title-gestionar">
                         <div class="text-h6"><b>Cargar planificación de carga horaria docente</b></div>
                     </q-card-section>
-                    <q-card-section v-if="isCargarActividades">
+                    <q-card-section v-if=" isCargarActividades ">
                         <div class="text-h6">Actividades obtenidas:</div>
                         <q-list dense bordered separator>
-                            <q-item v-for="item, index in actividadesPDF" :key="index" v-ripple>
+                            <q-item v-for="    item, index     in     actividadesPDF    " :key=" index " v-ripple>
                                 <q-item-section>
                                     <q-item-label caption>{{ item.nombre }}
                                     </q-item-label>
@@ -465,7 +472,7 @@
                         <div class="column items-center">
 
                             <q-uploader color="blue-4" text-color="black" style="width: 98%;"
-                                label="Subir Aquí el Documento" accept=".pdf" @input="obtenerDatosPdf" />
+                                label="Subir Aquí el Documento" accept=".pdf" @input=" obtenerDatosPdf " />
 
                         </div>
                         <q-banner dense class="bg-orange-3 q-pa-none q-ma-xs" style="font-size: 10px !important;">
@@ -501,9 +508,9 @@
                     </q-card-section>
                     <q-separator></q-separator>
                     <q-card-actions align="right">
-                        <q-btn :disabled="loaderUpload" flat label="Cerrar" color="negative" v-close-popup
-                            @click="confirm_delete = false" />
-                        <q-btn :loading="loaderUpload" v-if="uploadOk" @click="guardarActividadesPDF"
+                        <q-btn :disabled=" loaderUpload " flat label="Cerrar" color="negative" v-close-popup
+                            @click=" confirm_delete = false " />
+                        <q-btn :loading=" loaderUpload " v-if=" uploadOk " @click=" guardarActividadesPDF "
                             color="positive">Guardar</q-btn>
                     </q-card-actions>
                 </q-card>
@@ -725,7 +732,7 @@ async function editarConclusionRecomendacion(idConclusion) {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Ocurrió un error al guardar la información')
-        generateMessage('OK', 'Campo editado con éxito')
+        generateMessage('OK', res.data.message)
         textEditConclusion.value = null
         indexEditConclusion.value = null
         return obtenerConclusionesRecomendaciones()
@@ -744,7 +751,7 @@ async function eliminarConclusionRecomendacion() {
         if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
         if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
         if (res.status != 200) return generateMessage('NO OK', 'Error al eliminar')
-        generateMessage('OK', 'Item eliminado con éxito')
+        //generateMessage('OK', 'Conclusion y/o recomendacion eliminada con éxito')
         confirm_delete_conclusion.value = false
         conclusion_delete.value = null
         return obtenerConclusionesRecomendaciones()
@@ -876,7 +883,7 @@ async function editarCamposActividad(idCampo) {
     if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
     if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('NO OK', res.message)
-    generateMessage('OK', 'Campo editado con éxito')
+    generateMessage('OK', res.data.message)
     obtenerCamposActividad(informacionActividad.value.id, informacionActividad.value.nombre)
     textEditCampo.value = null
     itemEditCampo.value = null
@@ -902,7 +909,7 @@ async function eliminarCamposActividad(idCampo) {
     if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
     if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('NO OK', res.message)
-    generateMessage('OK', 'Item eliminado con éxito')
+    //generateMessage('OK', 'Item eliminado con éxito')
     obtenerCamposActividad(informacionActividad.value.id, informacionActividad.value.nombre)
 }
 
