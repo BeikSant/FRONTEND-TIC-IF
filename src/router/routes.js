@@ -1,74 +1,82 @@
 
 const routes = [
   {
-    path: '/',
+    path: '',
     component: () => import('layouts/HomePage.vue'),
     children: [
       {
-        path: '', component: () => import('pages/IndexPage.vue'),
-        meta: {
-          auth: true,
-        }
-      }
-    ]
-  },
-  {
-    path: '/docente',
-    component: () => import('layouts/HomePage.vue'),
-    children: [
-      {
-        path: '', component: () => import('pages/docente/MainPage.vue'),
-        meta: {
-          auth: true,
-          requireDirector: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/distributivo',
-    component: () => import('layouts/HomePage.vue'),
-    children: [
-      {
-        path: 'ver', component: () => import('pages/distributivo/VerActividadesPage.vue'),
-        meta: {
-          auth: true,
-        }
-      }
-    ]
-  },
-  {
-    path: '/informe',
-    component: () => import('layouts/HomePage.vue'),
-    children: [
-      {
-        path: 'gestionar', component: () => import('pages/gestionarInforme/MainPage.vue'),
+        path: '',
+        component: () => import('src/pages/pagina-inicio.vue'),
         meta: {
           auth: true,
         }
       },
       {
-        path: 'administrar', component: () => import('pages/administrarInforme/MainPage.vue'),
+        path: 'docentes',
+        component: () => import('src/pages/administrar-docentes/pagina-principal.vue'),
         meta: {
           auth: true,
           requireDirector: true
         }
       },
       {
-        path: 'historial', component: () => import('pages/historialInforme/MainPage.vue'),
+        path: 'distributivo',
+        component: () => import('src/pages/distributivo-general/pagina-principal.vue'),
         meta: {
           auth: true,
         }
+      },
+      {
+        path: 'periodo',
+        component: () => import('src/pages/periodo_academico/pagina-principal.vue'),
+        meta: {
+          auth: true,
+          requireDirector: true
+        }
+      },
+      {
+        path: 'informe',
+        children: [
+          {
+            path: 'gestionar',
+            component: () => import('pages/gestionar-informes/pagina-principal.vue'),
+            meta: {
+              auth: true,
+            }
+          },
+          {
+            path: 'revision',
+            component: () => import('pages/revisar-informes/pagina-principal.vue'),
+            meta: {
+              auth: true,
+              requireDirector: true
+            }
+          },
+          {
+            path: 'formato',
+            component: () => import('pages/formato-informe/pagina-principal.vue'),
+            meta: {
+              auth: true,
+              requireDirector: true
+            }
+          },
+          {
+            path: 'registro',
+            component: () => import('pages/registro-informes/pagina-principal.vue'),
+            meta: {
+              auth: true,
+            }
+          }
+        ]
       }
     ]
   },
-
 
   {
     path: '/login',
     children: [
       {
-        path: '', component: () => import('pages/auth/LoginPage.vue'),
+        path: '', component: () => import('pages/autorizacion/pagina-login.vue'),
         meta: {
           isLogin: true
         }
@@ -79,11 +87,11 @@ const routes = [
     path: '/recuperar/cuenta',
     children: [
       {
-        path: '', component: () => import('pages/auth/RecuperarCuenta.vue'),
+        path: '', component: () => import('pages/autorizacion/recuperar-cuenta.vue'),
       },
       {
         name: 'CambiarContrasenia',
-        path: ':token', component: () => import('pages/auth/CambiarContrasenia.vue'),
+        path: ':token', component: () => import('pages/autorizacion/cambiar-contrasenia.vue'),
       }
     ],
   },
@@ -91,11 +99,11 @@ const routes = [
   // but you can also remove it
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue')
+    component: () => import('src/pages/error-no-encontrado.vue')
   },
   {
-    path: '/inautorizado',
-    component: () => import('pages/InautorizadoPage.vue')
+    path: '/notfound',
+    component: () => import('src/pages/error-no-encontrado.vue')
   }
 ]
 

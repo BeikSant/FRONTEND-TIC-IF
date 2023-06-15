@@ -36,7 +36,7 @@ export default route(function (/* { store, ssrContext } */) {
 
     if (to.name == 'CambiarContrasenia') {
       const res = await user.verificarToken(to.params.token)
-      if (res.status != 200) return next("/inautorizado")
+      if (res.status != 200) return next("/notfound")
       return next()
 
     }
@@ -48,7 +48,7 @@ export default route(function (/* { store, ssrContext } */) {
       const res = await user.verificarSesion()
       if (res.status == 401) { Cookies.remove('auth-informefinal'); return next('/login') }
       if (requireDirector && res.data.rol == "director") return next()
-      if (requireDirector && res.data.rol == "docente") return next("/inautorizado")
+      if (requireDirector && res.data.rol == "docente") return next("/notfound")
       return next()
     } else {
       if (isLogin) return next()

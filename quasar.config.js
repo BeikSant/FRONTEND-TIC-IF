@@ -28,7 +28,7 @@ module.exports = configure(function (/* ctx */) {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
     boot: [
-
+      'socket',
       'axios',
     ],
 
@@ -90,7 +90,7 @@ module.exports = configure(function (/* ctx */) {
       watchOptions: {
         poll: 1000 // Check for changes every second
       },
-      open: true // opens browser window automatically
+      open: false // opens browser window automatically
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
@@ -108,7 +108,14 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: ['Notify']
+      plugins: ['Notify', 'LoadingBar', 'Dialog'],
+      config: {
+        loadingBar: {
+          color: 'red',
+          size: '2px',
+          position: 'top',
+        }
+      }
     },
 
     // animations: 'all', // --- includes all animations
