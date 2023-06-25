@@ -362,7 +362,7 @@ import observacionController from "src/controller/observacion-controller";
 import evidenciaController from "src/controller/evidencia-controller";
 import DOMPurify from 'dompurify';
 import { ref } from "vue";
-import { defineProps, watch } from "vue";
+import { watch } from "vue";
 import { useQuasar } from "quasar";
 
 const $q = useQuasar();

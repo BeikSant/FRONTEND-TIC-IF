@@ -16,7 +16,7 @@
 
         <template v-slot:top>
           <div class="row justify-between items-center full-width">
-            <span class="text-h6 text-bold">Lista de Periodos</span>
+            <span class="text-subtitle1 text-bold">LISTA DE PERIODOS</span>
             <q-input dense v-model="filter" placeholder="Buscar">
               <template v-slot:append>
                 <q-icon name="search" />

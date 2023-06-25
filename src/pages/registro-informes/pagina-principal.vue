@@ -1,7 +1,7 @@
 <template>
   <q-card class="q-ma-md" square flat bordered>
     <q-card-section class="bg-primary text-white">
-      <span class="text-bold text-h6">Registro de informes finales</span>
+      <span class="text-bold text-h6">Registro de Informes Finales</span>
     </q-card-section>
     <q-card-section class="no-padding">
       <q-table square flat bordered :columns="header" :rows="dataInformes" row-key="name" separator="cell" virtual-scroll
@@ -12,7 +12,7 @@
 
         <template v-slot:top>
           <div class="row justify-between items-center full-width">
-            <span class="text-h6 text-bold">Lista de Informes por Periodo</span>
+            <span class="text-subtitle1 text-bold text-uppercase">Lista de Informes por Periodo</span>
             <q-input dense v-model="filter" placeholder="Buscar">
               <template v-slot:append>
                 <q-icon name="search" />

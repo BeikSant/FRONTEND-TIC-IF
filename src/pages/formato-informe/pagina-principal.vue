@@ -1,7 +1,7 @@
 <template>
   <q-card class="q-ma-md" square bordered flat>
     <q-card-section class="bg-primary text-white row justify-between items-center">
-      <span class="text-h6 text-bold">Formatos del informe Final</span>
+      <span class="text-h6 text-bold">Formatos del Informe Final</span>
       <q-btn size="sm" color="blue-7" style="color:white" @click="formularioFormato()">Nuevo
         Formato</q-btn>
     </q-card-section>
@@ -14,7 +14,7 @@
 
         <template v-slot:top>
           <div class="row justify-between items-center full-width">
-            <span class="text-h6 text-bold">Lista de Formatos</span>
+            <span class="text-subtitle1 text-bold text-uppercase">Lista de Formatos</span>
             <q-input dense v-model="filter" placeholder="Buscar">
               <template v-slot:append>
                 <q-icon name="search" />
@@ -40,10 +40,10 @@
 
         <template v-slot:body-cell-tipo="props">
           <q-td :props="props">
-            <q-badge v-if="props.row.tipo == 'POR DEFECTO'" color="blue">
+            <q-badge style="white-space: break-spaces;" v-if="props.row.tipo == 'POR DEFECTO'" color="blue">
               POR DEFECTO
             </q-badge>
-            <q-badge v-else color="orange">
+            <q-badge style="white-space: break-spaces;" v-else color="orange">
               {{ props.row.tipo }}
             </q-badge>
           </q-td>

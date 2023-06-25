@@ -5,20 +5,17 @@
         <q-toolbar>
           <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
 
-          <q-toolbar-title class="title-main q-ml-md" width="70%">
+          <q-toolbar-title class="title-main" width="70%">
             <div class="row items-center text-h6 text-bold" style="gap: 10px">
-              <span v-if="!$q.screen.xs" style="white-space: break-spaces; line-height: normal; max-width: 100%">SISTEMA
-                DE GESTIÓN DEL
-                INFORME FINAL</span>
-              <span v-if="$q.screen.width > 464 && $q.screen.width < 600">
-                SISTEMA DE GESTIÓN DEL I.F.
-              </span>
-              <span v-if="$q.screen.width < 465">
-                S.G.I.F.
-              </span>
+              <div style="background-color: white; border-radius: 50%; padding: 4px;" class="q-my-sm">
+                <q-img alt="Logo UNL" src="~assets/carrera-icon.png" style="width: 40px" />
+              </div>
+              <span class="text-italic">
+                CISC-UNL</span>
             </div>
-
           </q-toolbar-title>
+
+          <!-- NOTIFICACIONES -->
           <div class="notificaciones">
             <q-btn dense flat round icon="mdi-bell">
               <q-badge size="xs" floating color="red" v-if="notificacionNoLeidas > 0">{{ notificacionNoLeidas
@@ -30,10 +27,10 @@
                 <q-list class="scroll" dense style="min-width: 250px; max-width: 350px; max-height: 50vh;">
                   <q-item v-if="notificaciones.length == 0">
                     <q-item-section>
-                      <q-item-label caption>No tiene notificaciones nuevas</q-item-label>
+                      <q-item-label caption>No tiene nuevas notificaciones</q-item-label>
                     </q-item-section>
                   </q-item>
-                  <template v-else v-for="item, key in notificaciones" :key="key">
+                  <template v-else v-for="item of notificaciones" :key="item">
                     <q-item>
                       <q-item-section>
                         <q-item-label :class="'text-caption text-justify ' + (item.leido ? 'text-grey-7' : '')">
@@ -58,15 +55,17 @@
               </q-menu>
             </q-btn>
           </div>
+          <!-- FIN NOTIFICACIONES -->
 
+          <!-- OPCIONES DE USUARIO -->
           <div class="q-mr-xs q-ml-xs">
             <q-btn dense flat round icon="mdi-account">
-              <q-menu fit v-model="menu_notificacion" square>
-                <q-list class="list" style="min-width: 100px; width: 200px" separator>
+              <q-menu fit v-model="menu_notificacion" square style="width: 230px;">
+                <q-list class="list" separator>
                   <q-item clickable @click="showEditarDedicación = true;
                   editDedicacion = perfil.dedicacion;
                   ">
-                    <q-item-section class="col-2">
+                    <q-item-section avatar class="col-3">
                       <q-icon name="mdi-account-edit" />
                     </q-item-section>
                     <q-item-section class="col">
@@ -74,7 +73,7 @@
                     </q-item-section>
                   </q-item>
                   <q-item clickable @click=" showCambiarContrasennia = true">
-                    <q-item-section class="col-2">
+                    <q-item-section avatar class="col-3">
                       <q-icon name="mdi-key" />
                     </q-item-section>
                     <q-item-section class="col">
@@ -83,7 +82,7 @@
                   </q-item>
                   <q-separator />
                   <q-item clickable @click=" logout()" class="bg-red-5 text-white text-bold">
-                    <q-item-section class="col-2">
+                    <q-item-section avatar class="col-3">
                       <q-icon name="mdi-login-variant" />
                     </q-item-section>
                     <q-item-section class="col">
@@ -94,11 +93,14 @@
               </q-menu>
             </q-btn>
           </div>
+          <!-- FIN OPCIONES DE USUARIO -->
+
         </q-toolbar>
       </q-header>
 
-      <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered="">
-        <q-img style="max-height: 150px" src="~assets/font-user.jpg" class="font-img">
+      <!-- LISTA DE NAVEGACION -->
+      <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered :width="315">
+        <q-img style="height: 150px;" src="~assets/font-user.jpg" class="font-img">
           <q-card-section style="z-index: 1" class="bg-transparent absolute-bottom text-subtitle2 text-left">
             <q-avatar class="items-end q-mb-sm">
               <img src="~assets/user-none.png">
@@ -138,9 +140,16 @@
           </q-item>
         </q-list>
       </q-drawer>
+      <!-- FIN LISTA DE NAVEGACION -->
+
+
+      <!-- CONTENIDO DE LA PAGINA -->
       <q-page-container>
         <router-view />
       </q-page-container>
+      <!-- FIN CONTENIDO DE LA PAGINA -->
+
+
       <q-dialog v-model="showCambiarContrasennia" persistent square>
         <q-card style="min-width: 300px">
           <q-card-section class="bg-primary text-white">
@@ -175,20 +184,42 @@
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="modalNotificaciones" persistent>
+      <q-dialog v-model="modalNotificaciones" persistent square :maximized="$q.screen.xs">
         <q-card class="full-width">
           <q-card-section class="row items-center q-py-sm text-white bg-primary">
-            <div class="text-h6">Notificaciones</div>
+            <div class="text-h6 text-bold">Notificaciones</div>
             <q-space />
-            <q-btn icon="close" flat round dense v-close-popup />
+            <q-btn icon="close" flat round dense v-close-popup @click="pagination = 1" />
+          </q-card-section>
+          <q-card-section class="q-pa-xs" style="min-height: 50vh;">
+            <q-list class="scroll" bordered separator>
+              <q-item v-if="todasNotificaciones.length == 0">
+                <q-item-section>
+                  <q-item-label caption>No tiene notificaciones</q-item-label>
+                </q-item-section>
+              </q-item>
+              <template v-else v-for="item of todasNotificaciones" :key="item">
+                <q-item>
+                  <q-item-section>
+                    <q-item-label :class="'text-caption text-justify ' + (item.leido ? 'text-grey-7' : '')">
+                      <b>{{ item.origen.primerNombre + ' ' + item.origen.primerApellido + ' ' }}</b> {{ item.mensaje
+                      }}
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-item-label caption :class="(!item.leido ? 'text-light-blue-9 text-bold' : '')">{{
+                      item.tiempoTranscurrido }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </template>
+
+            </q-list>
           </q-card-section>
           <q-separator></q-separator>
-          <q-card-section>
-
-            <div class="q-pa-lg flex flex-center">
-              <q-pagination v-model="current" color="primary" :max="10" :max-pages="6" boundary-numbers />
-            </div>
-          </q-card-section>
+          <q-card-actions class="justify-center">
+            <q-pagination v-model="pagination" color="primary" :max="pages" :max-pages="6" boundary-numbers
+              @update:model-value="obtenerTodasNotificaciones" />
+          </q-card-actions>
         </q-card>
       </q-dialog>
 
@@ -283,7 +314,6 @@ const formPassword = ref({
   password: "",
   new_password: "",
 });
-const pagination = ref(1)
 const instance = getCurrentInstance()
 const $socket = instance.appContext.app.config.globalProperties.$socket
 const menu_notificacion = ref(false)
@@ -302,6 +332,10 @@ const perfil = ref({});
 const modalNotificaciones = ref(false)
 let open = 0
 
+function temp() {
+  console.log(pagination.value)
+}
+
 async function obtenerNotificacionNoLeidas() {
   await notificacionController.obtenerNoLeidos((res) => {
     notificaciones.value = res.data.notificaciones
@@ -313,8 +347,21 @@ async function obtenerNotificacionNoLeidas() {
   })
 }
 
+const todasNotificaciones = ref([])
+const pagination = ref(1)
+const pages = ref(0)
 async function obtenerTodasNotificaciones() {
-  modalNotificaciones.value = true
+  const dialog = generateDialog('Cargando información')
+  await notificacionController.obtenerTodasDocente(pagination.value, 10, res => {
+    if (res.status != 200) return generateMessage("NOK", res.message);
+    todasNotificaciones.value = res.data.notificaciones.map(not => {
+      not.tiempoTranscurrido = tiempoTranscurrido(not.created_at)
+      return not
+    })
+    pages.value = res.data.pages
+    dialog.hide()
+    modalNotificaciones.value = true
+  })
 }
 
 function notificaionesAbiertas() {
@@ -474,6 +521,14 @@ function socket() {
   })
 }
 
+function generateDialog(message) {
+  return $q.dialog({
+    message: message,
+    progress: true,
+    persistent: true,
+    ok: false
+  })
+}
 
 obtenerPerfil();
 obtenerNotificacionNoLeidas()
@@ -486,14 +541,11 @@ body {
   background-color: rgba($color: black, $alpha: 0.15);
 }
 
-
-
 .btn-menu {
   display: none;
 }
 
 @media screen and (max-width: 500px) {
-
   .title-main {
     display: inline-block;
   }
