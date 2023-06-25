@@ -13,7 +13,7 @@
 
         <template v-slot:top>
           <div class="row justify-between items-center full-width">
-            <span class="text-h6 text-bold">LISTA DE DOCENTES</span>
+            <span class="text-subtitle1 text-bold">LISTA DE DOCENTES</span>
             <q-input dense v-model="filter" placeholder="Buscar">
               <template v-slot:append>
                 <q-icon name="search" />
@@ -121,32 +121,32 @@
   <q-dialog v-model="formulario" square>
     <q-card>
       <q-card-section class="bg-primary text-white">
-        <div class="text-h6">{{ titulo_form }}</div>
+        <div class="text-h6 text-bold">{{ titulo_form }}</div>
       </q-card-section>
 
       <q-form @submit="onSubmit" @reset="cerrarFormulario">
         <q-card-section class="scroll q-pa-lg">
           <div class="row q-col-gutter-x-md q-col-gutter-y-lg q-col-gutter-sm-y-sm">
             <q-input class="col-6 col-sm-6" square outlined v-model="first_name" label="Primer nombre*" lazy-rules
-              :rules="[val => val && val.length > 0 || 'Completa este campo']" hint="Ingresa el primer nombre" />
+              :rules="[val => val && val.length > 0 || 'Completa este campo']" hint="Ingrese el primer nombre" />
 
             <q-input class="col-6 col-sm-6" square outlined v-model="second_name" label="Segundo nombre"
-              hint="Ingresa el segundo nombre (opcional)" />
+              hint="Ingrese el segundo nombre (opcional)" />
 
             <q-input class="col-6 col-sm-6" outlined square v-model="first_surname" label="Primer apellido*" lazy-rules
-              :rules="[val => val && val.length > 0 || 'Completa este campo']" hint="Ingresa el primer apellido" />
+              :rules="[val => val && val.length > 0 || 'Completa este campo']" hint="Ingrese el primer apellido" />
 
             <q-input class="col-6 col-sm-6" outlined square v-model="second_surname" label="Segundo apellido*" lazy-rules
-              :rules="[val => val && val.length > 0 || 'Completa este campo']" hint="Ingresa el segundo apellido" />
+              :rules="[val => val && val.length > 0 || 'Completa este campo']" hint="Ingrese el segundo apellido" />
 
             <q-input class="col-12" outlined square v-model="email" suffix="@unl.edu.ec" label="Correo institucional*"
               lazy-rules :disable="idEditdocente != null"
               :rules="[val => val && val.length > 0 || 'Completa este campo',
               val => /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i.test(val + '@unl.edu.ec') || 'Formato de email no válido']"
-              hint="Ingresa el correo institucional" />
+              hint="Ingrese el correo institucional" />
 
             <q-input class="col-12" outlined square v-model="dedicacion" label="Dedicación*" lazy-rules
-              :rules="[val => val && val.length > 0 || 'Completa este campo']" hint="Ingresa la dedicación" />
+              :rules="[val => val && val.length > 0 || 'Completa este campo']" hint="Ingrese la dedicación" />
           </div>
         </q-card-section>
         <q-separator />
@@ -233,7 +233,7 @@ const docenterol = ref(null)
 
 const Listdocentes = ref(null)
 const columns = [
-  { name: 'nombre', sortable: true, align: 'center', label: 'NOMBRES', field: 'nombre', style: 'white-space: break-spaces;' },
+  { name: 'nombre', sortable: true, align: 'left', label: 'NOMBRES', field: 'nombre', style: 'white-space: break-spaces;' },
   { name: 'correo', align: 'center', label: 'CORREO', field: 'correo' },
   { name: 'dedicacion', align: 'center', label: 'DEDICACIÓN', field: 'dedicacion', style: 'white-space: break-spaces;' },
   { name: 'rol', sortable: true, align: 'center', label: 'ROL', field: 'rol' },

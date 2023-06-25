@@ -1,7 +1,7 @@
 <template>
   <q-card class="q-ma-md" square flat bordered>
     <q-card-section class="bg-primary row justify-between items-center">
-      <span class="text-white text-h6 text-bold">Revisión de informes finales</span>
+      <span class="text-white text-h6 text-bold">Revisión de Informes Finales</span>
       <q-select @update:model-value="obtenerInformesPeriodo" v-model="periodoSelected" :options="selectedPeriodos"
         color="primary" outlined square bg-color="white" label="Periodo académico" />
     </q-card-section>
@@ -14,12 +14,14 @@
         <template v-slot:top>
           <div class="row justify-between items-center full-width">
             <div>
-              <div class="text-h6"><b>Periodo Académico: </b>{{ periodoSeleccionado != null ? periodoSeleccionado.nombre :
+              <div class="text-subtitle1"><b>PERIODO ACADÉMICO: </b>{{ periodoSeleccionado !=
+                null ?
+                periodoSeleccionado.nombre :
                 ''
               }}
               </div>
-              <span class="text-h6 text-bold">Estado: </span><q-chip v-if="periodoSeleccionado != null" size="sm" square
-                :color="periodoSeleccionado.estado ? 'green-5' : 'red-5'" text-color="white"
+              <span class="text-subtitle1 text-bold">ESTADO: </span><q-chip v-if="periodoSeleccionado != null" size="sm"
+                square :color="periodoSeleccionado.estado ? 'green-5' : 'red-5'" text-color="white"
                 :label="periodoSeleccionado.estado ? 'En curso' : 'Culminado'" />
             </div>
             <q-input dense v-model="filter" placeholder="Buscar">

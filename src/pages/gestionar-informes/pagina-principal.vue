@@ -57,7 +57,7 @@
                             no-results-label="No hay ningún resultado">
                             <template v-slot:top>
                               <div class="row justify-between items-center full-width">
-                                <span class="text-h6 text-bold">Actividades de: {{ tab }}</span>
+                                <span class="text-subtitle1 text-bold text-uppercase">Lista de Actividades</span>
                                 <q-btn @click="nuevaActividadForm" size="sm" color="blue-7" style="color: white">Nueva
                                   Actividad</q-btn>
                               </div>
@@ -112,7 +112,7 @@
                             </template>
 
                             <template v-slot:body-cell-observacion="props">
-                              <q-td :props="props">
+                              <q-td :props="props" auto-width>
                                 <q-chip size="sm" square :color="props.row.observacion != 0 ? 'green-5' : 'red-5'"
                                   text-color="white" :label="props.row.observacion" />
                               </q-td>

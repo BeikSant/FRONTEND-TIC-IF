@@ -12,7 +12,7 @@
               de Gestión del Informe Final de Cumplimiento de Trabajo
               Académico de Docentes de la carrera de Computación!</b>
           </div>
-          <div class="col-6 col-xs-6 col-sm-3 col-lg-3 text-right">
+          <div class="col-6 col-xs-6 col-sm-2 col-lg-3 text-right">
             <img alt="Logo UNL" src="~assets/carrera-logo.jpg" style="width: 70px">
           </div>
         </div>
@@ -60,7 +60,7 @@
   color: white;
 }
 
-@media (max-width: $breakpoint-sm-max) {
+@media (max-width: $breakpoint-md-max) {
   .title-middle {
     display: none;
   }
