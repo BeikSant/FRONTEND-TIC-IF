@@ -12,7 +12,7 @@
       <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
         <div v-show="isData" class="no-padding no-margin">
           <template v-if="funSustantivaModel.length == 0">
-            <div align="center" class="q-pt-xl">
+            <div class="q-pt-xl text-center">
               <b>NADA QUE MOSTRAR</b>
             </div>
           </template>

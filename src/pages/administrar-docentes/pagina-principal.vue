@@ -175,7 +175,7 @@
         </div>
       </q-card-section>
 
-      <q-card-actions align="right">
+      <q-card-actions class="justify-end">
         <q-btn flat label="Cancel" color="negative" v-close-popup />
         <q-btn flat label="Aceptar" color="primary" @click="cambiarEstado()" />
       </q-card-actions>

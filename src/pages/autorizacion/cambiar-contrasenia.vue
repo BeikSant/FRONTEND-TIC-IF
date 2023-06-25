@@ -4,7 +4,7 @@
     <q-header class="bg-primary text-white">
       <q-toolbar>
 
-        <q-toolbar-title align="center">
+        <q-toolbar-title>
           <div class="row">
             <div class="col-12">
               <div class="text-caption" style="max-width: 100%; white-space: break-spaces;"><b>SISTEMA DE
@@ -22,7 +22,7 @@
     <q-footer>
       <q-toolbar>
         <q-toolbar-title>
-          <div class="col-12" align="center">
+          <div class="col-12">
             <div class="text-caption" style="max-width: 100%; white-space: break-spaces;"><b>
                 UNIVERSIDAD NACIONAL DE LOJA - CARRERA DE COMPUTACIÓN</b>
             </div>
@@ -34,7 +34,7 @@
   </q-layout>
   <div class="font flex flex-center fixed-center">
     <q-card class="" style="min-width: 350px">
-      <div class="row no-padding no-margin header-login items-center" align="center">
+      <div class="row no-padding no-margin header-login items-center justify-center">
         <div class="col-12">
           <h6 class="q-ma-none q-pa-md"><b>CAMBIAR CONTRASEÑA</b></h6>
         </div>

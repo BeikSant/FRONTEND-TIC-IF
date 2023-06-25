@@ -4,8 +4,8 @@
     <q-header class="bg-primary text-white">
       <q-toolbar>
 
-        <q-toolbar-title align="center">
-          <div class="row">
+        <q-toolbar-title>
+          <div class="row text-center">
             <div class="col-12">
               <div class="text-caption" style="max-width: 100%; white-space: break-spaces;"><b>SISTEMA DE
                   GESTIÓN DEL
@@ -55,7 +55,7 @@
     <q-footer>
       <q-toolbar>
         <q-toolbar-title>
-          <div class="col-12" align="center">
+          <div class="col-12 text-center">
             <div class="text-caption" style="max-width: 100%; white-space: break-spaces;"><b>
                 UNIVERSIDAD NACIONAL DE LOJA - CARRERA DE COMPUTACIÓN</b>
             </div>

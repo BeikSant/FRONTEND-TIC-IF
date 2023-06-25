@@ -157,7 +157,7 @@
           <span class="q-ml-sm">¿Está seguro que desea eliminar el Periodo Academico?</span>
         </q-card-section>
 
-        <q-card-actions align="right">
+        <q-card-actions class="justify-end">
           <q-btn flat label="Cancel" color="negative" v-close-popup />
           <q-btn flat label="Aceptar" color="primary" @click=" eliminarPeriodo()" />
         </q-card-actions>

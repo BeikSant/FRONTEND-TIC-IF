@@ -357,7 +357,7 @@
 
           </q-card-section>
           <q-separator></q-separator>
-          <q-card-actions align="right">
+          <q-card-actions class="justify-end">
             <q-btn flat label="Cerrar" color="negative" v-close-popup @click="confirm_delete = false" />
             <q-btn @click="enviarInforme()" color="positive">Enviar</q-btn>
           </q-card-actions>
