@@ -333,10 +333,8 @@
 
     <q-dialog v-model="modalEnviarInforme" persistent="">
       <q-card style="width: 450px">
-        <q-card-section class="card-title-gestionar">
-          <div class="text-h6">
-            <b>Enviar informe final</b>
-          </div>
+        <q-card-section class="text-h6 bg-primary text-white">
+          <b>Enviar informe final</b>
         </q-card-section>
         <q-card-section class="q-pa-xs">
           <q-banner dense class="bg-blue-3 q-pa-none q-ma-xs">

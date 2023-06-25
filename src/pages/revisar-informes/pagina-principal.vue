@@ -470,7 +470,8 @@ const obtenerPeriodos = async () => {
     periodos.value = res.data.periodos
     selectedPeriodos.value = periodos.value.map(periodo => periodo.nombre)
     periodoSelected.value = selectedPeriodos.value[0]
-    obtenerInformesPeriodo(periodoSelected.value)
+    if (periodos.value.length != 0) obtenerInformesPeriodo(periodoSelected.value)
+    loading.value = false
   })
 }
 

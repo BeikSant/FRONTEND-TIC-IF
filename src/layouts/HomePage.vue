@@ -87,7 +87,7 @@
                       <q-icon name="mdi-login-variant" />
                     </q-item-section>
                     <q-item-section class="col">
-                      <q-item-label>Cerrar sesion</q-item-label>
+                      <q-item-label>Cerrar sesión</q-item-label>
                     </q-item-section>
                   </q-item>
                 </q-list>
@@ -483,7 +483,7 @@ socket()
 
 <style lang="scss">
 body {
-  background-color: rgba($color: black, $alpha: 0.15);
+  background-color: rgba($color: black, $alpha: 0.09);
 }
 
 
