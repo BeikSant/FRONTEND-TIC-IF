@@ -3,12 +3,10 @@
 
     <q-card-section class="bg-primary text-white row items-center justify-between">
       <span class="col-6 text-bold text-h6">Periodo Académico:
-        <template v-if="!visibleCard">
-          <span class="text-weight-light" v-if="!existePeriodo">No existe un periodo academico activo</span>
-          <span class="text-weight-light" v-else>{{ periodo.nombre }}</span>
-        </template>
+        <span class="text-weight-light" v-if="!existePeriodo">NO DISPONIBLE</span>
+        <span class="text-weight-light" v-else>{{ periodo.nombre }}</span>
       </span>
-      <div v-if="existePeriodo" class="column q-gutter-xs col-auto">
+      <div v-if="noActividades == false" class="column q-gutter-xs col-auto">
         <q-btn :disabled="tab.length == 0" size="sm" color="positive" @click="descargarPDF()">Generar
           Informe</q-btn>
         <q-btn :disabled="tab.length == 0" size="sm" color="pink"
@@ -32,164 +30,154 @@
           <q-tab-panels v-if="formatoInforme != null" v-model="tabPrincipal" keep-alive>
             <q-tab-panel name="Actividades" class="q-pa-md bg-blue-1">
               <q-card-section class="no-padding no-margin" style="min-height: 150px">
-                <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
-                  <div v-show="isDataTable" class="no-padding no-margin">
-                    <template v-if="tab.length == 0">
-                      <div class="text-center q-pt-xl">
-                        <b>NADA QUE MOSTRAR</b>
-                      </div>
-                    </template>
-                    <template v-else>
+                <div v-show="existenDatosTabla" class="no-padding no-margin">
 
-                      <q-tabs indicator-color="white" v-model="tab" active-class="text-white" dense
-                        class="bg-primary text-grey-6" inline-label outside-arrows mobile-arrows>
-                        <q-tab v-for="(fs, index) in actividadesEspecificas" :key="index" :label="fs.nombre"
-                          :name="fs.nombre" />
-                      </q-tabs>
+                  <q-tabs indicator-color="white" v-model="tab" active-class="text-white" dense
+                    class="bg-primary text-grey-6" inline-label outside-arrows mobile-arrows>
+                    <q-tab v-for="(actividades, index) in actividadesEspecificas" :key="index"
+                      :label="actividades.funcionSustantiva.nombre" :name="actividades.funcionSustantiva.nombre" />
+                  </q-tabs>
 
-                      <q-tab-panels v-model="tab" animated>
-                        <q-tab-panel class="no-padding no-margin" v-for="(funs, index) in actividadesEspecificas"
-                          :key="index" :name="funs.nombre">
-                          <q-table square bordered :columns="headers" :rows="funs.actividadesEspecificas" row-key="name"
-                            separator="cell" flat :no-data-label="'No tiene actividades en esta funcion sustantiva'"
-                            :pagination="{ rowsPerPage: 10 }" :rows-per-page-options="[5, 10, 0]"
-                            rows-per-page-label="Resultados por página" :dense="$q.screen.lt.md" :grid="$q.screen.xs"
-                            no-results-label="No hay ningún resultado">
-                            <template v-slot:top>
-                              <div class="row justify-between items-center full-width">
-                                <span class="text-subtitle1 text-bold text-uppercase">Lista de Actividades</span>
-                                <q-btn @click="nuevaActividadForm" size="sm" color="blue-7" style="color: white">Nueva
-                                  Actividad</q-btn>
-                              </div>
-                            </template>
+                  <q-tab-panels v-model="tab" animated>
+                    <q-tab-panel class="no-padding no-margin" v-for="(actividades, index) in actividadesEspecificas"
+                      :key="index" :name="actividades.funcionSustantiva.nombre">
+                      <q-table square bordered :columns="headers" :rows="actividades.actividadesEspecificas"
+                        row-key="name" separator="cell" flat
+                        :no-data-label="'No tiene actividades en esta funcion sustantiva'"
+                        :pagination="{ rowsPerPage: 10 }" :rows-per-page-options="[5, 10, 0]"
+                        rows-per-page-label="Resultados por página" :dense="$q.screen.lt.md" :grid="$q.screen.xs"
+                        no-results-label="No hay ningún resultado">
+                        <template v-slot:top>
+                          <div class="row justify-between items-center full-width">
+                            <span class="text-subtitle1 text-bold text-uppercase">Lista de Actividades</span>
+                            <q-btn v-if="noActividades == false" @click="nuevaActividadForm" size="sm" color="blue-7"
+                              style="color: white">Nueva
+                              Actividad</q-btn>
+                          </div>
+                        </template>
 
-                            <template v-slot:body-cell-acciones="props">
-                              <q-td :props="props" class="q-gutter-x-xs" auto-width>
-                                <span>
-                                  <q-btn size="sm" color="positive" round dense icon="mdi-folder-edit"
-                                    @click="mostrarCamposActividad(props.row)" />
-                                  <q-tooltip :offset="[10, 10]" class="bg-indigo">
-                                    Gestionar actividad
-                                  </q-tooltip>
-                                </span>
-                                <span>
-                                  <q-btn size="sm" color="warning" round dense @click="editarActividadForm(props.row)"
-                                    icon="mdi-file-document-edit" />
-                                  <q-tooltip :offset="[10, 10]" class="bg-indigo">
-                                    Editar información
-                                  </q-tooltip>
-                                </span>
-                                <span v-if="!props.row.requerido">
-                                  <q-btn size="sm" color="negative" round dense
-                                    @click="confirmacionEliminarActividad(props.row)" icon="mdi-delete" />
-                                  <q-tooltip :offset="[10, 10]" class="bg-indigo">
-                                    Eliminar actividad
-                                  </q-tooltip>
-                                </span>
-                              </q-td>
-                            </template>
+                        <template v-slot:body-cell-acciones="props">
+                          <q-td :props="props" class="q-gutter-x-xs" auto-width>
+                            <span>
+                              <q-btn size="sm" color="positive" round dense icon="mdi-folder-edit"
+                                @click="mostrarCamposActividad(props.row)" />
+                              <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                Gestionar actividad
+                              </q-tooltip>
+                            </span>
+                            <span>
+                              <q-btn size="sm" color="warning" round dense @click="editarActividadForm(props.row)"
+                                icon="mdi-file-document-edit" />
+                              <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                Editar información
+                              </q-tooltip>
+                            </span>
+                            <span v-if="!props.row.requerido">
+                              <q-btn size="sm" color="negative" round dense
+                                @click="confirmacionEliminarActividad(props.row)" icon="mdi-delete" />
+                              <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                Eliminar actividad
+                              </q-tooltip>
+                            </span>
+                          </q-td>
+                        </template>
 
-                            <template v-slot:body-cell-horas="props">
-                              <q-td :props="props" auto-width>
-                                <q-chip size="sm" square :color="props.row.horas != 0 ? 'indigo-5' : 'red-5'"
-                                  text-color="white" :label="props.row.horas" />
-                              </q-td>
-                            </template>
+                        <template v-slot:body-cell-horas="props">
+                          <q-td :props="props" auto-width>
+                            <q-chip size="sm" square :color="props.row.horas != 0 ? 'indigo-5' : 'red-5'"
+                              text-color="white" :label="props.row.horas" />
+                          </q-td>
+                        </template>
 
-                            <template v-slot:body-cell-actividadDesarrollada="props">
-                              <q-td :props="props" auto-width>
-                                <q-chip size="sm" square
-                                  :color="props.row.actividadDesarrollada != 0 ? 'green-5' : 'red-5'" text-color="white"
-                                  :label="props.row.actividadDesarrollada" />
-                              </q-td>
-                            </template>
+                        <template v-slot:body-cell-actividadDesarrollada="props">
+                          <q-td :props="props" auto-width>
+                            <q-chip size="sm" square :color="props.row.actividadDesarrollada != 0 ? 'green-5' : 'red-5'"
+                              text-color="white" :label="props.row.actividadDesarrollada" />
+                          </q-td>
+                        </template>
 
-                            <template v-slot:body-cell-evidencia="props">
-                              <q-td :props="props" auto-width>
-                                <q-chip size="sm" square :color="props.row.evidencia != 0 ? 'green-5' : 'red-5'"
-                                  text-color="white" :label="props.row.evidencia" />
-                              </q-td>
-                            </template>
+                        <template v-slot:body-cell-evidencia="props">
+                          <q-td :props="props" auto-width>
+                            <q-chip size="sm" square :color="props.row.evidencia != 0 ? 'green-5' : 'red-5'"
+                              text-color="white" :label="props.row.evidencia" />
+                          </q-td>
+                        </template>
 
-                            <template v-slot:body-cell-observacion="props">
-                              <q-td :props="props" auto-width>
-                                <q-chip size="sm" square :color="props.row.observacion != 0 ? 'green-5' : 'red-5'"
-                                  text-color="white" :label="props.row.observacion" />
-                              </q-td>
-                            </template>
+                        <template v-slot:body-cell-observacion="props">
+                          <q-td :props="props" auto-width>
+                            <q-chip size="sm" square :color="props.row.observacion != 0 ? 'green-5' : 'red-5'"
+                              text-color="white" :label="props.row.observacion" />
+                          </q-td>
+                        </template>
 
-                            <template v-slot:item="props">
-                              <div class="q-pa-xs grid-estilo">
-                                <q-card bordered flat>
-                                  <q-list dense>
-                                    <q-item v-for="col in props.cols" :key="col.name">
-                                      <q-item-section class="col-12 q-mb-xs q-mt-xs">
-                                        <q-item-label class="text-bold" caption>{{ col.label }}</q-item-label>
+                        <template v-slot:item="props">
+                          <div class="q-pa-xs grid-estilo">
+                            <q-card bordered flat>
+                              <q-list dense>
+                                <q-item v-for="col in props.cols" :key="col.name">
+                                  <q-item-section class="col-12 q-mb-xs q-mt-xs">
+                                    <q-item-label class="text-bold" caption>{{ col.label }}</q-item-label>
 
-                                        <q-item-label v-if="col.name == 'acciones'" class="row q-gutter-x-xs">
-                                          <span>
-                                            <q-btn size="sm" color="positive" round dense icon="mdi-folder-edit"
-                                              @click="mostrarCamposActividad(props.row)" />
-                                            <q-tooltip :offset="[10, 10]" class="bg-indigo">
-                                              Gestionar actividad
-                                            </q-tooltip>
-                                          </span>
-                                          <span>
-                                            <q-btn size="sm" color="warning" round dense
-                                              @click="editarActividadForm(props.row)" icon="mdi-file-document-edit" />
-                                            <q-tooltip :offset="[10, 10]" class="bg-indigo">
-                                              Editar información
-                                            </q-tooltip>
-                                          </span>
-                                          <span v-if="!props.row.requerido">
-                                            <q-btn size="sm" color="negative" round dense
-                                              @click="confirmacionEliminarActividad(props.row)" icon="mdi-delete" />
-                                            <q-tooltip :offset="[10, 10]" class="bg-indigo">
-                                              Eliminar actividad
-                                            </q-tooltip>
-                                          </span>
-                                        </q-item-label>
+                                    <q-item-label v-if="col.name == 'acciones'" class="row q-gutter-x-xs">
+                                      <span>
+                                        <q-btn size="sm" color="positive" round dense icon="mdi-folder-edit"
+                                          @click="mostrarCamposActividad(props.row)" />
+                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                          Gestionar actividad
+                                        </q-tooltip>
+                                      </span>
+                                      <span>
+                                        <q-btn size="sm" color="warning" round dense
+                                          @click="editarActividadForm(props.row)" icon="mdi-file-document-edit" />
+                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                          Editar información
+                                        </q-tooltip>
+                                      </span>
+                                      <span v-if="!props.row.requerido">
+                                        <q-btn size="sm" color="negative" round dense
+                                          @click="confirmacionEliminarActividad(props.row)" icon="mdi-delete" />
+                                        <q-tooltip :offset="[10, 10]" class="bg-indigo">
+                                          Eliminar actividad
+                                        </q-tooltip>
+                                      </span>
+                                    </q-item-label>
 
-                                        <q-item-label v-else-if="col.name == 'horas'">
-                                          <q-chip size="sm" square :color="props.row.horas != 0 ? 'indigo-5' : 'red-5'"
-                                            text-color="white" :label="props.row.horas" />
-                                        </q-item-label>
+                                    <q-item-label v-else-if="col.name == 'horas'">
+                                      <q-chip size="sm" square :color="props.row.horas != 0 ? 'indigo-5' : 'red-5'"
+                                        text-color="white" :label="props.row.horas" />
+                                    </q-item-label>
 
-                                        <q-item-label v-else-if="col.name == 'evidencia'">
-                                          <q-chip size="sm" square :color="props.row.evidencia != 0 ? 'green-5' : 'red-5'"
-                                            text-color="white" :label="props.row.evidencia" />
-                                        </q-item-label>
+                                    <q-item-label v-else-if="col.name == 'evidencia'">
+                                      <q-chip size="sm" square :color="props.row.evidencia != 0 ? 'green-5' : 'red-5'"
+                                        text-color="white" :label="props.row.evidencia" />
+                                    </q-item-label>
 
-                                        <q-item-label v-else-if="col.name == 'observacion'">
-                                          <q-chip size="sm" square
-                                            :color="props.row.observacion != 0 ? 'green-5' : 'red-5'" text-color="white"
-                                            :label="props.row.observacion" />
-                                        </q-item-label>
+                                    <q-item-label v-else-if="col.name == 'observacion'">
+                                      <q-chip size="sm" square :color="props.row.observacion != 0 ? 'green-5' : 'red-5'"
+                                        text-color="white" :label="props.row.observacion" />
+                                    </q-item-label>
 
-                                        <q-item-label v-else-if="col.name == 'actividadDesarrollada'">
-                                          <q-chip size="sm" square
-                                            :color="props.row.actividadDesarrollada != 0 ? 'green-5' : 'red-5'"
-                                            text-color="white" :label="props.row.actividadDesarrollada" />
+                                    <q-item-label v-else-if="col.name == 'actividadDesarrollada'">
+                                      <q-chip size="sm" square
+                                        :color="props.row.actividadDesarrollada != 0 ? 'green-5' : 'red-5'"
+                                        text-color="white" :label="props.row.actividadDesarrollada" />
 
-                                        </q-item-label>
+                                    </q-item-label>
 
-                                        <q-item-label v-else>{{ col.value }}
-                                        </q-item-label>
-                                      </q-item-section>
-                                    </q-item>
-                                  </q-list>
-                                </q-card>
-                              </div>
-                            </template>
+                                    <q-item-label v-else>{{ col.value }}
+                                    </q-item-label>
+                                  </q-item-section>
+                                </q-item>
+                              </q-list>
+                            </q-card>
+                          </div>
+                        </template>
 
-                          </q-table>
-                        </q-tab-panel>
-                      </q-tab-panels>
-                    </template>
-                  </div>
-                </transition>
-                <q-inner-loading :showing="visible" label="Cargando información..." label-class="text-teal"
-                  label-style="font-size: 1.1em" />
+                      </q-table>
+                    </q-tab-panel>
+                  </q-tab-panels>
+
+                </div>
               </q-card-section>
             </q-tab-panel>
             <!-- CONCLUSIONES Y O RECOMENDACIONES-->
@@ -204,7 +192,7 @@
           <CompObservaciones :formatoInforme="formatoInforme" :actividad="actividadEspecifica"></CompObservaciones>
         </div>
       </transition>
-      <q-inner-loading :showing="visibleCard" label="Cargando información..." label-class="text-teal"
+      <q-inner-loading :showing="estaCargandoInformacion" label="Cargando información..." label-class="text-teal"
         label-style="font-size: 1.1em" />
     </q-card-section>
     <!-- DIALOG DE CAMPOS ACTIVIDAD ESPECIFICA-->
@@ -218,7 +206,7 @@
           </span>
         </q-card-section>
         <q-separator />
-        <q-form @submit="onSubmit">
+        <q-form @submit="guardarFormActividad">
           <q-card-section style="max-height: 50vh" class="scroll row q-col-gutter-y-lg q-col-gutter-x-md">
 
             <q-select class="col-6" outlined square v-model="selected" :options="selectActividades" label="Codificación"
@@ -251,18 +239,7 @@
     </q-dialog>
 
     <q-dialog v-model="confirm_delete" persistent>
-      <q-card>
-        <q-card-section class="row items-center">
-          <q-avatar icon="warning" color="warning" text-color="white" />
-          <span class="q-ml-sm">¿Está seguro en eliminar la actividad especifica
-            <b>{{ actividadEliminar.nombre }}</b>?</span>
-        </q-card-section>
-
-        <q-card-actions class="justify-end">
-          <q-btn flat label="Cancel" color="negative" v-close-popup @click="confirm_delete = false" />
-          <q-btn flat label="Aceptar" color="primary" @click="eliminarActividad()" />
-        </q-card-actions>
-      </q-card>
+      <EliminarActividad :function="eliminarActividad" :actividadEliminar="actividadEliminar.nombre" />
     </q-dialog>
 
     <q-dialog v-model="noActividades" persistent square>
@@ -358,7 +335,7 @@
         </q-card-section>
         <q-separator></q-separator>
         <q-card-actions class="justify-end">
-          <q-btn flat label="Cerrar" color="negative" v-close-popup @click="confirm_delete = false" />
+          <q-btn flat label="Cerrar" color="negative" v-close-popup />
           <q-btn @click="enviarInforme()" color="positive">Enviar</q-btn>
         </q-card-actions>
       </q-card>
@@ -406,6 +383,7 @@
 
 <script setup>
 import CompConclusiones from "./components/comp-conclusiones.vue";
+import EliminarActividad from "./components/eliminar-actividad.vue";
 import CompObservaciones from "./components/comp-gestionar-actividad.vue";
 import { ref } from "vue";
 import { useQuasar } from "quasar";
@@ -427,9 +405,10 @@ const existePeriodo = ref(false)
 
 const router = useRouter();
 
-const isDataTable = ref(false);
-const visible = ref(true);
-const visibleCard = ref(true);
+const existenDatosTabla = ref(false);
+
+const tieneActividades = ref(false);
+const estaCargandoInformacion = ref(true); // Animacion de cargando informacion
 
 const noActividades = ref(false); //Cuando el usuario tiene actividades del distributivo
 const modalEnviarInforme = ref(false)
@@ -450,7 +429,7 @@ const horas_actividad = ref(0);
 
 const selectActividades = ref([]);
 const formatoInforme = ref(null);
-const periodo = ref({ estado: false }); //Para inicializar el template
+const periodo = ref(null); //Para inicializar el template
 const informe = ref(null);
 const funcionesSustantivas = ref([]);
 const actividadesEspecificas = ref([]);
@@ -506,118 +485,69 @@ const headers = [
 const actividadEspecifica = ref(null);
 
 const obtenerUltimoPeriodo = async () => {
-  await periodoController.obtenerUltimoPeriodo((res) => {
-    visibleCard.value = false
-    if (res.status == 401) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/login" });
-    }
-    if (res.status == 403) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/" });
-    }
+  return periodoController.obtenerUltimoPeriodo(async (res) => {
     if (res.status != 200) {
       generateMessage("NO OK", res.message);
-      visible.value = false;
-      return (isDataTable.value = true);
+      if (res.status == 401) return router.push({ path: "/login" })
+      if (res.status == 403) return router.push({ path: "/" })
+      return false
     }
-    existePeriodo.value = true
-    periodo.value = res.data.periodo;
-    obtenerInformePorPeriodo();
+    return res.data.periodo
   });
-
 };
 
 const obtenerInformePorPeriodo = async () => {
-  await informeController.obtenerInformePeriodo(
-    periodo.value.nombre,
+  return await informeController.obtenerInformePeriodo(
+    periodo.value._id,
     async (res) => {
       if (res.status != 200) {
         generateMessage("NO OK", res.message);
-        visible.value = false;
-        return (isDataTable.value = true);
+        if (res.status == 401) return router.push({ path: "/login" })
+        if (res.status == 403) return router.push({ path: "/" })
+        return false
       }
-      informe.value = res.data.informeFinal;
-      await obtenerActividadesDistributivo();
-      obtenerActividadesInforme();
+      return res.data.informeFinal;
     }
   );
 };
 
+//Obtienes las funciones sustantivas con sus
+//actividades del distributivo general 
 const obtenerActividadesDistributivo = async () => {
-  //Obtienes las actividades del distributivo con sus respectivas funciones sustantivas
-  await distributivo.obtenerTodasActividades(async (res) => {
-    if (res.status == 401) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/login" });
-    }
-    if (res.status == 403) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/" });
-    }
+  return distributivo.obtenerTodasActividades(async (res) => {
     if (res.status != 200) {
       generateMessage("NO OK", res.message);
-      visible.value = false;
-      return (isDataTable.value = true);
+      if (res.status == 401) return router.push({ path: "/login" })
+      if (res.status == 403) return router.push({ path: "/" })
+      return false
     }
-    funcionesSustantivas.value = res.data.actividades.funcionesSustantivas;
-    for (let i = 0; i < funcionesSustantivas.value.length; i++) {
-      actividadesEspecificas.value.push({
-        nombre: funcionesSustantivas.value[i].nombre,
-        actividadesEspecificas: [],
-      }); // Aqui se coloca la funcion sustantivas y las actividad del distributivo que tiene
-    }
-    if (actividadesEspecificas.value.length != 0)
-      tab.value = actividadesEspecificas.value[0].nombre;
+    return res.data.actividades.funcionesSustantivas;
   });
-  visible.value = false;
-  isDataTable.value = true;
 };
 
 const obtenerActividadesInforme = async () => {
-  await especificaController.obtenerActividadesPorInforme(
-    informe.value._id,
+  return await especificaController.obtenerActividadesPorInforme(informe.value._id,
     (res) => {
       if (res.status != 200) {
         generateMessage("NO OK", res.message);
-        visible.value = false;
-        return (isDataTable.value = true);
+        if (res.status == 401) return router.push({ path: "/login" })
+        if (res.status == 403) return router.push({ path: "/" })
+        return false
       }
-      const actsEsp = res.data.actividadesEspecificas;
-      if (actsEsp.length == 0) noActividades.value = true;
-      if (actsEsp.length > 0) noActividades.value = false;
-      for (let i = 0; i < actividadesEspecificas.value.length; i++) {
-        actividadesEspecificas.value[i].actividadesEspecificas = [];
-      }
-      for (let i = 0; i < actsEsp.length; i++) {
-        for (let j = 0; j < actividadesEspecificas.value.length; j++) {
-          if (
-            actsEsp[i].actividadDistributivo.funcionSustantiva.nombre ==
-            actividadesEspecificas.value[j].nombre
-          )
-            actividadesEspecificas.value[j].actividadesEspecificas.push(
-              actsEsp[i]
-            );
-        }
-      }
+      return res.data.actividadesEspecificas
     }
-  );
-  isDataTable.value = true;
-  visible.value = false;
-};
+  )
+}
 
 const obtenerFormatoInforme = async () => {
-  formatoController.obtenerInformeActivo((res) => {
-    if (res.status == 401) {
+  return formatoController.obtenerInformeActivo((res) => {
+    if (res.status != 200) {
       generateMessage("NO OK", res.message);
-      return router.push({ path: "/login" });
+      if (res.status == 401) return router.push({ path: "/login" })
+      if (res.status == 403) return router.push({ path: "/" })
+      return false
     }
-    if (res.status == 403) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/" });
-    }
-    if (res.status != 200) return generateMessage("NO OK", res.message);
-    formatoInforme.value = res.data;
+    return res.data;
   });
 };
 
@@ -627,21 +557,22 @@ function confirmacionEliminarActividad(actividad) {
 }
 
 async function eliminarActividad() {
+  const dialogo = generateDialog('Eliminando Actividad')
+  confirm_delete.value = false;
   await especificaController.eliminarActividad(
     actividadEliminar.value._id,
-    (res) => {
-      if (res.status == 401) {
+    async (res) => {
+      if (res.status != 200) {
         generateMessage("NO OK", res.message);
-        return router.push({ path: "/login" });
+        if (res.status == 401) return router.push({ path: "/login" })
+        if (res.status == 403) return router.push({ path: "/" })
+        return
       }
-      if (res.status == 403) {
-        generateMessage("NO OK", res.message);
-        return router.push({ path: "/" });
-      }
-      if (res.status != 200) return generateMessage("NO OK", res.message);
-      obtenerActividadesInforme();
+      const aeRequest = await obtenerActividadesInforme()
+      formatearArrayActividades(aeRequest)
       actividadEliminar.value = null;
-      confirm_delete.value = false;
+      dialogo.hide()
+      generateMessage("OK", res.data.message);
     }
   );
 }
@@ -664,8 +595,8 @@ async function nuevaActividadForm() {
 }
 
 async function editarActividadForm(actividad) {
-  await resetForm();
-  await selectedActividadDistributivo();
+  resetForm();
+  selectedActividadDistributivo();
   titulo_form.value = "Editar Actividad";
   editarActividad.value = true;
   selected.value = actividad.nombre.split(" - ")[0];
@@ -679,71 +610,35 @@ async function editarActividadForm(actividad) {
   actividadEspecificaEditar.value = actividad;
 }
 
-async function onSubmit() {
+async function guardarFormActividad() {
+  const dialogo = generateDialog('Guardando Actividad')
   let actividad = {
     nombre: selected.value + " - " + nombre_actividad.value,
-    horas: +horas_actividad.value,
+    horas: Number(horas_actividad.value),
   };
-  const fs = funcionesSustantivas.value.filter(
-    (fun) => fun.nombre == tab.value
-  );
-  const actividadDis = fs[0].actividadesDistributivo.filter(
-    (act) => act.sigla == selected.value
-  );
+  const fs = funcionesSustantivas.value.filter(fun => fun.nombre == tab.value);
+  const actividadDis = fs[0].actividadesDistributivo.filter(act => act.sigla == selected.value);
+  let res = null
   if (editarActividad.value) {
-    if (
-      selected.value !=
-      actividadEspecificaEditar.value.actividadDistributivo.sigla
-    )
+    if (selected.value != actividadEspecificaEditar.value.actividadDistributivo.sigla) {
       actividad.actividadesDistributivo = actividadDis[0]._id;
-    await especificaController.editarActividad(
-      actividadEspecificaEditar.value._id,
-      actividad,
-      (res) => {
-        if (res.status == 401) {
-          generateMessage("NO OK", res.message);
-          return router.push({ path: "/login" });
-        }
-        if (res.status == 403) {
-          generateMessage("NO OK", res.message);
-          return router.push({ path: "/" });
-        }
-        if (res.status != 200)
-          return generateMessage(
-            "NO OK",
-            "Ocurrió un error al editar la actividad"
-          );
-        generateMessage("OK", "Actividad editada con éxito");
-        resetForm();
-        obtenerActividadesInforme();
-      }
-    );
+    }
+    res = await especificaController.editarActividad(actividadEspecificaEditar.value._id, actividad);
   } else {
-    actividad.requerido = false,
-      await especificaController.crearActividad(
-        informe.value._id,
-        actividadDis[0]._id,
-        actividad,
-        (res) => {
-          if (res.status == 401) {
-            generateMessage("NO OK", res.message);
-            return router.push({ path: "/login" });
-          }
-          if (res.status == 403) {
-            generateMessage("NO OK", res.message);
-            return router.push({ path: "/" });
-          }
-          if (res.status != 200)
-            return generateMessage(
-              "NO OK",
-              "Ocurrió un error al guardar la actividad"
-            );
-          generateMessage("OK", "Actividad guardada con éxito");
-          resetForm();
-          obtenerActividadesInforme();
-        }
-      );
+    actividad.requerido = false
+    res = await especificaController.crearActividad(informe.value._id, actividadDis[0]._id, actividad);
   }
+  if (res.status != 200) {
+    generateMessage("NO OK", res.message);
+    if (res.status == 401) return router.push({ path: "/login" })
+    if (res.status == 403) return router.push({ path: "/" })
+    return dialogo.hide()
+  }
+  const aeRequest = await obtenerActividadesInforme()
+  formatearArrayActividades(aeRequest)
+  resetForm();
+  generateMessage("OK", res.data.message);
+  dialogo.hide()
 }
 
 async function resetForm() {
@@ -782,6 +677,7 @@ async function obtenerDatosPdf(file) {
 }
 
 async function guardarActividadesPDF() {
+  const dialog = generateDialog('Guardando actividades')
   for (let i = 0; i < actividadesPDF.value.length; i++) {
     const actividad = {
       nombre: actividadesPDF.value[i].nombre,
@@ -792,48 +688,44 @@ async function guardarActividadesPDF() {
       informe.value._id,
       actividadesPDF.value[i].actividadDistributivo,
       actividad,
-      (res) => {
-        if (res.status != 200)
+      async (res) => {
+        if (res.status != 200) {
           return generateMessage(
             "NO OK",
             "Ocurrió un error al guardar la actividad" +
             actividadesPDF.value[i].nombre.split(" - ")[0]
           );
+        }
       }
     );
   }
-  obtenerActividadesInforme();
+  const aeRequest = await obtenerActividadesInforme()
   noActividades.value = false;
+  formatearArrayActividades(aeRequest)
+  dialog.hide()
 }
 
 async function enviarInforme() {
   const dialog = $q.dialog({
     message: 'Enviando informe...',
-    progress: true, // we enable default settings
-    persistent: true, // we want the user to not be able to close it
-    ok: false // we want the user to not be able to close it
+    progress: true,
+    persistent: true,
+    ok: false
   })
   if (informeUpload.value == null) return generateMessage("WARNING", "Aún no ha seleccionado ningún archivo")
   const formData = new FormData()
   formData.append('firmado_por', 'docente')
   formData.append('myFile', informeUpload.value)
   await informeController.guardarInforme(formData, async (res) => {
-    if (res.status == 401) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/login" });
-    }
-    if (res.status == 403) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/" });
-    }
     if (res.status != 200) {
+      dialog.hide()
       generateMessage("NO OK", res.message);
-      visible.value = false;
-      return (isDataTable.value = true);
+      if (res.status == 401) return router.push({ path: "/login" })
+      if (res.status == 403) return router.push({ path: "/" })
+      return existenDatosTabla.value = true
     }
     informeUpload.value = null
     modalEnviarInforme.value = false
-    generateMessage('OK', "Documento enviado")
     const data = {
       mensaje: 'ha enviado el informe final firmado, para que lo apruebe, firme y reenvíe nuevamente.',
     }
@@ -849,33 +741,23 @@ async function enviarInforme() {
 }
 
 async function descargarPDF() {
+  for (const fs of actividadesEspecificas.value) {
+    for (const actividad of fs.actividadesEspecificas) {
+      if (actividad.horas == 0) return generateMessage("NOOK", "Existen actividades que no poseen horas")
+    }
+  }
   const dialog = $q.dialog({
     message: 'Generando informe...',
     progress: true, // we enable default settings
     persistent: true, // we want the user to not be able to close it
     ok: false // we want the user to not be able to close it
   })
-  for (const fs of actividadesEspecificas.value) {
-    for (const actividad of fs.actividadesEspecificas) {
-      if (actividad.horas == 0) return generateMessage("NOOK", "Existen actividades que no poseen horas")
-    }
-  }
-  //downloadPdf.downloadPdf()
-
   await generarPDF.generarPDF(
     informe.value._id,
     actividadesEspecificas.value,
     periodo.value.nombre
   );
-  setTimeout(() => {
-    dialog.hide()
-  }, 350)
-}
-
-function isUrl(s) {
-  var regexp =
-    /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-  return regexp.test(s);
+  dialog.hide()
 }
 
 const generateMessage = (tipo, message) => {
@@ -912,10 +794,50 @@ function generateDialog(message) {
   })
 }
 
-obtenerFormatoInforme();
-obtenerUltimoPeriodo();
-//descargarExcel.descargarInformeExcel()
+function formatearArrayActividades(aeRequest) {
+  actividadesEspecificas.value = funcionesSustantivas.value.map(fs => {
+    return {
+      funcionSustantiva: {
+        _id: fs._id,
+        nombre: fs.nombre
+      },
+      actividadesEspecificas: aeRequest.filter(ae =>
+        ae.actividadDistributivo.funcionSustantiva._id == fs._id)
+    }
+  })
+}
 
+async function cargarData() {
+  periodo.value = await obtenerUltimoPeriodo()
+  if (periodo.value != false) {
+    existePeriodo.value = true
+    informe.value = await obtenerInformePorPeriodo()
+    if (informe.value == false) {
+      return estaCargandoInformacion.value = false
+    }
+    funcionesSustantivas.value = await obtenerActividadesDistributivo()
+    if (funcionesSustantivas.value == false) {
+      return estaCargandoInformacion.value = false
+    }
+    tab.value = funcionesSustantivas.value[0].nombre
+    formatoInforme.value = await obtenerFormatoInforme()
+    if (formatoInforme.value == false) {
+      formatoInforme.value = null
+      return estaCargandoInformacion.value = false
+    }
+    const aeRequest = await obtenerActividadesInforme()
+    if (aeRequest.length == 0) {
+      noActividades.value = true
+    } else {
+      tieneActividades.value = true
+      noActividades.value = false
+    }
+    formatearArrayActividades(aeRequest)
+    existenDatosTabla.value = true
+  }
+  estaCargandoInformacion.value = false
+}
+cargarData()
 </script>
 
 <style lang="scss">

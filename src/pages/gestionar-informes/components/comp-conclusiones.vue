@@ -202,29 +202,29 @@ const toolbarEditorEditar = [['bold', 'italic', 'strike', 'underline'], ['link']
 
 
 const obtenerConclusionesRecomendaciones = async () => {
-  await conclusionRecomendacionController.obtenerPorInforme(
+  return await conclusionRecomendacionController.obtenerPorInforme(
     props.informe._id,
     (res) => {
-      if (res.status == 401) {
-        generateMessage("NO OK", res.message);
-        return router.push({ path: "/login" });
-      }
-      if (res.status == 403) {
-        generateMessage("NO OK", res.message);
-        return router.push({ path: "/" });
-      }
-      if (res.status != 200)
-        return generateMessage(
+      if (res.status != 200) {
+        if (res.status == 401) {
+          generateMessage("NO OK", res.message);
+          return router.push({ path: "/login" });
+        }
+        if (res.status == 403) {
+          generateMessage("NO OK", res.message);
+          return router.push({ path: "/" });
+        }
+        generateMessage(
           "NO OK",
           "Ocurrió un error al obtener las" +
           props.informe.conclusionesRecomendaciones
-        );
-      conclusionesRecomendaciones.value = res.data;
-      if (conclusionesRecomendaciones.value.length == 0) expansion_conclusion.value = true
+        )
+        return false
+      }
+      return res.data;
     }
   );
-  isRecomendaciones.value = true;
-  visibleConclusiones.value = false;
+
 };
 
 function mostrarEditorEditar(item) {
@@ -238,26 +238,30 @@ function mostrarEditorEditar(item) {
 
 async function editarConclusionRecomendacion() {
   if (textEditConclusion.value == "") return;
+  const dialogo = generateDialog('Editando ' + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase())
   const data = {
     nombre: sanitizarTexto(textEditConclusion.value),
   };
-  await conclusionRecomendacionController.editar(conclusionEditar.value._id, data, (res) => {
-    if (res.status == 401) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/login" });
-    }
-    if (res.status == 403) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/" });
-    }
-    if (res.status != 200)
+  await conclusionRecomendacionController.editar(conclusionEditar.value._id, data, async (res) => {
+    if (res.status != 200) {
+      dialogo.hide()
+      if (res.status == 401) {
+        generateMessage("NO OK", res.message);
+        return router.push({ path: "/login" });
+      }
+      if (res.status == 403) {
+        generateMessage("NO OK", res.message);
+        return router.push({ path: "/" });
+      }
       return generateMessage(
         "NO OK",
         "Ocurrio un error al editar la " + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase()
       );
+    }
+    conclusionesRecomendaciones.value = await obtenerConclusionesRecomendaciones();
     generateMessage("OK", "Se ha editado la " + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase());
     cancelarEdicion()
-    return obtenerConclusionesRecomendaciones();
+    return dialogo.hide()
   });
 }
 
@@ -268,28 +272,32 @@ async function confirmacionDeleteConclusion(conclusion) {
 }
 
 async function eliminarConclusionRecomendacion() {
+  const dialogo = generateDialog('Eliminando ' + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase())
   textEditConclusion.value = null;
   indexEditConclusion.value = null;
   await conclusionRecomendacionController.eliminar(
     conclusion_delete.value._id,
-    (res) => {
-      if (res.status == 401) {
-        generateMessage("NO OK", res.message);
-        return router.push({ path: "/login" });
-      }
-      if (res.status == 403) {
-        generateMessage("NO OK", res.message);
-        return router.push({ path: "/" });
-      }
-      if (res.status != 200)
+    async (res) => {
+      if (res.status != 200) {
+        dialogo.hide()
+        if (res.status == 401) {
+          generateMessage("NO OK", res.message);
+          return router.push({ path: "/login" });
+        }
+        if (res.status == 403) {
+          generateMessage("NO OK", res.message);
+          return router.push({ path: "/" });
+        }
         return generateMessage(
           "NO OK",
           "Ocurrio un error al eliminar la " + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase()
-        );
-      generateMessage("OK", "Se ha eliminado la " + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase());
+        )
+      }
+      conclusionesRecomendaciones.value = await obtenerConclusionesRecomendaciones();
       confirm_delete_conclusion.value = false;
       conclusion_delete.value = null;
-      return obtenerConclusionesRecomendaciones();
+      generateMessage("OK", "Se ha eliminado la " + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase());
+      return dialogo.hide()
     }
   );
 }
@@ -302,51 +310,32 @@ function cancelarEdicion() {
 }
 
 async function guardar() {
+  const dialogo = generateDialog('Guardando ' + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase())
   if (textconclusionesRecomendaciones.value == "") return;
   const data = {
     nombre: sanitizarTexto(textconclusionesRecomendaciones.value),
     informe: props.informe._id,
   };
-  await conclusionRecomendacionController.crear(data, (res) => {
-    if (res.status == 401) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/login" });
+  await conclusionRecomendacionController.crear(data, async (res) => {
+    if (res.status != 200) {
+      dialogo.hide()
+      if (res.status == 401) {
+        generateMessage("NO OK", res.message);
+        return router.push({ path: "/login" });
+      }
+      if (res.status == 403) {
+        generateMessage("NO OK", res.message);
+        return router.push({ path: "/" });
+      }
+      return generateMessage("NO OK", "Ocurrió un error al guardar la " + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase());
     }
-    if (res.status == 403) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/" });
-    }
-    if (res.status != 200) return generateMessage("NO OK", "Ocurrio un error al guardar la " + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase());
-    generateMessage("OK", "Se ha guardado la " + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase());
+    conclusionesRecomendaciones.value = await obtenerConclusionesRecomendaciones();
     textconclusionesRecomendaciones.value = '';
-    return obtenerConclusionesRecomendaciones();
+    generateMessage("OK", "Se ha guardado la " + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase());
+    return dialogo.hide()
   });
 }
 
-const generateMessage = (tipo, message) => {
-  if (tipo == "OK") {
-    $q.notify({
-      color: "green-5",
-      textColor: "white",
-      icon: "mdi-check-bold",
-      message: message,
-    });
-  } else if (tipo == "WARNING") {
-    $q.notify({
-      color: "orange-5",
-      textColor: "white",
-      icon: "warning",
-      message: message,
-    });
-  } else {
-    $q.notify({
-      color: "red-5",
-      textColor: "white",
-      icon: "warning",
-      message: message,
-    });
-  }
-};
 
 function sanitizarTexto(texto) {
   texto = texto.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
@@ -385,20 +374,62 @@ function pegarEditor(evt) {
 }
 
 async function cambiarPosicionConclusion(conclusion, key) {
+  const dialogo = generateDialog('Reordenando')
   if (estaEditandoConclusion.value) return generateMessage('WARNING', 'Se encuentra editando una ' + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase())
   textEditConclusion.value = null;
   indexEditConclusion.value = null;
   await conclusionRecomendacionController.editar(conclusion._id, { orden: key });
-  obtenerConclusionesRecomendaciones();
+  conclusionesRecomendaciones.value = await obtenerConclusionesRecomendaciones();
+  dialogo.hide()
 }
 
-obtenerConclusionesRecomendaciones()
+function generateDialog(message) {
+  return $q.dialog({
+    message: message,
+    progress: true,
+    persistent: true,
+    ok: false
+  })
+}
+
+const generateMessage = (tipo, message) => {
+  if (tipo == "OK") {
+    $q.notify({
+      color: "green-5",
+      textColor: "white",
+      icon: "mdi-check-bold",
+      message: message,
+    });
+  } else if (tipo == "WARNING") {
+    $q.notify({
+      color: "orange-5",
+      textColor: "white",
+      icon: "warning",
+      message: message,
+    });
+  } else {
+    $q.notify({
+      color: "red-5",
+      textColor: "white",
+      icon: "warning",
+      message: message,
+    });
+  }
+};
+
+async function iniciarData() {
+  conclusionesRecomendaciones.value = await obtenerConclusionesRecomendaciones()
+  isRecomendaciones.value = true;
+  visibleConclusiones.value = false;
+}
+
+
+iniciarData()
 
 //Esta funcion se ejecuta cuando se obtiene el informe final
 watch(
   () => props.informe,
   (_) => {
-    console.log("Aqui esto")
     if (props.informe != null) {
       obtenerConclusionesRecomendaciones();
     }

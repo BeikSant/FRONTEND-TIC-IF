@@ -461,11 +461,13 @@ const props = defineProps({
 });
 
 async function mostrarCamposActividad() {
+  const dialog = generateDialog('Obteniendo información...')
   await obtenerEvidencias();
   await obtenerActividadesDesarrolladas()
   await obtenerObservaciones()
   tab_actividad.value = props.formatoInforme.actividadesDesarrolladas;
   modalVerActividadEspecifica.value = true;
+  dialog.hide()
 }
 
 async function obtenerEvidencias() {
@@ -791,6 +793,15 @@ function estaEditando(_event) {
   if (estaEditandoDesarrolladas.value || estaEditandoEvidencias.value || estaEditandoObservaciones.value) {
     return generateMessage("WARNING", "Aún se encuentra editando una " + obtenerSingular(tab_actividad.value.toLowerCase()))
   }
+}
+
+function generateDialog(message) {
+  return $q.dialog({
+    message: message,
+    progress: true,
+    persistent: true,
+    ok: false
+  })
 }
 
 const generateMessage = (tipo, message) => {

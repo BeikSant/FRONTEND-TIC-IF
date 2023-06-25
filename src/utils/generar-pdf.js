@@ -95,13 +95,8 @@ export default {
       return { body, horas, textConclusion }
     }
 
-    let formato = null
-    if (idFormato == null) {
-      formato = await obtenerFormatoActivo()
-      await informeController.asignarFormato(informe, formato._id)
-    } else {
-      formato = await obtenerFormato(idFormato)
-    }
+    let formato = await obtenerFormatoActivo()
+
     let docente = await obtenerDocente()
     let { body, horas, textConclusion } = await obtenerBody(actividadesEspecificas, informe)
     body.push(

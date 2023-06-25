@@ -27,23 +27,12 @@ export default {
     }
   },
 
-  async asignarFormato(informe, formato, callback) {
-    try {
-      let res = await api.post(PATH + `/${informe}/${formato}`, {}, configHeader.headers())
-      if (callback) return callback(res)
-      return res
-    } catch (e) {
-      if (callback) return callback(centralErrors.obtenerMensajeError(e))
-      return centralErrors.obtenerMensajeError(e)
-    }
-  },
-
   async guardarInforme(data, callback) {
     try {
       let res = await api.post(PATH + `/upload`, data, configHeader.headers())
       if (callback) return callback(res)
       return res
-    } catch (error) {
+    } catch (e) {
       if (callback) return callback(centralErrors.obtenerMensajeError(e))
       return centralErrors.obtenerMensajeError(e)
     }

@@ -61,7 +61,7 @@
           <div class="q-mr-xs q-ml-xs">
             <q-btn dense flat round icon="mdi-account">
               <q-menu fit v-model="menu_notificacion" square style="width: 230px;">
-                <q-list class="list" separator>
+                <q-list separator>
                   <q-item clickable @click="showEditarDedicación = true;
                   editDedicacion = perfil.dedicacion;
                   ">
@@ -215,7 +215,6 @@
 
             </q-list>
           </q-card-section>
-          <q-separator></q-separator>
           <q-card-actions class="justify-center">
             <q-pagination v-model="pagination" color="primary" :max="pages" :max-pages="6" boundary-numbers
               @update:model-value="obtenerTodasNotificaciones" />
@@ -331,10 +330,6 @@ const isDirector = ref(false);
 const perfil = ref({});
 const modalNotificaciones = ref(false)
 let open = 0
-
-function temp() {
-  console.log(pagination.value)
-}
 
 async function obtenerNotificacionNoLeidas() {
   await notificacionController.obtenerNoLeidos((res) => {
