@@ -77,6 +77,9 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import userController from 'src/controller/user'
 import Cookies from 'js-cookie'
+import { useUserStore } from 'src/stores/user-store'
+
+const userStore = useUserStore()
 const $q = useQuasar()
 const isPassword = ref(true)
 const email = ref(null)
@@ -95,7 +98,8 @@ const onSubmit = async () => {
     message: res.message
   })
 
-  Cookies.set('auth-informefinal', res.data.token, { path: '/' })
+  await Cookies.set('auth-informefinal', res.data.token, { path: '/' })
+  userStore.obtenerUsuario()
   $q.notify({
     color: 'green-5',
     textColor: 'white',
@@ -104,6 +108,7 @@ const onSubmit = async () => {
   })
   return router.push({ path: '/' });
 };
+
 const onReset = () => {
   email.value = null
   password.value = null

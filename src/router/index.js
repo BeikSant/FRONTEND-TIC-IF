@@ -1,7 +1,6 @@
 import Cookies from 'js-cookie'
 import { route } from 'quasar/wrappers'
 import user from 'src/controller/user'
-import { useAuthStore } from 'src/stores/auth-stores'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
 

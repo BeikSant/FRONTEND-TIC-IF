@@ -3,7 +3,8 @@
     <q-card-section class="bg-primary text-white">
       <div class="flex items-center justify-between">
         <span class="text-h6 text-bold">Distributivo General de los Docentes</span>
-        <q-btn v-if="docente == 'director'" @click="fixed = true" size="sm" color="green">Nuevo
+        <q-btn v-if="userStore.user && userStore.user.usuario.rol.nombre.toUpperCase() === 'DIRECTOR'"
+          @click="fixed = true" size="sm" color="green">Nuevo
           Distributivo</q-btn>
       </div>
     </q-card-section>
@@ -120,12 +121,13 @@
 <script setup>
 import { ref } from 'vue';
 import readXlsxFile from 'read-excel-file';
-import docenteController from 'src/controller/docente';
 import distributivo from 'src/controller/distributivo';
 import { useQuasar } from 'quasar';
+import { useUserStore } from 'src/stores/user-store';
+import user from 'src/controller/user';
 
+const userStore = useUserStore()
 const $q = useQuasar()
-const docente = ref('docente')
 const baseURL = process.env.BASEURL
 const excelUpload = ref(null)
 const filter = ref('')
@@ -140,10 +142,6 @@ const columns = [
   { name: 'descripcion', align: 'left', label: 'DESCRIPCIÓN', field: 'descripcion', sortable: false, style: 'max-width: 500px; white-space: break-spaces;' },
 ]
 
-const obtenerDocente = async () => {
-  const res = await docenteController.obtenerPerfilDocente()
-  if (res.status == 200) docente.value = res.data.docente.usuario.rol.nombre
-}
 
 const obtenerActividades = async () => {
   await distributivo.obtenerTodasActividades(async (res) => {
@@ -228,8 +226,6 @@ function generateDialog(message) {
 }
 
 obtenerActividades()
-obtenerDocente()
-
 
 </script>
 

@@ -563,13 +563,19 @@ async function eliminarActividad() {
     actividadEliminar.value._id,
     async (res) => {
       if (res.status != 200) {
+        dialogo.hide()
         generateMessage("NO OK", res.message);
         if (res.status == 401) return router.push({ path: "/login" })
         if (res.status == 403) return router.push({ path: "/" })
         return
       }
-      const aeRequest = await obtenerActividadesInforme()
-      formatearArrayActividades(aeRequest)
+      actividadesEspecificas.value = actividadesEspecificas.value.map(fs => {
+        return {
+          funcionSustantiva: fs.funcionSustantiva,
+          actividadesEspecificas: fs.actividadesEspecificas.filter(ae =>
+            ae._id != actividadEliminar.value._id)
+        }
+      })
       actividadEliminar.value = null;
       dialogo.hide()
       generateMessage("OK", res.data.message);
@@ -611,7 +617,7 @@ async function editarActividadForm(actividad) {
 }
 
 async function guardarFormActividad() {
-  const dialogo = generateDialog('Guardando Actividad')
+  const dialogo = generateDialog('Guardando Actividad...')
   let actividad = {
     nombre: selected.value + " - " + nombre_actividad.value,
     horas: Number(horas_actividad.value),
@@ -629,13 +635,29 @@ async function guardarFormActividad() {
     res = await especificaController.crearActividad(informe.value._id, actividadDis[0]._id, actividad);
   }
   if (res.status != 200) {
+    dialogo.hide()
     generateMessage("NO OK", res.message);
     if (res.status == 401) return router.push({ path: "/login" })
     if (res.status == 403) return router.push({ path: "/" })
-    return dialogo.hide()
+    return
   }
-  const aeRequest = await obtenerActividadesInforme()
-  formatearArrayActividades(aeRequest)
+
+  if (!editarActividad.value) {
+    let ae = res.data.actividadEspecifica
+    actividadesEspecificas.value.forEach(ac => {
+      if (ac.funcionSustantiva._id == ae.actividadDistributivo.funcionSustantiva._id) {
+        ae.evidencia = 0
+        ae.actividadDesarrollada = 0
+        ae.observacion = 0
+        ac.actividadesEspecificas.push(ae)
+      }
+    });
+  } else {
+
+  }
+  //const aeRequest = await obtenerActividadesInforme()
+  //formatearArrayActividades(aeRequest)
+
   resetForm();
   generateMessage("OK", res.data.message);
   dialogo.hide()

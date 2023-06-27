@@ -63,7 +63,7 @@
               <q-menu fit v-model="menu_notificacion" square style="width: 230px;">
                 <q-list separator>
                   <q-item clickable @click="showEditarDedicación = true;
-                  editDedicacion = perfil.dedicacion;
+                  editDedicacion = userStore.user.dedicacion;
                   ">
                     <q-item-section avatar class="col-3">
                       <q-icon name="mdi-account-edit" />
@@ -72,7 +72,7 @@
                       <q-item-label>Cambiar dedicación</q-item-label>
                     </q-item-section>
                   </q-item>
-                  <q-item clickable @click=" showCambiarContrasennia = true">
+                  <q-item clickable @click="mostrarCambiarContrasena">
                     <q-item-section avatar class="col-3">
                       <q-icon name="mdi-key" />
                     </q-item-section>
@@ -105,8 +105,9 @@
             <q-avatar class="items-end q-mb-sm">
               <img src="~assets/user-none.png">
             </q-avatar>
-            <div class="text-h7 text-subtitle1 text-bold">{{ perfil.nombre }}</div>
-            <div class="text-subtitle2 text-italic">{{ perfil.rol }}</div>
+            <div class="text-h7 text-subtitle1 text-bold">{{ userStore.user.primerNombre + ' ' +
+              userStore.user.primerApellido }}</div>
+            <div class="text-subtitle2 text-italic">{{ userStore.user.usuario.rol.nombre.toUpperCase() }}</div>
           </q-card-section>
         </q-img>
         <q-list bordered>
@@ -119,7 +120,7 @@
             </q-item-section>
           </q-item>
         </q-list>
-        <q-list bordered v-if="isDirector">
+        <q-list bordered v-if="userStore.user && userStore.user.usuario.rol.nombre.toUpperCase() == 'DIRECTOR'">
           <q-item v-for=" link in linksDirector" :key="link.name" active-class="text-blue-9" :to="link.to" exact>
             <q-item-section v-if="link.icon" avatar>
               <q-icon :name="link.icon" />
@@ -156,7 +157,7 @@
             <div class="text-h6">Cambiar Contraseña</div>
           </q-card-section>
 
-          <q-form @submit=" onSubmit()" @reset=" cerrarFormulario()">
+          <q-form @submit=" cambiarContrasennia()">
             <q-card-section class="q-col-gutter-md">
               <q-input class="col" outlined square v-model="formPassword.password" label="Contraseña Actual" lazy-rules
                 :rules="[val => (val && val.length > 0) || 'Completa este campo']
@@ -177,7 +178,7 @@
             </q-card-section>
             <q-separator />
             <q-card-actions class="justify-end">
-              <q-btn type="reset" flat label="Cancelar" color="negative" />
+              <q-btn type="reset" flat label="Cancelar" color="negative" v-close-popup />
               <q-btn type="submit" color="positive" label="Guardar" />
             </q-card-actions>
           </q-form>
@@ -228,7 +229,7 @@
             <div class="text-h6">Cambiar Dedicación</div>
           </q-card-section>
 
-          <q-form @submit=" cambiarDedicacion()" @reset=" cerrarFormulario()" class="q-gutter-x-md">
+          <q-form @submit=" cambiarDedicacion()" class="q-gutter-x-md">
             <q-card-section class="q-mb-sm">
               <q-input class="col label-mid" outlined square v-model="editDedicacion" label="Dedicación Actual" lazy-rules
                 :rules="[
@@ -239,7 +240,7 @@
             </q-card-section>
             <q-separator />
             <q-card-actions class="justify-end">
-              <q-btn type="reset" flat label="Cancelar" color="negative" />
+              <q-btn type="reset" flat label="Cancelar" color="negative" v-close-popup />
               <q-btn type="submit" color="positive" label="Guardar" />
             </q-card-actions>
           </q-form>
@@ -259,6 +260,9 @@ import docenteController from "src/controller/docente";
 import { Cookies, useQuasar } from "quasar";
 import { getCurrentInstance } from "vue"
 import notificacionController from "src/controller/notificacion-controller";
+import { useUserStore } from "src/stores/user-store";
+
+const userStore = useUserStore()
 
 const linksDirector = [
   {
@@ -286,7 +290,6 @@ const linksDirector = [
     to: "/informe/revision",
   },
 ]
-
 const linksDocente = [
   {
     title: "Ver Distributivo General",
@@ -323,11 +326,8 @@ const showCambiarContrasennia = ref(false);
 const router = useRouter();
 const editDedicacion = ref("");
 const leftDrawerOpen = ref(false);
-let idDocente = null;
 const notificaciones = ref([])
 const notificacionNoLeidas = ref(0)
-const isDirector = ref(false);
-const perfil = ref({});
 const modalNotificaciones = ref(false)
 let open = 0
 
@@ -401,95 +401,48 @@ function tiempoTranscurrido(fecha) {
   }
 }
 
-const obtenerPerfil = async () => {
-  await docente.obtenerPerfilDocente((res) => {
-    if (res.status == 401) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/login" });
-    }
-    if (res.status == 403) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/" });
-    }
-    if (res.status != 200) return generateMessage("NOK", res.message);
-    perfil.value = {
-      dedicacion: res.data.docente.dedicacion,
-      nombre: `${res.data.docente.primerNombre} ${res.data.docente.primerApellido}`,
-      rol: res.data.docente.usuario.rol.nombre.toUpperCase(),
-    };
-    idDocente = res.data.docente._id;
-    isDirector.value = perfil.value.rol == "DIRECTOR" ? true : false;
-  });
-};
-
-const generateMessage = (tipo, message) => {
-  if (tipo == "OK") {
-    $q.notify({
-      color: "green-5",
-      textColor: "white",
-      icon: "mdi-check-bold",
-      message: message,
-    });
-  } else {
-    $q.notify({
-      color: "red-5",
-      textColor: "white",
-      icon: "warning",
-      message: message,
-    });
-  }
-};
-
 async function logout() {
-  if (Cookies.get("auth-informefinal"))
-    await Cookies.remove("auth-informefinal", { path: "/" });
+  if (Cookies.get("auth-informefinal")) Cookies.remove("auth-informefinal", { path: "/" });
   return router.push({ path: "/login" });
 }
 
 async function cambiarDedicacion() {
-  await docenteController.editarDedicacion(
-    idDocente,
-    editDedicacion.value,
+  await docenteController.editarDedicacion(userStore.user._id, editDedicacion.value,
     (res) => {
-      if (res.status == 401) {
-        generateMessage("NO OK", res.message);
-        return router.push({ path: "/login" });
+      if (res.status != 200) {
+        generateMessage("NO OK", res.message)
+        if (res.status == 401) return router.push({ path: "/login" });
+        if (res.status == 403) return router.push({ path: "/" });
+        return
       }
-      if (res.status == 403) {
-        generateMessage("NO OK", res.message);
-        return router.push({ path: "/" });
-      }
-      if (res.status != 200) return generateMessage("NO OK", res.message);
       generateMessage("OK", res.data.message);
-      perfil.value.dedicacion = editDedicacion.value;
+      userStore.user.dedicacion = editDedicacion.value
       showEditarDedicación.value = false;
     }
   );
 }
-async function onSubmit() {
-  await user.cambiarContrasennia(formPassword.value, (res) => {
-    if (res.status == 401) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/login" });
-    }
-    if (res.status == 403) {
-      generateMessage("NO OK", res.message);
-      return router.push({ path: "/" });
-    }
-    if (res.status != 200) return generateMessage("NO OK", res.message);
-    generateMessage("OK", res.data.message);
-    this.cerrarFormulario();
-  });
-}
 
-function cerrarFormulario() {
-  showCambiarContrasennia.value = false;
+function mostrarCambiarContrasena() {
   formPassword.value = {
     password: "",
     new_password: "",
   };
-  showEditarDedicación.value = false;
-  editDedicacion.value = "";
+  isPassword.value = true
+  isNewPassword.value = true
+  showCambiarContrasennia.value = true
+}
+
+async function cambiarContrasennia() {
+  await user.cambiarContrasennia(formPassword.value, (res) => {
+    if (res.status != 200) {
+      generateMessage("NO OK", res.message)
+      if (res.status == 401) return router.push({ path: "/login" });
+      if (res.status == 403) return router.push({ path: "/" })
+      return
+    }
+    generateMessage("OK", res.data.message)
+    showCambiarContrasennia.value = false
+  })
 }
 
 function toggleLeftDrawer() {
@@ -516,6 +469,24 @@ function socket() {
   })
 }
 
+const generateMessage = (tipo, message) => {
+  if (tipo == "OK") {
+    $q.notify({
+      color: "green-5",
+      textColor: "white",
+      icon: "mdi-check-bold",
+      message: message,
+    });
+  } else {
+    $q.notify({
+      color: "red-5",
+      textColor: "white",
+      icon: "warning",
+      message: message,
+    });
+  }
+};
+
 function generateDialog(message) {
   return $q.dialog({
     message: message,
@@ -525,7 +496,6 @@ function generateDialog(message) {
   })
 }
 
-obtenerPerfil();
 obtenerNotificacionNoLeidas()
 socket()
 
