@@ -3,7 +3,7 @@
     <q-card-section class="bg-primary text-white">
       <div class="row justify-between items-center">
         <span class="text-h6 text-bold">Gestionar Periodos Académicos</span>
-        <q-btn :disable="loading" size="sm" color="positive" style="color:white" @click="formularioPeriodo">Nuevo
+        <q-btn :disable="loading" size="sm" color="positive" style="color:white" @click="mostrarFormularioCrear">Nuevo
           Periodo</q-btn>
       </div>
     </q-card-section>
@@ -12,12 +12,12 @@
         :no-data-label="'No existen periodos académicos'" :pagination="{ rowsPerPage: 10 }"
         rows-per-page-label="Resultados por página" :rows-per-page-options="[5, 10, 0]" :loading="loading"
         loading-label="Cargando datos..." :dense="$q.screen.lt.md" :grid="$q.screen.xs"
-        no-results-label="No hay ningún resultado" :filter="filter">
+        no-results-label="No hay ningún resultado" :filter="filtroPeriodos">
 
         <template v-slot:top>
           <div class="row justify-between items-center full-width">
             <span class="text-subtitle1 text-bold">LISTA DE PERIODOS</span>
-            <q-input dense v-model="filter" placeholder="Buscar">
+            <q-input dense v-model="filtroPeriodos" placeholder="Buscar">
               <template v-slot:append>
                 <q-icon name="search" />
               </template>
@@ -106,7 +106,7 @@
       </q-table>
     </q-card-section>
 
-    <q-dialog v-model="formPeriodo.draw" persistent square>
+    <q-dialog v-model="formPeriodo.mostrar" persistent square>
       <q-card style="max-width: 400px">
         <q-card-section class="bg-primary text-white">
           <div class="text-h6 text-bold">{{ formPeriodo.titulo }}</div>
@@ -168,32 +168,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import periodoController from 'src/controller/periodo-controller';
 import { useQuasar } from 'quasar';
+import { pluginsQuasar } from 'src/composables/pluginsQuasar';
 
-const $q = useQuasar()
-
+const plugins = pluginsQuasar()
 const formPeriodo = ref({
-  draw: false,
+  mostrar: false,
   editar: false,
   titulo: '',
   nombre: '',
   fechaInicio: '',
   fechaFinal: '',
 })
-
-
-const filter = ref('')
+const filtroPeriodos = ref('')
 const headerPeriodo = [
   { name: 'nombre', label: 'NOMBRE', sortable: true, field: 'nombre', align: 'left', style: 'max-width: 120px; white-space: break-spaces;' },
-  { name: 'fechaInicio', label: 'FECHA INICO', sortable: true, field: 'fechaInicio', align: 'center' },
-  { name: 'fechaFin', label: 'FECHA FINAL', sortable: true, field: 'fechaFin', align: 'center' },
+  { name: 'fechaInicio', label: 'FECHA INICO', sortable: true, field: 'fechaInicioFormateada', align: 'center' },
+  { name: 'fechaFin', label: 'FECHA FINAL', sortable: true, field: 'fechaFinFormateada', align: 'center' },
   { name: 'estado', label: 'ESTADO', sortable: false, field: 'estado', align: 'center' },
   { name: 'acciones', label: 'ACCIONES', sortable: false, field: 'acciones', align: 'center' }
 ]
 const dataPeriodo = ref([])
-
 const dialogEliminarPeriodo = ref(false)
 const idEliminarPeriodo = ref(null)
 const loading = ref(false)
@@ -201,48 +198,46 @@ const loading = ref(false)
 async function obtenerTodosPeriodos() {
   loading.value = true
   await periodoController.obtenerTodosPeriodos((res) => {
-    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
-    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('NO OK', res.message)
-    let periodos = res.data.periodos
-    for (let i = 0; i < periodos.length; i++) {
-      periodos[i].fechaInicio = new Date(periodos[i].fechaInicio).toLocaleDateString()
-      periodos[i].fechaFin && periodos.fechaFin != '' ?
-        periodos[i].fechaFin = new Date(periodos[i].fechaFin).toLocaleDateString() :
-        periodos[i].fechaFin = 'NO DEFINIDO'
-
+    if (res.status != 200) {
+      plugins.generateNotify(plugins.NOTIFY_TYPES.negative, res.message)
+      if (res.status == 401) return router.push({ path: '/login' })
+      if (res.status == 403) return router.push({ path: '/' })
+      return
     }
-    dataPeriodo.value = periodos
+    dataPeriodo.value = res.data.periodos.map(p => {
+      p.fechaInicioFormateada = new Date(p.fechaInicio).toLocaleDateString()
+      p.fechaFinFormateada = p.fechaFin
+        ? new Date(p.fechaFin).toLocaleDateString()
+        : 'NO DEFINIDO'
+      return p
+    })
     loading.value = false
   })
-
 }
 
-function formularioPeriodo() {
-  formPeriodo.value.draw = true
+function mostrarFormularioCrear() {
+  formPeriodo.value.mostrar = true
   formPeriodo.value.titulo = 'Nuevo Periodo Académico'
   formPeriodo.value.editar = false
 }
 
 function formularioEditarPeriodo(periodo) {
-  formPeriodo.value.draw = true
+  formPeriodo.value.mostrar = true
   formPeriodo.value.editar = true
   formPeriodo.value.titulo = 'Editar Periodo Académico'
   formPeriodo.value.id = periodo._id
   formPeriodo.value.nombre = periodo.nombre
-  const fechaInicioOriginal = periodo.fechaInicio;
-  const partesFecha = fechaInicioOriginal.split('/');
-  const fechaInicioFormateada = partesFecha[2] + '-' + (partesFecha[1] < 10 ? '0' + partesFecha[1] : partesFecha[1]) + '-' + (
-    partesFecha[0] < 10 ? '0' + partesFecha[0] : partesFecha[0]
-  );
-  formPeriodo.value.fechaInicio = fechaInicioFormateada
-  if (periodo.fechaFin != 'NO DEFINIDO') {
-    const fechaFinOriginal = periodo.fechaFin;
-    const partesFechaFin = fechaFinOriginal.split('/');
-    const fechaFinFormateada = partesFechaFin[2] + '-' + (partesFechaFin[1] < 10 ? '0' + partesFechaFin[1] : partesFechaFin[1]) + '-' + (
-      partesFechaFin[0] < 10 ? '0' + partesFechaFin[0] : partesFechaFin[0]
-    );
-    formPeriodo.value.fechaFinal = fechaFinFormateada
+
+  const partesFechaInico = periodo.fechaInicioFormateada.split('/').reverse();
+  formPeriodo.value.fechaInicio = partesFechaInico.map(d => {
+    return d.length == 1 ? '0' + d : d
+  }).join('-')
+
+  if (periodo.fechaFin != null) {
+    const partesFechaFin = periodo.fechaFinFormateada.split('/').reverse();
+    formPeriodo.value.fechaFinal = partesFechaFin.map(d => {
+      return d.length == 1 ? '0' + d : d
+    }).join('-')
   } else {
     formPeriodo.value.fechaFinal = ''
   }
@@ -250,25 +245,30 @@ function formularioEditarPeriodo(periodo) {
 }
 
 async function guardarFormPeriodo() {
+  const dialogo = plugins.generateDialog('Guardando información...')
   const data = {
     nombre: formPeriodo.value.nombre,
     fechaInicio: new Date(formPeriodo.value.fechaInicio + ' 14:00:00'),
-    fechaFin: ''
+    fechaFin: formPeriodo.value.fechaFinal != ''
+      ? new Date(formPeriodo.value.fechaFinal + ' 14:00:00')
+      : ''
   }
-  if (formPeriodo.value.fechaFinal != '') data.fechaFin = new Date(formPeriodo.value.fechaFinal + ' 14:00:00')
-  console.log(data)
-  let res = null
-  if (formPeriodo.value.editar) {
-    res = await periodoController.editar(formPeriodo.value.id, data)
+  const res = formPeriodo.value.editar
+    ? await periodoController.editar(formPeriodo.value.id, data)
+    : await periodoController.crearPeriodo(data)
+
+  if (res.status != 200) {
+    dialogo.hide()
+    plugins.generateNotify(plugins.NOTIFY_TYPES.negative, res.message)
+    if (res.status == 401) return router.push({ path: '/login' })
+    if (res.status == 403) return router.push({ path: '/' })
   } else {
-    res = await periodoController.crearPeriodo(data)
+    obtenerTodosPeriodos()
+    resetForm()
+    formPeriodo.value.mostrar = false
+    plugins.generateNotify(plugins.NOTIFY_TYPES.positive, res.data.message)
+    dialogo.hide()
   }
-  if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
-  if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-  if (res.status != 200) return generateMessage('NO OK', res.message)
-  obtenerTodosPeriodos()
-  formPeriodo.value.draw = false
-  generateMessage('OK', res.data.message)
 }
 
 function isMayorFechaInicial() {
@@ -277,14 +277,13 @@ function isMayorFechaInicial() {
     const fechaInicio = new Date(formPeriodo.value.fechaInicio)
     const fechaFinal = new Date(formPeriodo.value.fechaFinal)
     if (fechaInicio > fechaFinal) return false
-    return true
   }
   return true
 }
 
 function resetForm() {
   formPeriodo.value = {
-    draw: false,
+    mostrar: false,
     editable: false,
     titulo: '',
     nombre: '',
@@ -299,36 +298,26 @@ function confirmacionEliminarPeriodo(data) {
 }
 
 async function eliminarPeriodo() {
+  const dialogo = plugins.generateDialog('Eliminando periodo...')
   await periodoController.eliminarPeriodo(idEliminarPeriodo.value, (res) => {
-    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
-    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('NO OK', res.message)
-    obtenerTodosPeriodos()
-    return generateMessage('OK', res.data.message)
+    if (res.status != 200) {
+      dialogo.hide()
+      plugins.generateNotify(plugins.NOTIFY_TYPES.negative, res.message)
+      if (res.status == 401) return router.push({ path: '/login' })
+      if (res.status == 403) return router.push({ path: '/' })
+    } else {
+      obtenerTodosPeriodos()
+      plugins.generateNotify(plugins.NOTIFY_TYPES.positive, res.data.message)
+      return dialogo.hide()
+    }
+    idEliminarPeriodo.value = null
+    dialogEliminarPeriodo.value = false
   })
-  idEliminarPeriodo.value = null
-  dialogEliminarPeriodo.value = false
 }
 
-const generateMessage = (tipo, message) => {
-  if (tipo == 'OK') {
-    $q.notify({
-      color: 'green-5',
-      textColor: 'white',
-      icon: 'mdi-check-bold',
-      message: message
-    })
-  } else {
-    $q.notify({
-      color: 'red-5',
-      textColor: 'white',
-      icon: 'warning',
-      message: message
-    })
-  }
-}
-
-obtenerTodosPeriodos()
+onMounted(() => {
+  obtenerTodosPeriodos()
+})
 
 </script>
 

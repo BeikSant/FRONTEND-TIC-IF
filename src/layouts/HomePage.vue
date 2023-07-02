@@ -335,10 +335,11 @@ async function obtenerNotificacionNoLeidas() {
   await notificacionController.obtenerNoLeidos((res) => {
     notificaciones.value = res.data.notificaciones
     notificacionNoLeidas.value = 0
-    for (let i = 0; i < notificaciones.value.length; i++) {
-      if (!notificaciones.value[i].leido) notificacionNoLeidas.value++
-      notificaciones.value[i].tiempoTranscurrido = tiempoTranscurrido(notificaciones.value[i].created_at)
-    }
+    notificaciones.value = res.data.notificaciones.map(n => {
+      if (!n.leido) notificacionNoLeidas.value++
+      n.tiempoTranscurrido = tiempoTranscurrido(n.created_at)
+      return n
+    })
   })
 }
 
@@ -453,13 +454,13 @@ function socket() {
   $socket.on('notificacion', (notificacion) => {
     notificacion.tiempoTranscurrido = tiempoTranscurrido(notificacion.created_at)
     if (notificacion.destinos.length > 1) {
-      for (let i = 0; i < notificacion.destinos.length; i++) {
-        if (notificacion.destinos[i] == idDocente) {
+      notificacion.destinos.length.map(d => {
+        if (d == idDocente) {
           notificaciones.value.unshift(notificacion)
           notificacionNoLeidas.value++
           open = 0
         }
-      }
+      })
     } else if (idDocente == notificacion.destino) {
       notificaciones.value.unshift(notificacion)
       notificacionNoLeidas.value++

@@ -349,10 +349,10 @@ async function obtenerTodosFormatos() {
     if (res.status == 401) { generateMessage('negative', res.message); return router.push({ path: '/login' }) }
     if (res.status == 403) { generateMessage('negative', res.message); return router.push({ path: '/' }) }
     if (res.status != 200) return generateMessage('negative', res.message)
-    dataFormato.value = res.data.formatos
-    for (let i = 0; i < dataFormato.value.length; i++) {
-      if (dataFormato.value[i].estado) formatoActivo.value = dataFormato.value[i]
-    }
+    dataFormato.value = res.data.formatos.map(f => {
+      if (f.estado) formatoActivo.value = f
+      return f
+    })
     loading.value = false
   })
 }

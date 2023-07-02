@@ -6,8 +6,8 @@
         DOCENTE</q-btn>
     </q-card-section>
     <q-card-section class="no-padding">
-      <q-table square :rows="rows" :columns="columns" row-key="name" class="shadow-0" :rows-per-page-options="[5, 10, 0]"
-        bordered :loading="loading" separator="cell" loading-label="Cargando datos..."
+      <q-table square :rows="docentes" :columns="columns" row-key="name" class="shadow-0"
+        :rows-per-page-options="[5, 10, 0]" bordered :loading="loading" separator="cell" loading-label="Cargando datos..."
         rows-per-page-label="Resultados por página" :dense="$q.screen.lt.md" :grid="$q.screen.xs"
         no-results-label="No hay ningún resultado" :filter="filter">
 
@@ -155,12 +155,10 @@
           <q-btn type="submit" flat label="Guardar" square class="bg-positive text-white" />
         </q-card-actions>
       </q-form>
-
-
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="confirm" persistent>
+  <q-dialog v-model="confirmacionEstado" persistent>
     <q-card style="max-width: 400px;">
       <q-card-section class="row items-center">
         <div class="row">
@@ -205,13 +203,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
-import docente from 'src/controller/docente';
+import docenteController from 'src/controller/docente';
 import user from 'src/controller/user';
+import { pluginsQuasar } from 'src/composables/pluginsQuasar'
 
 const $q = useQuasar()
+const plugins = pluginsQuasar()
 
 const titulo_form = ref(null)
 const first_name = ref(null)
@@ -226,12 +226,10 @@ const idEditdocente = ref(null)
 const selectRoles = ['DOCENTE', 'DIRECTOR']
 const filter = ref('')
 
-const confirm = ref(false)
+const confirmacionEstado = ref(false)
 const confirm_rol = ref(false)
 const docenteestado = ref(null)
 const docenterol = ref(null)
-
-const Listdocentes = ref(null)
 const columns = [
   { name: 'nombre', sortable: true, align: 'left', label: 'NOMBRES', field: 'nombre', style: 'white-space: break-spaces;' },
   { name: 'correo', align: 'center', label: 'CORREO', field: 'correo' },
@@ -240,71 +238,88 @@ const columns = [
   { name: 'estado', sortable: true, align: 'center', label: "CUENTA", field: 'estado' },
   { name: 'acciones', sortable: false, align: 'center', label: "ACCIONES", field: 'acciones' },
 ]
-const rows = ref([])
+const docentes = ref([])
 const formulario = ref(false)
 const router = useRouter()
 
 const obtenerDocentes = async () => {
   loading.value = true
-  await docente.obtenerDocentes((res) => {
-    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
-    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('NO OK', res.message)
-    let docentes = []
-    Listdocentes.value = res.data
-    for (let i = 0; i < Listdocentes.value.length; i++) {
-      const docente = Listdocentes.value[i]
-      const nombre = `${docente.primerNombre} ${docente.segundoNombre} ${docente.primerApellido} ${docente.segundoApellido}`
-      docentes.push({
-        id: docente._id,
-        nombre: nombre,
-        primerNombre: docente.primerNombre,
-        segundoNombre: docente.segundoNombre,
-        primerApellido: docente.primerApellido,
-        segundoApellido: docente.segundoApellido,
-        estado: docente.usuario.estado,
-        isActual: docente.isActual ? true : false,
-        rol: docente.usuario.rol.nombre.toUpperCase(),
-        correo: docente.correo,
-        dedicacion: docente.dedicacion
-      })
+  await docenteController.obtenerDocentes((res) => {
+    if (res.status != 200) {
+      loading.value = false
+      plugins.generateNotify(plugins.NOTIFY_TYPES.warning, res.message)
+      if (res.status == 401) return router.push({ path: '/login' })
+      if (res.status == 403) return router.push({ path: '/' })
+      return
     }
-    rows.value = docentes
+    docentes.value = res.data.map(doc => {
+      doc.nombre = `${doc.primerNombre} ${doc.segundoNombre} ${doc.primerApellido} ${doc.segundoApellido}`
+      doc.isActual = doc.isActual ? true : false
+      doc.estado = doc.usuario.estado
+      doc.rol = doc.usuario.rol.nombre.toUpperCase()
+      return doc
+    })
+    console.log(docentes.value)
   })
   loading.value = false
 }
 
 const crearDocente = async (data) => {
-  await docente.crearDocente(data, (res) => {
-    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
-    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('NO OK', res.message)
-    generateMessage('OK', res.data.message)
+  const dialogo = plugins.generateDialog('Guardando docente...')
+  await docenteController.crearDocente(data, async (res) => {
+    if (res.status != 200) {
+      dialogo.hide()
+      plugins.generateNotify(plugins.NOTIFY_TYPES.warning, res.message)
+      if (res.status == 401) return router.push({ path: '/login' })
+      if (res.status == 403) return router.push({ path: '/' })
+      return
+    }
+    let docCreado = res.data.docente
+    docCreado.nombre = `${docCreado.primerNombre} ${docCreado.segundoNombre} ${docCreado.primerApellido} ${docCreado.segundoApellido}`
+    docCreado.isActual = docCreado.isActual ? true : false
+    docCreado.estado = docCreado.usuario.estado
+    docCreado.rol = docCreado.usuario.rol.nombre.toUpperCase()
+    docentes.value.push(docCreado)
     cerrarFormulario()
-    obtenerDocentes()
+    plugins.generateNotify(plugins.NOTIFY_TYPES.positive, res.data.message)
+    return dialogo.hide()
   })
 }
 
 const editarDocente = async (id, data) => {
-  await docente.editarDocente(id, data, (res) => {
-    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
-    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('NO OK', res.message)
-    generateMessage('OK', res.data.message)
+  const dialogo = plugins.generateDialog('Actualizando información...')
+  await docenteController.editarDocente(id, data, (res) => {
+    if (res.status != 200) {
+      dialogo.hide()
+      plugins.generateNotify(plugins.NOTIFY_TYPES.warning, res.message)
+      if (res.status == 401) return router.push({ path: '/login' })
+      if (res.status == 403) return router.push({ path: '/' })
+      return
+    }
+    let docActualizado = { ...res.data.docente }
+    docActualizado.nombre = `${docActualizado.primerNombre} ${docActualizado.segundoNombre} ${docActualizado.primerApellido} ${docActualizado.segundoApellido}`
+    docActualizado.isActual = docActualizado.isActual ? true : false
+    docActualizado.estado = docActualizado.usuario.estado
+    docActualizado.rol = docActualizado.usuario.rol.nombre.toUpperCase()
+    const nuevosDocentes = docentes.value.map(doc => {
+      return docActualizado._id === doc._id ? docActualizado : { ...doc };
+    })
+    docentes.value = nuevosDocentes
+    plugins.generateNotify(plugins.NOTIFY_TYPES.positive, res.data.message)
     cerrarFormulario()
-    obtenerDocentes()
+    return dialogo.hide()
   })
 }
 
 const formularioCrear = async () => {
-  await onReset()
+  onReset()
   titulo_form.value = "Agregar Nuevo Docente"
   formulario.value = true
 }
 
 const formularioEditar = async (docente) => {
-  await onReset()
-  idEditdocente.value = docente.id
+  onReset()
+  idEditdocente.value = docente._id
   titulo_form.value = 'Editar Información del Docente'
   first_name.value = docente.primerNombre
   second_name.value = docente.segundoNombre
@@ -321,19 +336,28 @@ const cerrarFormulario = () => {
 }
 
 const cuadroConfirmacionEstado = async (docente) => {
-  confirm.value = true
+  confirmacionEstado.value = true
   docenteestado.value = docente
 
 }
 
 const cambiarEstado = async () => {
-  await user.cambiarEstado(docenteestado.value.id, (res) => {
-    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
-    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('NO OK', res.message)
-    generateMessage('OK', 'El estado de la cuenta del docente ha sido cambiado')
-    confirm.value = false
-    obtenerDocentes()
+  const dialogo = plugins.generateDialog('Cambiando estado...')
+  await user.cambiarEstado(docenteestado.value._id, (res) => {
+    if (res.status != 200) {
+      dialogo.hide()
+      plugins.generateNotify(plugins.NOTIFY_TYPES.warning, res.message)
+      if (res.status == 401) return router.push({ path: '/login' })
+      if (res.status == 403) return router.push({ path: '/' })
+      return
+    }
+    docentes.value = docentes.value.map(doc => {
+      if (docenteestado.value._id == doc._id) doc.estado = !doc.estado
+      return doc
+    })
+    confirmacionEstado.value = false
+    plugins.generateNotify(plugins.NOTIFY_TYPES.positive, 'Estado de la cuenta actualizada con éxito')
+    return dialogo.hide()
   })
 }
 
@@ -372,36 +396,26 @@ const confirmRol = async (docente) => {
 }
 
 const cambiarRol = async () => {
-  await user.cambiarRol(docenterol.value.id, docenterol.value.rolnuevo.toLowerCase(), res => {
-    if (res.status == 401) { generateMessage('NO OK', res.message); return router.push({ path: '/login' }) }
-    if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('NO OK', res.message)
-    generateMessage('OK', 'El rol del docente ha sido cambiado')
+  const dialogo = plugins.generateDialog('Cambiando estado...')
+  await user.cambiarRol(docenterol.value._id, docenterol.value.rolnuevo.toLowerCase(), res => {
+    if (res.status != 200) {
+      dialogo.hide()
+      plugins.generateNotify(plugins.NOTIFY_TYPES.warning, res.message)
+      if (res.status == 401) return router.push({ path: '/login' })
+      if (res.status == 403) return router.push({ path: '/' })
+      return
+    }
+    plugins.generateNotify(plugins.NOTIFY_TYPES.positive, 'Rol actualizado con éxito')
     confirm_rol.value = false
     docenterol.value = null
     obtenerDocentes()
+    return dialogo.hide()
   })
 }
 
-const generateMessage = (tipo, message) => {
-  if (tipo == 'OK') {
-    $q.notify({
-      color: 'green-5',
-      textColor: 'white',
-      icon: 'mdi-check-bold',
-      message: message
-    })
-  } else {
-    $q.notify({
-      color: 'red-5',
-      textColor: 'white',
-      icon: 'warning',
-      message: message
-    })
-  }
-}
-
-obtenerDocentes()
+onMounted(() => {
+  obtenerDocentes()
+})
 
 </script>
 
