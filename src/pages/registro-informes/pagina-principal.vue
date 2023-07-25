@@ -140,6 +140,144 @@
             </template>
           </q-td>
         </template>
+
+
+        <template v-slot:item="props">
+          <div class="q-pa-xs grid-estilo">
+            <q-card bordered flat>
+              <q-list dense>
+                <q-item v-for="col in props.cols" :key="col.name">
+                  <q-item-section class="col-12 q-mb-xs q-mt-xs">
+                    <q-item-label class="text-bold" caption>{{ col.label }}</q-item-label>
+
+                    <q-item-label v-if="col.name == 'estado'">
+                      <q-chip size="sm" square :color="props.row.estado ? 'green-5' : 'red-5'" text-color="white"
+                        :label="props.row.estado ? 'En curso' : 'Culminado'" />
+                    </q-item-label>
+
+                    <q-item-label v-else-if="col.name == 'estadoInforme'">
+                      <q-chip size="sm" square :color="props.row.estadoInforme.color" text-color="white"
+                        :label="props.row.estadoInforme.estado" />
+                    </q-item-label>
+
+
+                    <q-item-label v-else-if="col.name == 'firma_docente'">
+                      <q-btn size="sm" color="light-blue-9" icon-right="mdi-download" label="DESCARGAR" dense
+                        @click="desacargarPDF(props.row.firma_docente)">
+                        <q-tooltip max-width="150px" style="text-align: center;">Descargar Informe</q-tooltip>
+                      </q-btn>
+                    </q-item-label>
+
+                    <q-item-label v-else-if="col.name == 'firma_director'">
+                      <template v-if="props.row.firma_director == null">
+                        <q-chip class="q-mr-none" size="sm" color="grey" square text-color="white"
+                          label="No Disponible" />
+                        <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
+                          <q-tooltip max-width="150px" style="text-align: center;">Informe pendiente de firma por parte
+                            del
+                            Director</q-tooltip>
+                        </q-btn>
+                      </template>
+                      <template v-else>
+                        <q-btn size="sm" color="light-blue-9" icon-right="mdi-download" label="DESCARGAR" dense
+                          @click="desacargarPDF(props.row.firma_director)">
+                          <q-tooltip max-width="150px" style="text-align: center;">Descargar Informe</q-tooltip>
+                        </q-btn>
+                      </template>
+                    </q-item-label>
+
+                    <q-item-label v-else-if="col.name == 'acciones'">
+                      <template
+                        v-if="props.row.firma_director != null && props.row.estadoInforme.estado != 'Novedad documento'">
+                        <q-btn-dropdown size="xs" color="indigo-6" label="Notificar">
+
+                          <q-list dense class="text-caption" separator style="text-align: center;" bordered>
+                            <q-item clickable v-close-popup
+                              @click="enviarNotificacion(props.row, 'indica que el documento del informe final no es correcto')">
+                              <q-item-section>
+                                <q-item-label>Documento incorrecto</q-item-label>
+                              </q-item-section>
+                            </q-item>
+
+                            <q-item clickable v-close-popup
+                              @click="enviarNotificacion(props.row, 'indica que la firma del informe final no es válida')">
+                              <q-item-section>
+                                <q-item-label>Firma no válida</q-item-label>
+                              </q-item-section>
+                            </q-item>
+
+                            <q-item clickable v-close-popup
+                              @click="enviarNotificacion(props.row, 'indica que el informe final enviado no contiene la firma del director')">
+                              <q-item-section>
+                                <q-item-label>Documento sin firma</q-item-label>
+                              </q-item-section>
+                            </q-item>
+                            <q-item clickable @click="modalMensajePersonalizado = true">
+                              <q-item-section>
+                                <q-item-label>Mensaje personalizado</q-item-label>
+                              </q-item-section>
+                            </q-item>
+                          </q-list>
+
+                          <q-dialog persistent v-model="modalMensajePersonalizado">
+                            <q-card style="max-width: 400px; min-width: 300px;">
+                              <q-card-section class="bg-primary text-h6 text-white">
+                                Mensaje personalizado
+                              </q-card-section>
+                              <q-card-section>
+                                <q-input v-model="mensajePersonalizado" filled type="textarea" label="Mensaje"
+                                  hint="Escriba un mensaje personalizado para el director">
+
+                                </q-input>
+                              </q-card-section>
+                              <q-separator class="q-mt-sm"></q-separator>
+                              <q-card-actions class="text-center justify-end">
+                                <q-btn v-close-popup flat color="red" @click=" mensajePersonalizado = ''">Cancelar</q-btn>
+                                <q-btn :disabled="mensajePersonalizado == ''"
+                                  @click="enviarNotificacion(props.row, mensajePersonalizado)"
+                                  color="positive">Enviar</q-btn>
+                              </q-card-actions>
+                            </q-card>
+                          </q-dialog>
+
+                        </q-btn-dropdown>
+                        <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
+                          <q-tooltip max-width="150px" style="text-align: center;">
+                            <span>Notificar al director
+                              sobre problemas encontrados en el documento que ha enviado</span>
+                          </q-tooltip>
+                        </q-btn>
+                      </template>
+                      <template v-else>
+                        <q-chip class="q-mr-none" size="sm" color="grey" square text-color="white"
+                          label="No Disponible" />
+                        <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
+                          <q-tooltip v-if="props.row.estado" max-width="150px" style="text-align: center;">
+                            <span v-if="props.row.firma_director == null">
+                              Informe pendiente de
+                              firma por parte del Director
+                            </span>
+                            <span v-else-if="props.row.estadoInforme.estado == 'Novedad documento'">
+                              <span>Existe una novedad en el documento</span>
+                            </span>
+                          </q-tooltip>
+                          <q-tooltip v-else max-width="100px" style="text-align: center;">Este periodo ya ha
+                            culminado</q-tooltip>
+                        </q-btn>
+                      </template>
+                    </q-item-label>
+
+                    <q-item-label v-else>{{ col.value }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card>
+          </div>
+        </template>
+
+
+
       </q-table>
 
 
@@ -275,21 +413,15 @@ const generateMessage = (tipo, message) => {
 </script>
 
 <style lang="scss">
-.card-title-gestionar {
-  background-color: $primary;
-  color: white;
-}
-
-.dot {
-  height: 8px;
-  width: 8px;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
 @media (max-width: 600px) {
-  .mobile-tooltip {
-    font-size: 12px;
+  .grid-estilo {
+    width: 50%;
+  }
+}
+
+@media (max-width: 325px) {
+  .grid-estilo {
+    width: 100%;
   }
 }
 </style>

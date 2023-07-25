@@ -1,5 +1,6 @@
 const TYPES = {
   bold: 'b',
+  underline: 'u',
   italic: 'i',
   strike: 'strike',
   link: 'a'
@@ -14,11 +15,17 @@ function htmlToObject(str) {
       const obj = { text }
       for (const type of types) {
         if (type == TYPES.bold) obj.bold = true
-        else if (type == TYPES.italic) obj.italic = true
+        else if (type == TYPES.italic) obj.italics = true
         else if (type == TYPES.strike) {
           if (!obj.decoration) obj.decoration = 'lineThrough'
+        } else if (type == TYPES.underline) {
+          obj.decoration = 'underline'
         }
-        else { obj.link = type; obj.decoration = 'underline' }
+        else {
+          obj.link = type
+          obj.decoration = 'underline'
+          obj.bold = true
+        }
       }
       array.push(obj)
     }
@@ -55,6 +62,7 @@ function htmlToObject(str) {
       }
       if (tag == 'br' || tag == 'div') texto = '\n'
       if (tag == 'b') tags.push(TYPES.bold)
+      if (tag == 'u') tags.push(TYPES.underline)
       if (tag == 'i') tags.push(TYPES.italic)
       if (tag == 'strike') tags.push(TYPES.strike)
     } else {

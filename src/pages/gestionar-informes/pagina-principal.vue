@@ -6,7 +6,7 @@
         <span class="text-weight-light" v-if="!existePeriodo">NO DISPONIBLE</span>
         <span class="text-weight-light" v-else>{{ periodo.nombre }}</span>
       </span>
-      <div v-if="noActividades == false" class="column q-gutter-xs col-auto">
+      <div v-if="noActividades == false && existePeriodo && !estaCargandoInformacion" class="column q-gutter-xs col-auto">
         <q-btn :disabled="tab.length == 0" size="sm" color="positive" @click="descargarPDF()">Generar
           Informe</q-btn>
         <q-btn :disabled="tab.length == 0" size="sm" color="pink"
@@ -43,7 +43,7 @@
                       :key="index" :name="actividades.funcionSustantiva.nombre">
                       <q-table square bordered :columns="headers" :rows="actividades.actividadesEspecificas"
                         row-key="name" separator="cell" flat
-                        :no-data-label="'No tiene actividades en esta funcion sustantiva'"
+                        :no-data-label="'Aún no posee actividades en esta función sustantiva'"
                         :pagination="{ rowsPerPage: 10 }" :rows-per-page-options="[5, 10, 0]"
                         rows-per-page-label="Resultados por página" :dense="$q.screen.lt.md" :grid="$q.screen.xs"
                         no-results-label="No hay ningún resultado">
@@ -512,7 +512,7 @@ const obtenerInformePorPeriodo = async () => {
 };
 
 //Obtienes las funciones sustantivas con sus
-//actividades del distributivo general 
+//actividades del distributivo general
 const obtenerActividadesDistributivo = async () => {
   return distributivo.obtenerTodasActividades(async (res) => {
     if (res.status != 200) {
@@ -688,7 +688,6 @@ async function obtenerDatosPdf(file) {
   const dialog = generateDialog('Obteniendo actividades')
   uploadOk.value = true;
   actividadesPDF.value = await planificacionDocente.obtenerActividadPdf(file);
-  console.log(actividadesPDF.value)
   if (actividadesPDF.value.length == 0) {
     dialog.hide()
     uploadOk.value = false;
@@ -837,8 +836,11 @@ async function cargarData() {
     if (informe.value == false) {
       return estaCargandoInformacion.value = false
     }
+
     funcionesSustantivas.value = await obtenerActividadesDistributivo()
     if (funcionesSustantivas.value == false) {
+      existePeriodo.value = false
+      generateMessage('NOOK', 'Aún no se ha cargado el distributivo general')
       return estaCargandoInformacion.value = false
     }
     tab.value = funcionesSustantivas.value[0].nombre
@@ -856,6 +858,8 @@ async function cargarData() {
     }
     formatearArrayActividades(aeRequest)
     existenDatosTabla.value = true
+  } else {
+    existePeriodo.value = false
   }
   estaCargandoInformacion.value = false
 }

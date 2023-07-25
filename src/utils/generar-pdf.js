@@ -69,6 +69,7 @@ export default {
           for (let k = 0; k < datos.desarrolladas.length; k++) {
             if (k != 0) desarrolladas.push('\n\n')
             desarrolladas = desarrolladas.concat(htmlToObject(datos.desarrolladas[k].nombre))
+            console.log(desarrolladas)
           };
           for (let k = 0; k < datos.observaciones.length; k++) {
             if (k != 0) observaciones.push('\n\n')

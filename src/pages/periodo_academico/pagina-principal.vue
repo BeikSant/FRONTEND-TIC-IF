@@ -3,7 +3,7 @@
     <q-card-section class="bg-primary text-white">
       <div class="row justify-between items-center">
         <span class="text-h6 text-bold">Gestionar Periodos Académicos</span>
-        <q-btn :disable="loading" size="sm" color="positive" style="color:white" @click="mostrarFormularioCrear">Nuevo
+        <q-btn v-if="!loading" size="sm" color="positive" style="color:white" @click="mostrarFormularioCrear">Nuevo
           Periodo</q-btn>
       </div>
     </q-card-section>
@@ -170,9 +170,10 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import periodoController from 'src/controller/periodo-controller';
-import { useQuasar } from 'quasar';
 import { pluginsQuasar } from 'src/composables/pluginsQuasar';
+import { useRouter } from "vue-router";
 
+const router = useRouter()
 const plugins = pluginsQuasar()
 const formPeriodo = ref({
   mostrar: false,
@@ -245,6 +246,9 @@ function formularioEditarPeriodo(periodo) {
 }
 
 async function guardarFormPeriodo() {
+  // if (dataPeriodo.value.some(p => p.nombre.toLowerCase() === formPeriodo.value.nombre.toLowerCase())) {
+  //   return plugins.generateNotify(plugins.NOTIFY_TYPES.warning, 'El nombre del periodo ya existe')
+  // }
   const dialogo = plugins.generateDialog('Guardando información...')
   const data = {
     nombre: formPeriodo.value.nombre,

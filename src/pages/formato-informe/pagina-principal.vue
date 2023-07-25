@@ -57,16 +57,16 @@
                   Descargar
                 </q-tooltip></q-btn>
             </span>
-            <span>
-              <q-btn v-if="props.row.tipo != 'POR DEFECTO'" size="sm" color="warning" round dense
-                @click=" editarFormatoForm(props.row)" icon="mdi-file-document-edit">
+            <span v-if="props.row.tipo != 'POR DEFECTO'">
+              <q-btn size="sm" color="warning" round dense @click=" editarFormatoForm(props.row)"
+                icon="mdi-file-document-edit">
                 <q-tooltip class="bg-indigo" :offset="[10, 10]">
                   Editar
                 </q-tooltip></q-btn>
             </span>
-            <span>
-              <q-btn v-if="props.row.tipo != 'POR DEFECTO'" size="sm" color="negative" round dense
-                @click=" confirmacionEliminarFormato(props.row)" icon="mdi-delete" :disable="props.row.estado">
+            <span v-if="props.row.tipo != 'POR DEFECTO'">
+              <q-btn size="sm" color="negative" round dense @click=" confirmacionEliminarFormato(props.row)"
+                icon="mdi-delete" :disable="props.row.estado">
               </q-btn>
               <q-tooltip v-if="props.row.estado && props.row.tipo != 'POR DEFECTO'" class="bg-indigo" :offset="[10, 10]">
                 Este formato se encuentra activo
@@ -121,16 +121,16 @@
                             Descargar
                           </q-tooltip></q-btn>
                       </span>
-                      <span>
-                        <q-btn v-if="props.row.tipo != 'POR DEFECTO'" size="sm" color="warning" round dense
-                          @click=" editarFormatoForm(props.row)" icon="mdi-file-document-edit">
+                      <span v-if="props.row.tipo != 'POR DEFECTO'">
+                        <q-btn size="sm" color="warning" round dense @click=" editarFormatoForm(props.row)"
+                          icon="mdi-file-document-edit">
                           <q-tooltip class="bg-indigo" :offset="[10, 10]">
                             Editar
                           </q-tooltip></q-btn>
                       </span>
-                      <span>
-                        <q-btn v-if="props.row.tipo != 'POR DEFECTO'" size="sm" color="negative" round dense
-                          @click=" confirmacionEliminarFormato(props.row)" icon="mdi-delete" :disable="props.row.estado">
+                      <span v-if="props.row.tipo != 'POR DEFECTO'">
+                        <q-btn size="sm" color="negative" round dense @click=" confirmacionEliminarFormato(props.row)"
+                          icon="mdi-delete" :disable="props.row.estado">
                         </q-btn>
                         <q-tooltip v-if="props.row.estado && props.row.tipo != 'POR DEFECTO'" class="bg-indigo"
                           :offset="[10, 10]">
@@ -316,8 +316,12 @@ import { ref } from 'vue';
 import { useQuasar } from 'quasar';
 import formatoController from 'src/controller/formato-controller';
 import downloadPdf from 'src/utils/downloadPdf';
+import { pluginsQuasar } from 'src/composables/pluginsQuasar';
+import { useRouter } from "vue-router";
 
+const router = useRouter()
 const $q = useQuasar()
+const plugins = pluginsQuasar()
 const tabFormato = ref('informacionGeneral')
 
 const formatoActivo = ref(null)
@@ -345,14 +349,17 @@ const formatoUsar = ref(null)
 
 async function obtenerTodosFormatos() {
   loading.value = true
-  await formatoController.obtenerTodosFormato((res) => {
-    if (res.status == 401) { generateMessage('negative', res.message); return router.push({ path: '/login' }) }
-    if (res.status == 403) { generateMessage('negative', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('negative', res.message)
-    dataFormato.value = res.data.formatos.map(f => {
-      if (f.estado) formatoActivo.value = f
-      return f
-    })
+  return await formatoController.obtenerTodosFormato((res) => {
+    if (res.status != 200) {
+      plugins.generateNotify(plugins.NOTIFY_TYPES.negative, res.message)
+      if (res.status == 401) return router.push({ path: '/login' })
+      if (res.status == 403) return router.push({ path: '/' })
+    } else {
+      dataFormato.value = res.data.formatos.map(f => {
+        if (f.estado) formatoActivo.value = f
+        return f
+      })
+    }
     loading.value = false
   })
 }
@@ -374,7 +381,7 @@ async function guardarFormFormato() {
   for (let key in formFormato.value) {
     if (formFormato.value.hasOwnProperty(key)) {
       if (formFormato.value[key] === '') {
-        return generateMessage('warning', 'Debe llenar todos los campos')
+        plugins.generateNotify(plugins.NOTIFY_TYPES.warning, 'Debe completar todos los campos')
       }
     }
   }
@@ -382,50 +389,70 @@ async function guardarFormFormato() {
   delete formFormato.value.created_at
   delete formFormato.value.updated_at
   delete formFormato.value._id
+  const dialogo = plugins.generateDialog('Guardando formato...')
   if (formFormato.value.isEditar) {
-    await formatoController.actualizar(idformato, formFormato.value, res => {
-      if (res.status == 401) { generateMessage('negative', res.message); return router.push({ path: '/login' }) }
-      if (res.status == 403) { generateMessage('negative', res.message); return router.push({ path: '/' }) }
-      if (res.status != 200) return generateMessage('negative', res.message)
-      generateMessage('positive', res.data.message)
-      resetFormFormato()
-      obtenerTodosFormatos()
+    await formatoController.actualizar(idformato, formFormato.value, async res => {
+      if (res.status != 200) {
+        dialogo.hide()
+        plugins.generateNotify(plugins.NOTIFY_TYPES.negative, res.message)
+        if (res.status == 401) return router.push({ path: '/login' })
+        if (res.status == 403) return router.push({ path: '/' })
+      } else {
+        await obtenerTodosFormatos()
+        plugins.generateNotify(plugins.NOTIFY_TYPES.positive, res.data.message)
+      }
     })
   } else {
     delete formFormato.value.estado
     delete formFormato.value.tipo
-    await formatoController.crearFormato(formFormato.value, res => {
-      if (res.status == 401) { generateMessage('negative', res.message); return router.push({ path: '/login' }) }
-      if (res.status == 403) { generateMessage('negative', res.message); return router.push({ path: '/' }) }
-      if (res.status != 200) return generateMessage('negative', res.message)
-      generateMessage('positive', res.data.message)
-      resetFormFormato()
-      obtenerTodosFormatos()
+    await formatoController.crearFormato(formFormato.value, async res => {
+      if (res.status != 200) {
+        dialogo.hide()
+        plugins.generateNotify(plugins.NOTIFY_TYPES.negative, res.message)
+        if (res.status == 401) return router.push({ path: '/login' })
+        if (res.status == 403) return router.push({ path: '/' })
+      } else {
+        await obtenerTodosFormatos()
+        plugins.generateNotify(plugins.NOTIFY_TYPES.positive, res.data.message)
+      }
     })
   }
-
   resetFormFormato()
+  dialogo.hide()
 }
 
 async function eliminarFormato() {
-  await formatoController.eliminar(formatoEliminar.value._id, res => {
-    if (res.status == 401) { generateMessage('negative', res.message); return router.push({ path: '/login' }) }
-    if (res.status == 403) { generateMessage('negative', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('negative', res.message)
+  const dialogo = plugins.generateDialog('Eliminando formato...')
+  await formatoController.eliminar(formatoEliminar.value._id, async res => {
+    if (res.status != 200) {
+      dialogo.hide()
+      plugins.generateNotify(plugins.NOTIFY_TYPES.negative, res.message)
+      if (res.status == 401) return router.push({ path: '/login' })
+      if (res.status == 403) return router.push({ path: '/' })
+    } else {
+      await obtenerTodosFormatos()
+      plugins.generateNotify(plugins.NOTIFY_TYPES.positive, res.data.message)
+      dialogo.hide()
+    }
     dialogEliminarFormato.value = false
-    generateMessage('positive', res.data.message)
-    obtenerTodosFormatos()
   })
 }
 
 async function usarFormato() {
-  await formatoController.cambiarEstado(formatoUsar.value._id, res => {
-    if (res.status == 401) { generateMessage('negative', res.message); return router.push({ path: '/login' }) }
-    if (res.status == 403) { generateMessage('negative', res.message); return router.push({ path: '/' }) }
-    if (res.status != 200) return generateMessage('negative', res.message)
-    dialogUsarFormato.value = false
-    generateMessage('positive', res.data.message)
-    obtenerTodosFormatos()
+  const dialogo = plugins.generateDialog('Cambiando formato...')
+  await formatoController.cambiarEstado(formatoUsar.value._id, async res => {
+    if (res.status != 200) {
+      dialogo.hide()
+      plugins.generateNotify(plugins.NOTIFY_TYPES.negative, res.message)
+      dialogUsarFormato.value = false
+      if (res.status == 401) return router.push({ path: '/login' })
+      if (res.status == 403) return router.push({ path: '/' })
+    } else {
+      dialogUsarFormato.value = false
+      await obtenerTodosFormatos()
+      plugins.generateNotify(plugins.NOTIFY_TYPES.positive, 'Se ha cambiado el formato con éxito')
+      dialogo.hide()
+    }
   })
 }
 

@@ -42,7 +42,7 @@ export default {
       CenturyGothic: {
         normal: process.env.BASEURL + '/fonts/century_gothic/GOTHIC.TTF',
         bold: process.env.BASEURL + '/fonts/century_gothic/GOTHICB.TTF',
-        italic: process.env.BASEURL + '/fonts/century_gothic/GOTHICI.TTF',
+        italics: process.env.BASEURL + '/fonts/century_gothic/GOTHICI.TTF',
         bolditalic: process.env.BASEURL + '/fonts/century_gothic/GOTHICBI.TTF',
       }
     }

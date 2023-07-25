@@ -105,9 +105,10 @@
             <q-avatar class="items-end q-mb-sm">
               <img src="~assets/user-none.png">
             </q-avatar>
-            <div class="text-h7 text-subtitle1 text-bold">{{ userStore.user.primerNombre + ' ' +
-              userStore.user.primerApellido }}</div>
-            <div class="text-subtitle2 text-italic">{{ userStore.user.usuario.rol.nombre.toUpperCase() }}</div>
+            <div class="text-h7 text-subtitle1 text-bold">{{ userStore.user ? userStore.user.primerNombre + ' ' +
+              userStore.user.primerApellido : '' }}</div>
+            <div class="text-subtitle2 text-italic">{{ userStore.user ? userStore.user.usuario.rol.nombre.toUpperCase() :
+              'DOCENTE' }}</div>
           </q-card-section>
         </q-img>
         <q-list bordered>
@@ -252,9 +253,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import docente from "src/controller/docente";
 import user from "src/controller/user";
 import docenteController from "src/controller/docente";
 import { Cookies, useQuasar } from "quasar";
@@ -452,16 +452,17 @@ function toggleLeftDrawer() {
 
 function socket() {
   $socket.on('notificacion', (notificacion) => {
+    console.log("Aqui estamos")
     notificacion.tiempoTranscurrido = tiempoTranscurrido(notificacion.created_at)
     if (notificacion.destinos.length > 1) {
       notificacion.destinos.length.map(d => {
-        if (d == idDocente) {
+        if (d == userStore.user._id) {
           notificaciones.value.unshift(notificacion)
           notificacionNoLeidas.value++
           open = 0
         }
       })
-    } else if (idDocente == notificacion.destino) {
+    } else if (userStore.user._id == notificacion.destino) {
       notificaciones.value.unshift(notificacion)
       notificacionNoLeidas.value++
       open = 0
@@ -497,8 +498,10 @@ function generateDialog(message) {
   })
 }
 
-obtenerNotificacionNoLeidas()
-socket()
+onMounted(() => {
+  obtenerNotificacionNoLeidas()
+  socket()
+})
 
 </script>
 

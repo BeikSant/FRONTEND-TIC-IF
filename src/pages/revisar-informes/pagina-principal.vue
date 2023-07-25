@@ -2,8 +2,8 @@
   <q-card class="q-ma-md" square flat bordered>
     <q-card-section class="bg-primary row justify-between items-center">
       <span class="text-white text-h6 text-bold">Revisión de Informes Finales</span>
-      <q-select @update:model-value="obtenerInformesPeriodo" v-model="periodoSelected" :options="selectedPeriodos"
-        color="primary" outlined square bg-color="white" label="Periodo académico" />
+      <q-select :disable="loading" @update:model-value="obtenerInformesPeriodo" v-model="periodoSelected"
+        :options="selectedPeriodos" color="primary" outlined square bg-color="white" label="Periodo académico" />
     </q-card-section>
     <q-card-section class="no-padding">
       <q-table flat square :columns="header" :rows="dataInformes" row-key="name" separator="cell"
@@ -449,8 +449,8 @@ const filter = ref('')
 const header = [
   { name: 'docente', label: 'DOCENTE', sortable: true, field: 'docente', align: 'left', style: "white-space: break-spaces;", },
   { name: 'estadoInforme', label: 'ESTADO INFORME', sortable: false, field: 'estadoInforme', align: 'center', style: "white-space: break-spaces;", },
-  { name: 'firma_docente', label: 'FIRMADO DOCENTE', sortable: false, field: 'firma_docente', align: 'center' },
-  { name: 'firma_director', label: 'FIRMADO DIRECTOR', sortable: false, field: 'firma_director', align: 'center' },
+  { name: 'firma_docente', label: 'FIRMA DOCENTE', sortable: false, field: 'firma_docente', align: 'center' },
+  { name: 'firma_director', label: 'FIRMA DIRECTOR', sortable: false, field: 'firma_director', align: 'center' },
   { name: 'acciones', label: 'ACCIONES', sortable: false, field: 'acciones', align: 'center' },
 ]
 const dataInformes = ref([])
@@ -466,24 +466,22 @@ const modalInformeEnviado = ref(false)
 const docenteAEnviarInforme = ref(null)
 
 const obtenerPeriodos = async () => {
-  loading.value = true
   await periodoController.obtenerTodosPeriodos(res => {
     if (res.status != 200) return errorRequest()
     periodos.value = res.data.periodos
     selectedPeriodos.value = periodos.value.map(periodo => periodo.nombre)
     periodoSelected.value = selectedPeriodos.value[0]
     if (periodos.value.length != 0) obtenerInformesPeriodo(periodoSelected.value)
-    loading.value = false
   })
 }
 
 const obtenerInformesPeriodo = async (value) => {
+  dataInformes.value = []
   loading.value = true
   periodoSeleccionado.value = periodos.value.filter((periodo) => periodo.nombre == value)[0]
   await informeController.obtenerTodosPorPeriodo(periodoSeleccionado.value._id, (res) => {
     if (res.status != 200) return errorRequest()
     const informes = res.data.informes
-    dataInformes.value = []
     for (let i = 0; i < informes.length; i++) {
       dataInformes.value.push({
         idDocente: informes[i].docente._id,
@@ -555,7 +553,6 @@ async function enviarNotificacion(informe, notificacion) {
     mensaje: notificacion,
   }
   informeController.cambiarEstado(informe.id, 'novedadDocumento', res => {
-    console.log(res)
     obtenerInformesPeriodo(periodoSelected.value)
   })
   await notificacionController.guardarNotificacion(data, res => {

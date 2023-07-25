@@ -3,17 +3,18 @@
     <q-card style="width: 70%; background-color: none" class="q-ma-sm card-index" square flat bordered>
       <q-card-section class="bg-primary">
         <div class="row items-center justify-between">
-          <div class="col-6 col-xs-6 col-sm-3 col-lg-3 text-left">
-            <img alt="Logo de la carrera de Computación" src="~assets/logo_unl.png" style="width: 170px">
+          <div class="text-center col-12 col-sm-6 col-lg-4 col-xl-3">
+            <img alt="Logo de la carrera de Computación" src="~assets/logo_unl.png" style="width: 190px">
           </div>
-          <div class="title-middle col-sm-6 col-lg-6 text-subtitle1 text-center">
+          <div class="title-middle col-sm-6 col-lg-4 col-xl-6 text-subtitle1 text-center">
             <b>¡<i>BIENVENIDO</i>
               al Sistema
               de Gestión del Informe Final de Cumplimiento de Trabajo
               Académico de Docentes de la carrera de Computación!</b>
           </div>
-          <div class="col-6 col-xs-6 col-sm-2 col-lg-3 text-right">
-            <img alt="Logo UNL" src="~assets/carrera-logo.jpg" style="width: 70px">
+          <div class="text-center col-12 col-sm-6 col-lg-4 col-xl-3">
+            <img alt="CISC UNL" class="bg-white rounded-borders q-pa-xs" src="~assets/carrera img/logo-transparent.png"
+              style="width: 210px">
           </div>
         </div>
         <div class="title-end col-12 text-subtitle1 text-center q-mt-sm">

@@ -13,8 +13,8 @@
       <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
         <div v-show="isData" class="no-padding no-margin">
           <template v-if="funSustantivaModel.length == 0">
-            <div class="q-pt-xl text-center">
-              <b>NADA QUE MOSTRAR</b>
+            <div class="q-py-xl text-center">
+              <span>¡Aún no se ha cargado el distributivo general!</span>
             </div>
           </template>
           <template v-else>
@@ -48,7 +48,7 @@
           </template>
         </div>
       </transition>
-      <q-inner-loading :showing="visible" label="Cargando información..." label-class="text-teal"
+      <q-inner-loading style="height: 150px;" :showing="visible" label="Cargando información..." label-class="text-teal"
         label-style="font-size: 1.1em" />
     </q-card-section>
   </q-card>

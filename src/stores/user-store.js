@@ -4,15 +4,15 @@ import { ref } from 'vue'
 
 export const useUserStore = defineStore("user", () => {
 
-    const user = ref(null)
+  const user = ref(null)
 
-    async function obtenerUsuario() {
-        const res = await docenteController.obtenerPerfilDocente();
-        user.value = { ...res.data.docente }
-    }
+  async function obtenerUsuario() {
+    const res = await docenteController.obtenerPerfilDocente();
+    user.value = { ...res.data.docente }
+  }
 
-    obtenerUsuario()
+  obtenerUsuario()
 
-    return { user, obtenerUsuario }
+  return { user, obtenerUsuario }
 
 });

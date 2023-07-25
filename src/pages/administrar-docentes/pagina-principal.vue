@@ -205,12 +205,13 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
 import docenteController from 'src/controller/docente';
 import user from 'src/controller/user';
 import { pluginsQuasar } from 'src/composables/pluginsQuasar'
+import { useRouter } from 'vue-router';
 
 const $q = useQuasar()
+const router = useRouter()
 const plugins = pluginsQuasar()
 
 const titulo_form = ref(null)
@@ -240,7 +241,6 @@ const columns = [
 ]
 const docentes = ref([])
 const formulario = ref(false)
-const router = useRouter()
 
 const obtenerDocentes = async () => {
   loading.value = true
@@ -259,7 +259,6 @@ const obtenerDocentes = async () => {
       doc.rol = doc.usuario.rol.nombre.toUpperCase()
       return doc
     })
-    console.log(docentes.value)
   })
   loading.value = false
 }
