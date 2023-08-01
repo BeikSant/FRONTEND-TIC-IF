@@ -396,13 +396,14 @@ import distributivo from "src/controller/distributivo";
 import formatoController from "src/controller/formato-controller";
 import planificacionDocente from "src/utils/planificacionDocente";
 import notificacionController from "src/controller/notificacion-controller";
+import { useUserStore } from "src/stores/user-store";
 
 const tabPrincipal = ref('Actividades')
 const uploadOk = ref(false);
 const isCargarActividades = ref(false);
 const actividadesPDF = ref([]);
 const existePeriodo = ref(false)
-
+const userStore = useUserStore()
 const router = useRouter();
 
 const existenDatosTabla = ref(false);
@@ -750,14 +751,18 @@ async function enviarInforme() {
     const data = {
       mensaje: 'ha enviado el informe final firmado, para que lo apruebe, firme y reenvíe nuevamente.',
     }
-    await notificacionController.guardarNotificacion(data, res => {
-      setTimeout(() => {
-        dialog.hide()
-      }, 350)
-      if (res.status != 200) return generateMessage("NO OK", "Ocurrió un error al notificar al docente");
-      modalInformeEnviado.value = true
-    })
-
+    if (userStore.user.usuario.rol.nombre.toLowerCase() == 'director') {
+      dialog.hide()
+      return modalInformeEnviado.value = true
+    } else {
+      await notificacionController.guardarNotificacion(data, res => {
+        setTimeout(() => {
+          dialog.hide()
+        }, 350)
+        if (res.status != 200) return generateMessage("NO OK", "Ocurrió un error al notificar al docente");
+        modalInformeEnviado.value = true
+      })
+    }
   })
 }
 

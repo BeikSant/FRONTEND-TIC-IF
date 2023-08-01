@@ -23,7 +23,8 @@
 
         <template v-slot:body-cell-acciones="props">
           <q-td :props="props" auto-width>
-            <template v-if="props.row.firma_director != null && props.row.estadoInforme.estado != 'Novedad documento'">
+            <template
+              v-if="props.row.firma_director != null && props.row.estadoInforme.estado != 'Novedad documento' && userStore.user.usuario.rol.nombre.toLowerCase() != 'director'">
               <q-btn-dropdown size="xs" color="indigo-6" label="Notificar">
 
                 <q-list dense class="text-caption" separator style="text-align: center;" bordered>
@@ -87,14 +88,17 @@
               <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
                 <q-tooltip v-if="props.row.estado" max-width="150px" style="text-align: center;">
                   <span v-if="props.row.firma_director == null">
-                    Informe pendiente de
-                    firma por parte del Director
+                    Firma pendiente del Director
                   </span>
                   <span v-else-if="props.row.estadoInforme.estado == 'Novedad documento'">
                     <span>Existe una novedad en el documento</span>
                   </span>
+                  <span v-else>
+                    <span>Usted es el director</span>
+                  </span>
                 </q-tooltip>
-                <q-tooltip v-else max-width="100px" style="text-align: center;">Este periodo ya ha culminado</q-tooltip>
+                <q-tooltip v-else max-width="100px" style="text-align: center;">Este periodo ya ha
+                  culminado</q-tooltip>
               </q-btn>
             </template>
           </q-td>
@@ -117,7 +121,7 @@
         <template v-slot:body-cell-firma_docente="props">
           <q-td :props="props" auto-width>
             <q-btn size="sm" color="light-blue-9" icon-right="mdi-download" label="DESCARGAR" dense
-              @click="desacargarPDF(props.row.firma_docente)">
+              @click="desacargarPDF(props.row, props.row.firma_docente, 'firma_docente')">
               <q-tooltip max-width="150px" style="text-align: center;">Descargar Informe</q-tooltip>
             </q-btn>
           </q-td>
@@ -128,13 +132,12 @@
             <template v-if="props.row.firma_director == null">
               <q-chip class="q-mr-none" size="sm" color="grey" square text-color="white" label="No Disponible" />
               <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
-                <q-tooltip max-width="150px" style="text-align: center;">Informe pendiente de firma por parte del
-                  Director</q-tooltip>
+                <q-tooltip max-width="150px" style="text-align: center;">Aprobación pendiente</q-tooltip>
               </q-btn>
             </template>
             <template v-else>
               <q-btn size="sm" color="light-blue-9" icon-right="mdi-download" label="DESCARGAR" dense
-                @click="desacargarPDF(props.row.firma_director)">
+                @click="desacargarPDF(props.row, props.row.firma_director, 'firma_director')">
                 <q-tooltip max-width="150px" style="text-align: center;">Descargar Informe</q-tooltip>
               </q-btn>
             </template>
@@ -163,7 +166,7 @@
 
                     <q-item-label v-else-if="col.name == 'firma_docente'">
                       <q-btn size="sm" color="light-blue-9" icon-right="mdi-download" label="DESCARGAR" dense
-                        @click="desacargarPDF(props.row.firma_docente)">
+                        @click="desacargarPDF(props.row, props.row.firma_docente, col.name)">
                         <q-tooltip max-width="150px" style="text-align: center;">Descargar Informe</q-tooltip>
                       </q-btn>
                     </q-item-label>
@@ -173,14 +176,12 @@
                         <q-chip class="q-mr-none" size="sm" color="grey" square text-color="white"
                           label="No Disponible" />
                         <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
-                          <q-tooltip max-width="150px" style="text-align: center;">Informe pendiente de firma por parte
-                            del
-                            Director</q-tooltip>
+                          <q-tooltip max-width="150px" style="text-align: center;">Aprobación pendiente</q-tooltip>
                         </q-btn>
                       </template>
                       <template v-else>
                         <q-btn size="sm" color="light-blue-9" icon-right="mdi-download" label="DESCARGAR" dense
-                          @click="desacargarPDF(props.row.firma_director)">
+                          @click="desacargarPDF(props.row, props.row.firma_director, col.name)">
                           <q-tooltip max-width="150px" style="text-align: center;">Descargar Informe</q-tooltip>
                         </q-btn>
                       </template>
@@ -254,8 +255,7 @@
                         <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
                           <q-tooltip v-if="props.row.estado" max-width="150px" style="text-align: center;">
                             <span v-if="props.row.firma_director == null">
-                              Informe pendiente de
-                              firma por parte del Director
+                              Aprobación pendiente
                             </span>
                             <span v-else-if="props.row.estadoInforme.estado == 'Novedad documento'">
                               <span>Existe una novedad en el documento</span>
@@ -311,7 +311,10 @@ import { useQuasar } from 'quasar';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import notificacionController from 'src/controller/notificacion-controller';
+import { useUserStore } from 'src/stores/user-store';
+import { saveAs } from 'file-saver'
 
+const userStore = useUserStore()
 const router = useRouter()
 const modalMensajePersonalizado = ref(false)
 const mensajePersonalizado = ref('')
@@ -354,14 +357,15 @@ const obtenerHistorialInformes = async () => {
 
 function devolverEstado(estado) {
   if (estado == 'completado') return { estado: 'Aprobado', color: 'green-5' }
-  if (estado == 'enviadoFirmar') return { estado: 'Pendiente firma', color: 'orange-5' }
+  if (estado == 'enviadoFirmar') return { estado: 'Aprobación pendiente', color: 'orange-5' }
   if (estado == 'novedadDocumento') return { estado: 'Novedad documento', color: 'red-5' }
   return { estado: 'No iniciado', color: 'grey-5' }
 }
 
-async function desacargarPDF(base) {
+async function desacargarPDF(info, base, tipo) {
   const url = process.env.API_URL + '/uploads/' + base
-  window.open(url, '_blank');
+  const namePdf = `${userStore.user.primerNombre.toLowerCase()}-${userStore.user.primerApellido.toLowerCase()}-${info.periodo.toLowerCase()}-${tipo}-signed.pdf`
+  saveAs(url, namePdf)
 }
 
 async function enviarNotificacion(informe, notificacion) {

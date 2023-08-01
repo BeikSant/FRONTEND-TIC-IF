@@ -44,8 +44,7 @@
             <template v-if="props.row.firma_director == null">
               <q-chip class="q-mr-none" size="sm" color="grey" square text-color="white" label="No Disponible" />
               <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
-                <q-tooltip max-width="150px" style="text-align: center;">Informe pendiente de firma por parte del
-                  Director</q-tooltip>
+                <q-tooltip max-width="150px" style="text-align: center;">Aprobación pendiente</q-tooltip>
               </q-btn>
             </template>
             <template v-else>
@@ -79,11 +78,12 @@
             <div>
               <q-btn @click="mostrarModalEnviarInforme(props.row)" size="xs" color="pink-7" label="Enviar Informe" />
               <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
-                <q-tooltip max-width="150px" style="text-align: center;">Enviar el informe final con la firma del
-                  Director</q-tooltip>
+                <q-tooltip max-width="150px" style="text-align: center;">Enviar informe final aprobado</q-tooltip>
               </q-btn>
             </div>
-            <div v-if="props.row.estadoInforme.estado != 'Novedad documento'">
+            <div
+              v-if="props.row.estadoInforme.estado != 'Novedad documento' && props.row.idDocente != userStore.user._id">
+
               <q-btn-dropdown size="xs" color="indigo-6" label="Notificar">
 
                 <q-list dense class="text-caption" separator style="text-align: center;" bordered>
@@ -157,9 +157,7 @@
                   informe
                 </span>
                 <span v-else-if="props.row.firma_director == null">
-                  Informe
-                  pendiente de
-                  firma por parte del Director
+                  Aprobación pendiente
                 </span>
                 <span v-else>
                   El documento ha sido aprobado
@@ -188,9 +186,7 @@
                         <q-chip class="q-mr-none" size="sm" color="grey" square text-color="white"
                           label="No Disponible" />
                         <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
-                          <q-tooltip max-width="150px" style="text-align: center;">Informe pendiente de firma por parte
-                            del
-                            Director</q-tooltip>
+                          <q-tooltip max-width="150px" style="text-align: center;">Aprobación pendiente</q-tooltip>
                         </q-btn>
                       </template>
                       <template v-else>
@@ -223,10 +219,8 @@
                           <q-btn @click="mostrarModalEnviarInforme(props.row)" size="xs" color="pink-7"
                             label="Enviar Informe" />
                           <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
-                            <q-tooltip max-width="150px" style="text-align: center;">Enviar el informe final con la
-                              firma
-                              del
-                              Director</q-tooltip>
+                            <q-tooltip max-width="150px" style="text-align: center;">Enviar informe final
+                              aprobado</q-tooltip>
                           </q-btn>
                         </div>
                         <div v-if="props.row.estadoInforme.estado != 'Novedad documento'">
@@ -434,11 +428,13 @@
 
 import informeController from 'src/controller/informe-controller';
 import { useQuasar } from 'quasar';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import periodoController from 'src/controller/periodo-controller';
 import notificacionController from 'src/controller/notificacion-controller';
+import { useUserStore } from 'src/stores/user-store';
 
+const userStore = useUserStore()
 const router = useRouter()
 const modalMensajePersonalizado = ref(false)
 const mensajePersonalizado = ref('')
@@ -501,7 +497,7 @@ const obtenerInformesPeriodo = async (value) => {
 
 function devolverEstado(estado) {
   if (estado == 'completado') return { estado: 'Aprobado', color: 'green-5' }
-  if (estado == 'enviadoFirmar') return { estado: 'Enviado para firmar', color: 'orange-5' }
+  if (estado == 'enviadoFirmar') return { estado: 'Aprobación pendiente', color: 'orange-5' }
   if (estado == 'novedadDocumento') return { estado: 'Novedad documento', color: 'red-5' }
   return { estado: 'Iniciado', color: 'indigo-5' }
 }
@@ -524,7 +520,7 @@ async function enviarInforme() {
   formData.append('docente', docenteAEnviarInforme.value.id)
   formData.append('myFile', informeUpload.value)
   await informeController.guardarInforme(formData, async (res) => {
-    if (res.status != 200) return errorRequest()
+    if (res.status != 200) return errorRequest(res)
     informeUpload.value = null
     modalEnviarInforme.value = false
     generateMessage('OK', "Documento enviado")
@@ -533,6 +529,7 @@ async function enviarInforme() {
       mensaje: 'ha aprobado y firmado su informe final.',
       destino: docenteAEnviarInforme.value.id
     }
+    if (docenteAEnviarInforme.value.id == userStore.user._id) return modalInformeEnviado.value = true
     await notificacionController.guardarNotificacion(data, res => {
       if (res.status != 200) return generateMessage("NO OK", "Ocurrió un error al notificar al docente");
       modalInformeEnviado.value = true
@@ -563,8 +560,6 @@ async function enviarNotificacion(informe, notificacion) {
   })
 }
 
-obtenerPeriodos()
-
 const errorRequest = (res) => {
   if (res.status == 401) { generateMessage('NO OK', res.message); return router.re('/login') }
   if (res.status == 403) { generateMessage('NO OK', res.message); return router.push({ path: '/' }) }
@@ -588,6 +583,11 @@ const generateMessage = (tipo, message) => {
     })
   }
 }
+
+onMounted(() => {
+  obtenerPeriodos()
+  console.log(userStore.user)
+})
 
 </script>
 
