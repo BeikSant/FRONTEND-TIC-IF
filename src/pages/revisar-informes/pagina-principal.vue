@@ -332,23 +332,18 @@
 
       <q-dialog v-model="modalEnviarInforme" persistent="">
         <q-card style="width: 450px">
-          <q-card-section class="card-title-gestionar">
+          <q-card-section class="bg-primary text-white">
             <div class="text-h6">
               <b>Enviar informe final firmado</b>
             </div>
           </q-card-section>
-          <q-card-section class="q-pa-xs">
-            <q-banner dense class="bg-blue-3 q-pa-none q-ma-xs">
-              <div class="row justify-center">
-                <div class="col-1 self-center text-center">
-                  <q-icon name="warning" class="q-ml-xs" />
-                </div>
-                <div class="col-11 q-pa-sm">
-                  <p class="text-caption text-weight-light text-justify	q-mb-none">
-                    Envíe el informe final con la firma del Director.
-                  </p>
-                </div>
-              </div>
+          <q-card-section class="q-pa-md">
+            <q-banner dense class="bg-indigo-1 text-justify">
+              <template v-slot:avatar>
+                <q-icon name="mdi-information" color="primary" />
+              </template>
+              <span class="text-caption">
+                Envíe el informe final con la firma del Director.</span>
             </q-banner>
             <div class="column items-center q-my-md">
               <q-input @update:model-value="val => { informeUpload = val[0] }" type="file" dense class="bg-grey-5 q-px-md"

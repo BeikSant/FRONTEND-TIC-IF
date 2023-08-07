@@ -762,9 +762,14 @@ async function enviarInforme() {
 }
 
 async function descargarPDF() {
+  let isNotify = false
   for (const fs of actividadesEspecificas.value) {
     for (const actividad of fs.actividadesEspecificas) {
-      if (actividad.horas == 0) return generateMessage("NOOK", "Existen actividades que no poseen horas")
+      if (actividad.horas == 0 && !isNotify) {
+        isNotify = true
+        generateMessage("WARNING", "Algunas actividades que no poseen horas")
+        break;
+      }
     }
   }
   const dialog = $q.dialog({
