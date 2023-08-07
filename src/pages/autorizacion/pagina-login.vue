@@ -16,8 +16,8 @@
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
-    <div class="full-width row justify-center items-center bg-grey-3" style="height: 100vh;">
-      <q-card class="" style="min-width: 350px" square flat bordered>
+    <div class="full-width row justify-center items-center bg-grey-3" style="height: 95vh;">
+      <q-card class="q-mx-xl" style="min-width: 350px" square flat bordered>
         <q-card-section class="bg-primary text-white text-h6 text-center text-bold">
           <span>INICIO DE SESIÓN</span>
         </q-card-section>
