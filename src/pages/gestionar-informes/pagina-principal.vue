@@ -10,6 +10,7 @@
         <q-btn :disabled="tab.length == 0" size="sm" color="positive" @click="descargarPDF()">Generar
           Informe</q-btn>
         <q-btn :disabled="tab.length == 0" size="sm" color="pink"
+          v-if="informe.estado != 'completado' && informe.estado != 'enviadoFirmar'"
           @click="informe.documento_firma_docente == null ? modalEnviarInforme = true : modalAdvertenciaInforme = true">Enviar
           informe</q-btn>
       </div>
@@ -314,19 +315,13 @@
         <q-card-section class="text-h6 bg-primary text-white">
           <b>Enviar informe final</b>
         </q-card-section>
-        <q-card-section class="q-pa-xs">
-          <q-banner dense class="bg-blue-3 q-pa-none q-ma-xs">
-            <div class="row justify-center">
-              <div class="col-1 self-center text-center">
-                <q-icon name="warning" class="q-ml-xs" />
-              </div>
-              <div class="col-11 q-pa-sm">
-                <p class="text-caption text-weight-light text-justify	q-mb-none">
-                  Envíe el informe final generado y firmado por usted, para que el Director pueda aprobarlo y
-                  firmarlo.
-                </p>
-              </div>
-            </div>
+        <q-card-section class="q-pa-md">
+          <q-banner dense class="bg-indigo-1 text-justify">
+            <template v-slot:avatar>
+              <q-icon name="mdi-information" color="primary" />
+            </template>
+            <span class="text-caption">
+              Envíe el informe final firmado al Director para su aprobación</span>
           </q-banner>
           <div class="column items-center q-my-md">
             <q-input @update:model-value="val => { informeUpload = val[0] }" type="file" dense class="bg-grey-5 q-px-md"
@@ -747,6 +742,7 @@ async function enviarInforme() {
       if (res.status == 403) return router.push({ path: "/" })
       return existenDatosTabla.value = true
     }
+    informe.value.estado = 'enviadoFirmar'
     informeUpload.value = null
     modalEnviarInforme.value = false
     const data = {

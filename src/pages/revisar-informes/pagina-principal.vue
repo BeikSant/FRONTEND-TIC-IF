@@ -337,7 +337,7 @@
                 <q-icon name="mdi-information" color="primary" />
               </template>
               <span class="text-caption">
-                Envíe el informe final con la firma del Director.</span>
+                Envíe el informe final aprobado y firmado al docente.</span>
             </q-banner>
             <div class="column items-center q-my-md">
               <q-input @update:model-value="val => { informeUpload = val[0] }" type="file" dense class="bg-grey-5 q-px-md"
