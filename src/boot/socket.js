@@ -2,7 +2,7 @@ import { boot } from 'quasar/wrappers'
 import io from 'socket.io-client'
 
 const socket = io(process.env.API_URL, {
-  transports: ["polling"],
+  transports: ["polling", "websocket"],
   path: process.env.PATH_AXIOS,
   forceNew: true
 })

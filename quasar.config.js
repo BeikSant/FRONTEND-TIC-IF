@@ -112,7 +112,7 @@ module.exports = configure(function (/* ctx */) {
       config: {
         loadingBar: {
           color: 'red',
-          size: '2px',
+          size: '3px',
           position: 'top',
         }
       }
