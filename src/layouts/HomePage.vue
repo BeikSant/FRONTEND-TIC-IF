@@ -452,7 +452,6 @@ function toggleLeftDrawer() {
 
 function socket() {
   $socket.on('notificacion', (notificacion) => {
-    console.log("Aqui estamos")
     notificacion.tiempoTranscurrido = tiempoTranscurrido(notificacion.created_at)
     if (notificacion.destinos.length > 1) {
       notificacion.destinos.length.map(d => {

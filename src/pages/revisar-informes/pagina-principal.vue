@@ -2,7 +2,7 @@
   <q-card class="q-ma-md" square flat bordered>
     <q-card-section class="bg-primary row justify-between items-center">
       <span class="text-white text-h6 text-bold">Revisión de Informes Finales</span>
-      <q-select :disable="loading" @update:model-value="obtenerInformesPeriodo" v-model="periodoSelected"
+      <q-select :disable="loading" @update:model-value="cambiarPeriodo" v-model="periodoSelected"
         :options="selectedPeriodos" color="primary" outlined square bg-color="white" label="Periodo académico" />
     </q-card-section>
     <q-card-section class="no-padding">
@@ -14,15 +14,15 @@
         <template v-slot:top>
           <div class="row justify-between items-center full-width">
             <div>
-              <div class="text-subtitle1"><b>PERIODO ACADÉMICO: </b>{{ periodoSeleccionado !=
+              <div class="text-subtitle1"><b>PERIODO ACADÉMICO: </b>{{ periodoSelected !=
                 null ?
-                periodoSeleccionado.nombre :
+                periodoSelected.nombre :
                 ''
               }}
               </div>
-              <span class="text-subtitle1 text-bold">ESTADO: </span><q-chip v-if="periodoSeleccionado != null" size="sm"
-                square :color="periodoSeleccionado.estado ? 'green-5' : 'red-5'" text-color="white"
-                :label="periodoSeleccionado.estado ? 'En curso' : 'Culminado'" />
+              <span class="text-subtitle1 text-bold">ESTADO: </span><q-chip v-if="periodoSelected != null" size="sm"
+                square :color="periodoSelected.estado ? 'green-5' : 'red-5'" text-color="white"
+                :label="periodoSelected.estado ? 'En curso' : 'Culminado'" />
             </div>
             <q-input dense v-model="filter" placeholder="Buscar">
               <template v-slot:append>
@@ -74,7 +74,7 @@
 
         <template v-slot:body-cell-acciones="props">
           <q-td :props="props" auto-width
-            v-if="periodoSeleccionado.estado && props.row.firma_docente != null && props.row.estadoInforme.estado != 'Aprobado'">
+            v-if="periodoSelected.estado && props.row.firma_docente != null && props.row.estadoInforme.estado != 'Aprobado'">
             <div>
               <q-btn @click="mostrarModalEnviarInforme(props.row)" size="xs" color="pink-7" label="Enviar Informe" />
               <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
@@ -148,7 +148,7 @@
             <q-chip class="q-mr-none" size="sm" color="grey" square text-color="white" label="No Disponible" />
             <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
               <q-tooltip max-width="100px" style="text-align: center;">
-                <span v-if="!periodoSeleccionado.estado">
+                <span v-if="!periodoSelected.estado">
                   Este periodo ya ha culminado
                 </span>
                 <span v-else-if="props.row.firma_docente == null">
@@ -214,7 +214,7 @@
 
                     <q-item-label v-else-if="col.name == 'acciones'">
                       <q-td
-                        v-if="periodoSeleccionado.estado && props.row.firma_docente != null && props.row.estadoInforme.estado != 'Aprobado'">
+                        v-if="periodoSelected.estado && props.row.firma_docente != null && props.row.estadoInforme.estado != 'Aprobado'">
                         <div>
                           <q-btn @click="mostrarModalEnviarInforme(props.row)" size="xs" color="pink-7"
                             label="Enviar Informe" />
@@ -291,7 +291,7 @@
                           label="No Disponible" />
                         <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
                           <q-tooltip max-width="100px" style="text-align: center;">
-                            <span v-if="!periodoSeleccionado.estado">
+                            <span v-if="!periodoSelected.estado">
                               Este periodo ya ha culminado
                             </span>
                             <span v-else-if="props.row.firma_docente == null">
@@ -448,7 +448,6 @@ const dataInformes = ref([])
 const periodos = ref([]) //Es la lista de todos los periodos
 const periodoSelected = ref(null) // Esta variables es el v-model del selected de los periodos
 const selectedPeriodos = ref([]) // Todos la lista de options del selected
-const periodoSeleccionado = ref(null)
 const informeUpload = ref(null)
 
 const modalEnviarInforme = ref(false)
@@ -459,18 +458,24 @@ const docenteAEnviarInforme = ref(null)
 const obtenerPeriodos = async () => {
   await periodoController.obtenerTodosPeriodos(res => {
     if (res.status != 200) return errorRequest()
-    periodos.value = res.data.periodos
-    selectedPeriodos.value = periodos.value.map(periodo => periodo.nombre)
+    periodos.value = res.data.periodos.map(p => {
+      p.label = p.nombre
+      return p
+    })
+    selectedPeriodos.value = [...periodos.value]
     periodoSelected.value = selectedPeriodos.value[0]
-    if (periodos.value.length != 0) obtenerInformesPeriodo(periodoSelected.value)
+    obtenerInformesPeriodo(periodoSelected.value)
   })
 }
 
-const obtenerInformesPeriodo = async (value) => {
+const cambiarPeriodo = (newSelected) => {
+  obtenerInformesPeriodo(newSelected)
+}
+
+const obtenerInformesPeriodo = async (periodoSearch) => {
   dataInformes.value = []
   loading.value = true
-  periodoSeleccionado.value = periodos.value.filter((periodo) => periodo.nombre == value)[0]
-  await informeController.obtenerTodosPorPeriodo(periodoSeleccionado.value._id, (res) => {
+  await informeController.obtenerTodosPorPeriodo(periodoSearch._id, (res) => {
     if (res.status != 200) return errorRequest()
     const informes = res.data.informes
     for (let i = 0; i < informes.length; i++) {
@@ -581,7 +586,6 @@ const generateMessage = (tipo, message) => {
 
 onMounted(() => {
   obtenerPeriodos()
-  console.log(userStore.user)
 })
 
 </script>

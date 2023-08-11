@@ -360,6 +360,7 @@
 import desarrolladaController from "src/controller/desarrollada-controller";
 import observacionController from "src/controller/observacion-controller";
 import evidenciaController from "src/controller/evidencia-controller";
+import { obtenerSingularPalabra } from "src/utils/obtenerSingular"
 import DOMPurify from 'dompurify';
 import { ref } from "vue";
 import { watch } from "vue";
@@ -855,7 +856,7 @@ function pegarEditor(evt) {
 
 
 function obtenerSingular(texto) {
-  return texto
+  return obtenerSingularPalabra(texto)
 }
 
 function formatearTodo() {

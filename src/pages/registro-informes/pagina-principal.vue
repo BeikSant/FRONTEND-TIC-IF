@@ -87,7 +87,10 @@
               <q-chip class="q-mr-none" size="sm" color="grey" square text-color="white" label="No Disponible" />
               <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
                 <q-tooltip v-if="props.row.estado" max-width="150px" style="text-align: center;">
-                  <span v-if="props.row.firma_director == null">
+                  <span v-if="props.row.firma_docente == null">
+                    Aún no ha enviado el informe
+                  </span>
+                  <span v-else-if="props.row.firma_director == null">
                     Firma pendiente del Director
                   </span>
                   <span v-else-if="props.row.estadoInforme.estado == 'Novedad documento'">
@@ -120,7 +123,15 @@
 
         <template v-slot:body-cell-firma_docente="props">
           <q-td :props="props" auto-width>
-            <q-btn size="sm" color="light-blue-9" icon-right="mdi-download" label="DESCARGAR" dense
+
+            <template v-if="props.row.firma_docente == null">
+              <q-chip class="q-mr-none" size="sm" color="grey" square text-color="white" label="No Disponible" />
+              <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
+                <q-tooltip max-width="150px" style="text-align: center;">Aún no ha enviado el informe</q-tooltip>
+              </q-btn>
+            </template>
+
+            <q-btn v-else size="sm" color="light-blue-9" icon-right="mdi-download" label="DESCARGAR" dense
               @click="desacargarPDF(props.row, props.row.firma_docente, 'firma_docente')">
               <q-tooltip max-width="150px" style="text-align: center;">Descargar Informe</q-tooltip>
             </q-btn>
@@ -165,8 +176,17 @@
 
 
                     <q-item-label v-else-if="col.name == 'firma_docente'">
-                      <q-btn size="sm" color="light-blue-9" icon-right="mdi-download" label="DESCARGAR" dense
-                        @click="desacargarPDF(props.row, props.row.firma_docente, col.name)">
+                      <template v-if="props.row.firma_docente == null">
+                        <q-chip class="q-mr-none" size="sm" color="grey" square text-color="white"
+                          label="No Disponible" />
+                        <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
+                          <q-tooltip max-width="150px" style="text-align: center;">Aún no ha enviado el
+                            informe</q-tooltip>
+                        </q-btn>
+                      </template>
+
+                      <q-btn v-else size="sm" color="light-blue-9" icon-right="mdi-download" label="DESCARGAR" dense
+                        @click="desacargarPDF(props.row, props.row.firma_docente, 'firma_docente')">
                         <q-tooltip max-width="150px" style="text-align: center;">Descargar Informe</q-tooltip>
                       </q-btn>
                     </q-item-label>
@@ -254,8 +274,11 @@
                           label="No Disponible" />
                         <q-btn round flat color="grey" size="xs" icon="mdi-help-circle-outline">
                           <q-tooltip v-if="props.row.estado" max-width="150px" style="text-align: center;">
-                            <span v-if="props.row.firma_director == null">
-                              Aprobación pendiente
+                            <span v-if="props.row.firma_docente == null">
+                              Aún no ha enviado el informe
+                            </span>
+                            <span v-else-if="props.row.firma_director == null">
+                              Firma pendiente del Director
                             </span>
                             <span v-else-if="props.row.estadoInforme.estado == 'Novedad documento'">
                               <span>Existe una novedad en el documento</span>
@@ -337,7 +360,6 @@ const obtenerHistorialInformes = async () => {
   await informeController.obtenerTodosInformes((res) => {
     if (res.status != 200) return errorRequest()
     const informes = res.data.informes
-    console.log(informes)
     dataInformes.value = []
     for (let i = 0; i < informes.length; i++) {
       dataInformes.value.push({
@@ -359,8 +381,9 @@ function devolverEstado(estado) {
   if (estado == 'completado') return { estado: 'Aprobado', color: 'green-5' }
   if (estado == 'enviadoFirmar') return { estado: 'Aprobación pendiente', color: 'orange-5' }
   if (estado == 'novedadDocumento') return { estado: 'Novedad documento', color: 'red-5' }
-  return { estado: 'No iniciado', color: 'grey-5' }
+  return { estado: 'Iniciado', color: 'indigo-5' }
 }
+
 
 async function desacargarPDF(info, base, tipo) {
   const url = process.env.API_URL + '/uploads/' + base
