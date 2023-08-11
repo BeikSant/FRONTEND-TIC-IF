@@ -3,7 +3,7 @@ import io from 'socket.io-client'
 
 const socket = io(process.env.API_URL, {
   transports: ["polling"],
-  path: '/informefinal-backend/socket.io/',
+  path: process.env.PATH_AXIOS,
   forceNew: true
 })
 
