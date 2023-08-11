@@ -197,8 +197,7 @@
                       @click="cambiarPosicionItem(item, key + 1 - 1)">
                       <q-tooltip class="bg-indigo"> Subir </q-tooltip></q-btn>
                     <q-btn flat icon="mdi-chevron-down" color="grey-7" size="xs" round
-                      :disable="key == actividadesDesarrolladas.length - 1"
-                      @click="cambiarPosicionItem(item, key + 1 + 1)">
+                      :disable="key == evidencias.length - 1" @click="cambiarPosicionItem(item, key + 1 + 1)">
                       <q-tooltip class="bg-indigo"> Bajar </q-tooltip></q-btn>
                   </q-item-section>
                   <q-item-section class="col-1 text-bold">
@@ -334,7 +333,7 @@
       </q-card-section>
       <q-separator v-if="!$q.screen.xs"></q-separator>
       <q-card-actions v-if="!$q.screen.xs" style="display: flex; justify-content: flex-end;">
-        <q-btn flat label="Cerrar" color="negative" v-close-popup />
+        <q-btn flat label="Cerrar" @click="actualizarActividad()" color="negative" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -366,6 +365,7 @@ import { ref } from "vue";
 import { watch } from "vue";
 import { useQuasar } from "quasar";
 
+const emits = defineEmits(["actualizarActividad"])
 const $q = useQuasar();
 const modalVerActividadEspecifica = ref(false);
 const tab_actividad = ref("actividadesdesarrolladas");
@@ -799,6 +799,16 @@ function generateDialog(message) {
     persistent: true,
     ok: false
   })
+}
+
+function actualizarActividad() {
+  const data = {
+    _id: props.actividad._id,
+    actividadesDesarrolladas: actividadesDesarrolladas.value.length,
+    observaciones: observaciones.value.length,
+    evidencias: evidencias.value.length
+  }
+  emits('actualizarActividad', data)
 }
 
 const generateMessage = (tipo, message) => {

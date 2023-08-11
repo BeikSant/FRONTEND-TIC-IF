@@ -189,7 +189,8 @@
             </q-tab-panel>
             <!-- FIN CONCLUSIONES Y O RECOMENDACIONES-->
           </q-tab-panels>
-          <CompObservaciones :formatoInforme="formatoInforme" :actividad="actividadEspecifica"></CompObservaciones>
+          <CompObservaciones :formatoInforme="formatoInforme" :actividad="actividadEspecifica"
+            @actualizar-actividad="(data) => actualizarActividad(data)"></CompObservaciones>
         </div>
       </transition>
       <q-inner-loading :showing="estaCargandoInformacion" label="Cargando información..." label-class="text-teal"
@@ -815,6 +816,19 @@ const generateMessage = (tipo, message) => {
     });
   }
 };
+
+function actualizarActividad(data) {
+  outerLoop: for (const fs of actividadesEspecificas.value) {
+    for (const act of fs.actividadesEspecificas) {
+      if (act._id == data._id) {
+        act.actividadDesarrollada = data.actividadesDesarrolladas
+        act.observacion = data.observaciones
+        act.evidencia = data.evidencias
+        break outerLoop;
+      }
+    }
+  }
+}
 
 function generateDialog(message) {
   return $q.dialog({
