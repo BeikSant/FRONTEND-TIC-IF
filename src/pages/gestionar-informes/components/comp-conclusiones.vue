@@ -178,10 +178,6 @@ const definitionsEditor = {
     tip: 'Cursiva',
     key: 0
   },
-  strike: {
-    tip: 'Tachado',
-    key: 0
-  },
   underline: {
     tip: 'Subrayado',
     key: 0
@@ -199,8 +195,8 @@ const definitionsEditor = {
     key: 0
   }
 }
-const toolbarEditor = [['bold', 'italic', 'strike', 'underline'], ['link'], ['undo', 'redo'], ['save'], ['borrar']]
-const toolbarEditorEditar = [['bold', 'italic', 'strike', 'underline'], ['link'], ['undo', 'redo'], ['edit']]
+const toolbarEditor = [['bold', 'italic', 'underline'], ['link'], ['undo', 'redo'], ['save'], ['borrar']]
+const toolbarEditorEditar = [['bold', 'italic', 'underline'], ['link'], ['undo', 'redo'], ['edit']]
 
 
 const obtenerConclusionesRecomendaciones = async () => {

@@ -388,10 +388,6 @@ const definitionsEditor = {
     tip: 'Negrita',
     key: 0
   },
-  italic: {
-    tip: 'Cursiva',
-    key: 0
-  },
   strike: {
     tip: 'Tachado',
     key: 0
@@ -414,8 +410,8 @@ const definitionsEditor = {
   }
 }
 
-const toolbarEditor = [['bold', 'italic', 'strike', 'underline'], ['link'], ['undo', 'redo'], [''], ['save', 'format']]
-const toolbarEditorEdit = [['bold', 'italic', 'strike', 'underline'], ['link'], ['undo', 'redo'], [''], ['save']]
+const toolbarEditor = [['bold', 'italic', 'underline'], ['link'], ['undo', 'redo'], [''], ['save', 'format']]
+const toolbarEditorEdit = [['bold', 'italic', 'underline'], ['link'], ['undo', 'redo'], [''], ['save']]
 
 //Estas variables tendran la informacion de la actividad especifica
 const actividadesDesarrolladas = ref([])
