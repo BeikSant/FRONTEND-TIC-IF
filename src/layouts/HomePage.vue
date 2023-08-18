@@ -3,7 +3,7 @@
     <q-layout view="hHh LpR fFf">
       <q-header class="bg-primary text-white">
         <q-toolbar>
-          <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
+          <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" v-if="$q.screen.xs || $q.screen.sm" />
 
           <q-toolbar-title class="title-main" width="70%">
             <div class="row items-center text-h6 text-bold" style="gap: 10px">
@@ -452,7 +452,6 @@ function toggleLeftDrawer() {
 
 function socket() {
   $socket.on('notificacion', (notificacion) => {
-    console.log("Aqui estamos")
     notificacion.tiempoTranscurrido = tiempoTranscurrido(notificacion.created_at)
     if (notificacion.destinos.length > 1) {
       notificacion.destinos.length.map(d => {

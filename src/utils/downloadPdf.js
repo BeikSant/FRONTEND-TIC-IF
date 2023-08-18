@@ -43,7 +43,7 @@ export default {
         normal: process.env.BASEURL + '/fonts/century_gothic/GOTHIC.TTF',
         bold: process.env.BASEURL + '/fonts/century_gothic/GOTHICB.TTF',
         italics: process.env.BASEURL + '/fonts/century_gothic/GOTHICI.TTF',
-        bolditalic: process.env.BASEURL + '/fonts/century_gothic/GOTHICBI.TTF',
+        bolditalics: process.env.BASEURL + '/fonts/century_gothic/GOTHICBI.TTF',
       }
     }
 

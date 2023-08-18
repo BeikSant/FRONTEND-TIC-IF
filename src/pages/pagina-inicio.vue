@@ -13,7 +13,7 @@
               Académico de Docentes de la carrera de Computación!</b>
           </div>
           <div class="text-center col-12 col-sm-6 col-lg-4 col-xl-3">
-            <img alt="CISC UNL" class="bg-white rounded-borders q-pa-xs" src="~assets/carrera img/logo-transparent.png"
+            <img alt="CISC UNL" class="bg-white rounded-borders q-pa-xs" src="~assets/carrera_img/logo-transparent.png"
               style="width: 210px">
           </div>
         </div>

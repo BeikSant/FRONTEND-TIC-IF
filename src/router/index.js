@@ -45,7 +45,7 @@ export default route(function (/* { store, ssrContext } */) {
     if (cookie) {
       if (isLogin) return next('/')
       const res = await user.verificarSesion()
-      if (res.status == 401) { Cookies.remove('auth-informefinal'); return next('/login') }
+      if (res.status != 200) { Cookies.remove('auth-informefinal'); return next('/login') }
       if (requireDirector && res.data.rol == "director") return next()
       if (requireDirector && res.data.rol == "docente") return next("/notfound")
       return next()

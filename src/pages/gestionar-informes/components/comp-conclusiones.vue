@@ -4,8 +4,9 @@
       <div v-show="isRecomendaciones" class="no-padding no-margin">
         <q-list bordered separator dense class="bg-white">
           <q-expansion-item v-model="expansion_conclusion" dense group="somegroup" header-class="bg-grey-5"
-            class="text-subtitle2" dense-toggle :label="'Agregar nuevas ' + formatoInforme.conclusiones.toLowerCase()"
-            icon="mdi-plus-box" :caption="expansion_conclusion ? '' : 'Expandir Aquí'">
+            class="text-subtitle2" dense-toggle
+            :label="'Agregar nueva ' + obtenerSingular(formatoInforme.conclusiones.toLowerCase())" icon="mdi-plus-box"
+            :caption="expansion_conclusion ? '' : 'Expandir Aquí'">
             <q-item class="bg-grey-2 no-padding">
               <q-item-section>
                 <q-item-label>
@@ -124,6 +125,7 @@ import { ref } from "vue";
 import { watch } from "vue";
 import DOMPurify from 'dompurify';
 import { useQuasar } from "quasar";
+import { obtenerSingularPalabra } from "src/utils/obtenerSingular";
 
 const props = defineProps({
   informe: Object,
@@ -176,10 +178,6 @@ const definitionsEditor = {
     tip: 'Cursiva',
     key: 0
   },
-  strike: {
-    tip: 'Tachado',
-    key: 0
-  },
   underline: {
     tip: 'Subrayado',
     key: 0
@@ -197,8 +195,8 @@ const definitionsEditor = {
     key: 0
   }
 }
-const toolbarEditor = [['bold', 'italic', 'strike', 'underline'], ['link'], ['undo', 'redo'], ['save'], ['borrar']]
-const toolbarEditorEditar = [['bold', 'italic', 'strike', 'underline'], ['link'], ['undo', 'redo'], ['edit']]
+const toolbarEditor = [['bold', 'italic', 'underline'], ['link'], ['undo', 'redo'], ['save'], ['borrar']]
+const toolbarEditorEditar = [['bold', 'italic', 'underline'], ['link'], ['undo', 'redo'], ['edit']]
 
 
 const obtenerConclusionesRecomendaciones = async () => {
@@ -346,7 +344,7 @@ function sanitizarTexto(texto) {
 }
 
 function obtenerSingular(texto) {
-  return texto
+  return obtenerSingularPalabra(texto)
 }
 
 function pegarEditor(evt) {
