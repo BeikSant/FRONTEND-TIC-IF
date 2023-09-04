@@ -463,7 +463,7 @@ const obtenerPeriodos = async () => {
     })
     selectedPeriodos.value = [...periodos.value]
     periodoSelected.value = selectedPeriodos.value[0]
-    obtenerInformesPeriodo(periodoSelected.value)
+    if (selectedPeriodos.value.length != 0) obtenerInformesPeriodo(periodoSelected.value)
   })
 }
 

@@ -383,7 +383,6 @@ import EliminarActividad from "./components/eliminar-actividad.vue";
 import CompObservaciones from "./components/comp-gestionar-actividad.vue";
 import { ref } from "vue";
 import { useQuasar } from "quasar";
-import generarPDF from "src/utils/generar-pdf";
 import periodoController from "src/controller/periodo-controller";
 import informeController from "src/controller/informe-controller";
 import especificaController from "src/controller/especifica-controller";
@@ -393,6 +392,7 @@ import formatoController from "src/controller/formato-controller";
 import planificacionDocente from "src/utils/planificacionDocente";
 import notificacionController from "src/controller/notificacion-controller";
 import { useUserStore } from "src/stores/user-store";
+import { saveAs } from 'file-saver'
 
 const tabPrincipal = ref('Actividades')
 const uploadOk = ref(false);
@@ -652,8 +652,6 @@ async function guardarFormActividad() {
   } else {
 
   }
-  //const aeRequest = await obtenerActividadesInforme()
-  //formatearArrayActividades(aeRequest)
 
   resetForm();
   generateMessage("OK", res.data.message);
@@ -773,6 +771,7 @@ async function descargarPDF() {
         break;
       }
     }
+    if (isNotify) break;
   }
   const dialog = $q.dialog({
     message: 'Generando informe...',
@@ -780,11 +779,15 @@ async function descargarPDF() {
     persistent: true, // we want the user to not be able to close it
     ok: false // we want the user to not be able to close it
   })
-  await generarPDF.generarPDF(
-    informe.value._id,
-    actividadesEspecificas.value,
-    periodo.value.nombre
-  );
+  const res = await informeController.generarFormato(informe.value._id)
+  if (res.status > 199 && res.status < 300) {
+    dialog.hide()
+    console.log(res.data)
+    const bytes = new Uint8Array(res.data.pdf.data);
+    const file = new Blob([bytes], { type: 'application/pdf' });
+    const fileURL = URL.createObjectURL(file);
+    saveAs(file, 'informe.pdf');
+  }
   dialog.hide()
 }
 

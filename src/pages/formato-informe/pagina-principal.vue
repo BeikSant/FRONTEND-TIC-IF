@@ -315,9 +315,9 @@
 import { ref } from 'vue';
 import { useQuasar } from 'quasar';
 import formatoController from 'src/controller/formato-controller';
-import downloadPdf from 'src/utils/downloadPdf';
 import { pluginsQuasar } from 'src/composables/pluginsQuasar';
 import { useRouter } from "vue-router";
+import { saveAs } from 'file-saver'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -468,8 +468,25 @@ function confirmacionEliminarFormato(formato) {
   dialogEliminarFormato.value = true
 }
 
-function verFormato(formatoVer) {
-  downloadPdf.formatoPdf(formatoVer, null)
+async function verFormato(formatoVer) {
+  const dialog = $q.dialog({
+    message: 'Generando formato...',
+    progress: true, // we enable default settings
+    persistent: true, // we want the user to not be able to close it
+    ok: false // we want the user to not be able to close it
+  })
+  const res = await formatoController.descargar(formatoVer._id)
+  if (res.status > 199 && res.status < 300) {
+    dialog.hide()
+    console.log(res.data)
+    const bytes = new Uint8Array(res.data.pdf.data);
+    const file = new Blob([bytes], { type: 'application/pdf' });
+    saveAs(file, 'formato.pdf');
+  } else {
+    plugins.generateNotify(plugins.NOTIFY_TYPES.negative, res.message)
+
+  }
+  dialog.hide()
 }
 
 const generateMessage = (tipo, message) => {

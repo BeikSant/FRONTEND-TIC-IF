@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "@tinymce/tinymce-vue": "^4.0.7",
     "autolinker": "^4.0.0",
     "axios": "^0.21.1",
     "connect-history-api-fallback": "^2.0.0",

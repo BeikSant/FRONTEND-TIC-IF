@@ -38,6 +38,8 @@ export default {
     }
   },
 
+
+
   async obtenerTodosPorPeriodo(periodo, callback) {
     try {
       let res = await api.get(PATH + '/all/' + periodo, configHeader.headers())
@@ -59,4 +61,16 @@ export default {
       return centralErrors.obtenerMensajeError(e)
     }
   },
+
+  async generarFormato(id, callback) {
+    try {
+      let res = await api.get(PATH + '/generate/' + id, configHeader.headers())
+      if (callback) return callback(res)
+      return res
+    } catch (e) {
+      if (callback) return callback(centralErrors.obtenerMensajeError(e))
+      return centralErrors.obtenerMensajeError(e)
+    }
+  },
+
 }

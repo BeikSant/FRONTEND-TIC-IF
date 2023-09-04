@@ -8,12 +8,17 @@
             :label="'Agregar nueva ' + obtenerSingular(formatoInforme.conclusiones.toLowerCase())" icon="mdi-plus-box"
             :caption="expansion_conclusion ? '' : 'Expandir Aquí'">
             <q-item class="bg-grey-2 no-padding">
+
               <q-item-section>
-                <q-item-label>
-                  <q-editor square flat class="text-body2" v-model="textconclusionesRecomendaciones" min-height="4rem"
-                    ref="editorRef" @paste="pegarEditor" :definitions="definitionsEditor" :toolbar="toolbarEditor"
-                    toolbar-bg="grey-5" toolbar-toggle-color="blue-7" />
-                </q-item-label>
+                <editor v-model="textconclusionesRecomendaciones"
+                  api-key="kelvh8lt9qpnex1cf3ne32qxcy8zslk1w7290j9vonsekyjk	" :init="{
+                    height: 200,
+                    menubar: false,
+                    plugins: pluginsEditor,
+                    toolbar: toolbarEditorNew,
+                    setup: setupEditor,
+                    language: 'es',
+                  }" />
               </q-item-section>
             </q-item>
           </q-expansion-item>
@@ -46,8 +51,8 @@
                   <div class="row justify-between items-center">
                     <div class="text-body2 items-center row q-gutter-x-md">
                       <q-icon name="mdi-file-edit"></q-icon>
-                      <b>Editar {{
-                        obtenerSingular(formatoInforme.conclusiones.toLowerCase()) }}</b>
+                      <span class="text-subtitle2">Editar {{
+                        obtenerSingular(formatoInforme.conclusiones.toLowerCase()) }}</span>
                     </div>
                     <div>
                       <q-btn dense size="sm" square flat class="bg-red text-white"
@@ -56,9 +61,14 @@
                   </div>
                 </q-item-label>
                 <q-item-label class="no-margin">
-                  <q-editor square flat class="text-body2" v-model="textEditConclusion" min-height="4rem" ref="editorRef"
-                    @paste="pegarEditor" :definitions="definitionsEditor" :toolbar="toolbarEditorEditar"
-                    toolbar-bg="grey-5" toolbar-toggle-color="blue-7" content-class="bg-grey-3" />
+                  <editor v-model="textEditConclusion" api-key="kelvh8lt9qpnex1cf3ne32qxcy8zslk1w7290j9vonsekyjk	" :init="{
+                    height: 200,
+                    menubar: false,
+                    plugins: pluginsEditor,
+                    toolbar: toolbarEditorEdit,
+                    setup: setupEditor,
+                    language: 'es',
+                  }" />
 
                 </q-item-label>
               </q-item-section>
@@ -92,11 +102,14 @@
                     <q-tooltip class="bg-indigo"> Eliminar </q-tooltip>
                   </span>
                 </div>
+
               </q-item-section>
             </q-item>
           </template>
         </q-list>
+
       </div>
+
     </transition>
     <q-inner-loading :showing="visibleConclusiones" label="Cargando información..." label-class="text-teal"
       label-style="font-size: 1.1em" />
@@ -121,11 +134,12 @@
 
 <script setup>
 import conclusionRecomendacionController from "src/controller/conclusionRecomendacion.controller";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { watch } from "vue";
 import DOMPurify from 'dompurify';
 import { useQuasar } from "quasar";
 import { obtenerSingularPalabra } from "src/utils/obtenerSingular";
+import Editor from '@tinymce/tinymce-vue'
 
 const props = defineProps({
   informe: Object,
@@ -195,9 +209,30 @@ const definitionsEditor = {
     key: 0
   }
 }
-const toolbarEditor = [['bold', 'italic', 'underline'], ['link'], ['undo', 'redo'], ['save'], ['borrar']]
-const toolbarEditorEditar = [['bold', 'italic', 'underline'], ['link'], ['undo', 'redo'], ['edit']]
 
+const toolbarEditorNew = 'savePer cancel | undo redo | bold italic forecolor backcolor | link |' +
+  'alignleft aligncenter alignright alignjustify | ' +
+  'bullist numlist outdent indent | removeformat | help'
+
+const toolbarEditorEdit = 'savePer | undo redo | bold italic forecolor backcolor | link |' +
+  'alignleft aligncenter alignright alignjustify | ' +
+  'bullist numlist outdent indent | removeformat | help'
+
+const pluginsEditor = ['advlist autolink lists link image charmap print preview anchor',
+  'searchreplace code fullscreen save textcolor',
+  'insertdatetime media table paste code help wordcount']
+
+const setupEditor = (editor) => {
+  editor.ui.registry.addButton('savePer', {
+    icon: 'upload',
+    tooltip: 'Guardar',
+    onAction: () => {
+      if (estaEditandoConclusion.value)
+        return editarConclusionRecomendacion()
+      guardar()
+    },
+  });
+}
 
 const obtenerConclusionesRecomendaciones = async () => {
   return await conclusionRecomendacionController.obtenerPorInforme(
@@ -231,7 +266,6 @@ function mostrarEditorEditar(item) {
   estaEditandoConclusion.value = true
   textEditConclusion.value = item.nombre
   conclusionEditar.value = item
-  editorRef.value = null
 }
 
 async function editarConclusionRecomendacion() {
@@ -308,8 +342,9 @@ function cancelarEdicion() {
 }
 
 async function guardar() {
-  const dialogo = generateDialog('Guardando ' + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase())
+  console.log(textconclusionesRecomendaciones.value)
   if (textconclusionesRecomendaciones.value == "") return;
+  const dialogo = generateDialog('Guardando ' + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase())
   const data = {
     nombre: sanitizarTexto(textconclusionesRecomendaciones.value),
     informe: props.informe._id,
@@ -336,44 +371,16 @@ async function guardar() {
 
 
 function sanitizarTexto(texto) {
-  texto = texto.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
-  texto = texto.replace(/(<div><br><\/div>){2,}/g, "<div><br></div>");
-  texto = DOMPurify.sanitize(texto)
-  texto = texto.replaceAll("&nbsp;", " ")
-  return texto.trim()
+  return DOMPurify.sanitize(texto)
 }
 
 function obtenerSingular(texto) {
   return obtenerSingularPalabra(texto)
 }
 
-function pegarEditor(evt) {
-  // Let inputs do their thing, so we don't break pasting of links.
-  if (evt.target.nodeName === 'INPUT') return
-  let text, onPasteStripFormattingIEPaste
-  evt.preventDefault()
-  evt.stopPropagation()
-  if (Array.isArray(editorRef.value)) editorRef.value = editorRef.value[0]
-  if (evt.originalEvent && evt.originalEvent.clipboardData.getData) {
-    text = evt.originalEvent.clipboardData.getData('text/plain')
-    editorRef.value.runCmd('insertText', text)
-  }
-  else if (evt.clipboardData && evt.clipboardData.getData) {
-    text = evt.clipboardData.getData('text/plain')
-    editorRef.value.runCmd('insertText', text)
-  }
-  else if (window.clipboardData && window.clipboardData.getData) {
-    if (!onPasteStripFormattingIEPaste) {
-      onPasteStripFormattingIEPaste = true
-      editorRef.value.runCmd('ms-pasteTextOnly', text)
-    }
-    onPasteStripFormattingIEPaste = false
-  }
-}
-
 async function cambiarPosicionConclusion(conclusion, key) {
-  const dialogo = generateDialog('Reordenando')
   if (estaEditandoConclusion.value) return generateMessage('WARNING', 'Se encuentra editando una ' + obtenerSingular(props.formatoInforme.conclusiones).toLowerCase())
+  const dialogo = generateDialog('Reordenando')
   textEditConclusion.value = null;
   indexEditConclusion.value = null;
   await conclusionRecomendacionController.editar(conclusion._id, { orden: key });
@@ -420,7 +427,6 @@ async function iniciarData() {
   isRecomendaciones.value = true;
   visibleConclusiones.value = false;
 }
-
 
 iniciarData()
 
