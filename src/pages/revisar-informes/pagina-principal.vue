@@ -340,7 +340,7 @@
                 Envíe el informe final aprobado y firmado al docente.</span>
             </q-banner>
             <div class="column items-center q-my-md">
-              <q-input n type="file" dense class="bg-grey-5 q-px-md" style="width: 98%;" />
+              <q-input @update:model-value="val => { informeUpload = val[0] }"  type="file" dense class="bg-grey-5 q-px-md" style="width: 98%;" />
             </div>
 
           </q-card-section>

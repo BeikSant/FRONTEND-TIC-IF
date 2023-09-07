@@ -118,7 +118,7 @@
     </q-card-section>
   </q-card>
 
-  <q-dialog v-model="formulario" square>
+  <q-dialog v-model="formulario" square persistent>
     <q-card>
       <q-card-section class="bg-primary text-white">
         <div class="text-h6 text-bold">{{ titulo_form }}</div>

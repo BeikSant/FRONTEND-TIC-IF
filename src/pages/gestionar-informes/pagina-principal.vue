@@ -688,6 +688,7 @@ async function obtenerDatosPdf(file) {
     uploadOk.value = false;
     return generateMessage("NO OK", "No se encontró ninguna actividad en el documento");
   }
+  console.log("AQUI TAMBIEN")
   isCargarActividades.value = true;
   dialog.hide()
 }

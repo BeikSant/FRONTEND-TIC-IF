@@ -30,7 +30,6 @@ export default {
 
 const compararActividades = (funcionesSustantivas, actividadesCompletas, actividadesObligatorias) => {
   let res = []
-
   for (const ac of actividadesCompletas) {
     for (const fs of funcionesSustantivas) {
       if (fs.actividadesDistributivo.some(item => item.sigla == ac.siglas)) {
@@ -93,16 +92,17 @@ async function obtenerInformacion(data) {
   const patron = /^A[A-Za-z]{1}\s*\d+/
   let actividadesCompletas = [];
   let actividadesObligatorias = [];
+  let isActividades = false
   for (let i = 0; i < datafilter.length; i++) {
-    if (datafilter[i] == 'ACTIVIDADES') { //Nos encontramos en el apartado de ACTIVIDADES
-      if (patron.test(datafilter[i]))
-        actividadesObligatorias.push({
-          siglas: datafilter[i],
-          descripcion: datafilter[i + 1],
-          horas: datafilter[i + 2]
-        })
-    } else { // NOS ENCONTRAMOS EN EL APARTADO DE CARGA HORARIA
-      if (patron.test(datafilter[i])) { // VERIFICA SI PERTENECE SI ES UN AD AG IA etc
+    if (datafilter[i] == 'ACTIVIDADES') isActividades = true
+    if (isActividades) {
+      if (patron.test(datafilter[i])) actividadesObligatorias.push({
+        siglas: datafilter[i],
+        descripcion: datafilter[i + 1],
+        horas: datafilter[i + 2]
+      })
+    } else {
+      if (patron.test(datafilter[i])) {
         let testHora = /^\d{2}:\d{2}$/
         let actividad = ''
         let isComplete = false
@@ -111,7 +111,11 @@ async function obtenerInformacion(data) {
           if (patron.test(datafilter[k + 1]) || datafilter[k + 1] == 'ACTIVIDADES' || testHora.test(datafilter[k + 1])) {
             if (actividad != '') {
               if (!actividadesCompletas.some(item => item.descripcion == actividad)) {
-                actividadesCompletas.push({ siglas: datafilter[i], descripcion: actividad, horas: 1 })
+                actividadesCompletas.push({
+                  siglas: datafilter[i],
+                  descripcion: actividad,
+                  horas: 1
+                })
               } else {
                 const actividadFind = actividadesCompletas.find(item => item.descripcion == actividad)
                 actividadFind.horas++
