@@ -24,6 +24,9 @@
                   v-model="textEditorConRec"
                   api-key="kelvh8lt9qpnex1cf3ne32qxcy8zslk1w7290j9vonsekyjk	"
                   :init="{
+                    mobile: {
+                      toolbar_mode: 'scrolling',
+                    },
                     height: 200,
                     menubar: false,
                     plugins: pluginsEditor,

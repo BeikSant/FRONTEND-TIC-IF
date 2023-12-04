@@ -36,7 +36,7 @@
               round
               dense
               icon="mdi-folder-edit"
-              @click="mostrarCamposActividad(props.row)"
+              @click="actividadGestionar = props.row"
             />
             <q-tooltip :offset="[10, 10]" class="bg-indigo">
               Gestionar actividad
@@ -73,6 +73,13 @@
     </q-table>
   </div>
 
+  <CompGestActividad
+    v-if="actividadGestionar != null"
+    :formatoInforme="formatoInforme"
+    :actividad="actividadGestionar"
+    @close-actividad="closeGestActividad"
+  ></CompGestActividad>
+
   <q-dialog v-model="dialogEditarActividad" persistent>
     <EditarActividad
       v-if="dialogEditarActividad"
@@ -85,7 +92,7 @@
 
 <script setup>
 import EditarActividad from "./editar-actividad.vue";
-
+import CompGestActividad from "./comp-gestionar-actividad.vue";
 import { pluginsQuasar } from "src/composables/pluginsQuasar";
 import distributivoController from "src/controller/distributivo";
 import especificaController from "src/controller/especifica-controller";
@@ -93,8 +100,13 @@ import especificaController from "src/controller/especifica-controller";
 import { onMounted, ref } from "vue";
 
 const pgQuasar = pluginsQuasar();
+const emit = defineEmits(["gestActivity"]);
 const props = defineProps({
   informe: {
+    type: Object,
+    default: null,
+  },
+  formatoInforme: {
     type: Object,
     default: null,
   },
@@ -146,7 +158,7 @@ const headersTable = [
     align: "center",
   },
 ];
-
+const actividadGestionar = ref(null);
 const funcionSustantiva = ref(null);
 const actividadesEspecificas = ref([]);
 const funcionesSustantivas = ref([]);
@@ -196,6 +208,14 @@ function editarActividad(actividad) {
 
 function closeDialog() {
   dialogEditarActividad.value = false;
+}
+
+function closeGestActividad(data) {
+  const find = actividadesEspecificas.value.find((a) => a._id == data._id);
+  find.actividadesDesarrolladas = data.actividadesDesarrolladas;
+  find.observaciones = data.observaciones;
+  find.evidencias = data.evidencias;
+  actividadGestionar.value = null;
 }
 
 onMounted(async () => {

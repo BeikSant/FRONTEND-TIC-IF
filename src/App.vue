@@ -41,4 +41,8 @@ html {
 .tox .tox-tbtn:disabled:hover svg {
   fill: rgba(34, 47, 62, 0.5) !important;
 }
+
+.tox-tinymce-aux {
+  display: none !important;
+}
 </style>

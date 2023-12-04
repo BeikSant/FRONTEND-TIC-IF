@@ -71,6 +71,7 @@
           <ListarActividadesDistributivo
             v-if="informeDocente"
             :informe="informeDocente"
+            :formatoInforme="formatoInforme"
           />
         </q-tab-panel>
         <q-tab-panel name="conclusiones">
