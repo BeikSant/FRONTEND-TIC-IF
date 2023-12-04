@@ -57,7 +57,10 @@ module.exports = configure(function (/* ctx */) {
         browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
         node: 'node16',
       },
-      env: require('dotenv').config().parsed,
+      env: {
+        VUE_APP_BASE_URL: 'http://localhost:9000',
+        VUE_APP_API_URL: 'http://181.233.51.129:8118'
+      },
       vueRouterMode: 'history', // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
