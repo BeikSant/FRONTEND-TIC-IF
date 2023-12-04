@@ -2,7 +2,7 @@ import { boot } from 'quasar/wrappers'
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: process.env.API_URL + '/api/v1',
+  baseURL: process.env.VITE_API_URL + '/api/v1',
   //withCredentials: true,
 })
 
