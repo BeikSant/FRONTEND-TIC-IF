@@ -39,7 +39,7 @@ const routes = [
         children: [
           {
             path: 'gestionar',
-            component: () => import('pages/gestionar-informes/pagina-principal.vue'),
+            component: () => import('pages/gestionar-informes/pagina-principal-V2.vue'),
             meta: {
               auth: true,
             }
@@ -95,8 +95,6 @@ const routes = [
       }
     ],
   },
-  // Always leave this as last one,
-  // but you can also remove it
   {
     path: '/:catchAll(.*)*',
     component: () => import('src/pages/error-no-encontrado.vue')

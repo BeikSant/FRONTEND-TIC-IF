@@ -3,7 +3,7 @@ import axios from 'axios'
 
 const api = axios.create({
   baseURL: process.env.API_URL + '/api/v1',
-  withCredentials: true,
+  //withCredentials: true,
 })
 
 export default boot(({ app }) => {

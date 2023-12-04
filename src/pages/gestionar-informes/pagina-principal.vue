@@ -525,6 +525,7 @@ const obtenerActividadesDistributivo = async () => {
 const obtenerActividadesInforme = async () => {
   return await especificaController.obtenerActividadesPorInforme(informe.value._id,
     (res) => {
+      console.log(res)
       if (res.status != 200) {
         generateMessage("NO OK", res.message);
         if (res.status == 401) return router.push({ path: "/login" })
@@ -763,17 +764,6 @@ async function enviarInforme() {
 }
 
 async function descargarPDF() {
-  let isNotify = false
-  for (const fs of actividadesEspecificas.value) {
-    for (const actividad of fs.actividadesEspecificas) {
-      if (actividad.horas == 0 && !isNotify) {
-        isNotify = true
-        generateMessage("WARNING", "Algunas actividades que no poseen horas")
-        break;
-      }
-    }
-    if (isNotify) break;
-  }
   const dialog = $q.dialog({
     message: 'Generando informe...',
     progress: true, // we enable default settings
@@ -786,7 +776,6 @@ async function descargarPDF() {
     console.log(res.data)
     const bytes = new Uint8Array(res.data.pdf.data);
     const file = new Blob([bytes], { type: 'application/pdf' });
-    const fileURL = URL.createObjectURL(file);
     saveAs(file, 'informe.pdf');
   }
   dialog.hide()

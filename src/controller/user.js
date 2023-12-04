@@ -6,13 +6,10 @@ const PATH = '/user'
 
 export default {
 
-  async login(data, callback) {
+  async login(data) {
     try {
-      let res = await api.post(PATH + '/login', data)
-      if (callback) return callback(res)
-      return res
+      return await api.post(PATH + '/login', data)
     } catch (e) {
-      if (callback) return callback(centralErrors.obtenerMensajeError(e))
       return centralErrors.obtenerMensajeError(e)
     }
   },
