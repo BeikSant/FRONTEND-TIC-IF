@@ -667,7 +667,7 @@ function devolverEstado(estado) {
 }
 
 async function desacargarPDF(info, base, tipo) {
-  const url = process.env.VITE_API_URL + "/uploads/" + base;
+  const url = process.env.VUE_APP_API_URL + "/uploads/" + base;
   const namePdf = `${userStore.user.primerNombre.toLowerCase()}-${userStore.user.primerApellido.toLowerCase()}-${info.periodo.toLowerCase()}-${tipo}-signed.pdf`;
   saveAs(url, namePdf);
 }

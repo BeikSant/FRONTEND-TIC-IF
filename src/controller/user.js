@@ -59,7 +59,7 @@ export default {
 
   async generarTokenRecuperacion(email, callback) {
     try {
-      let baseURL = process.env.VITE_BASE_URL
+      let baseURL = process.env.VUE_APP_BASE_URL
       let enlace = baseURL + '/recuperar/cuenta'
       let res = await api.post(PATH + '/tokenrecuperacion/' + email, { enlace })
       if (callback) return callback(res)

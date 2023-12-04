@@ -215,7 +215,7 @@ import user from "src/controller/user";
 
 const userStore = useUserStore();
 const $q = useQuasar();
-const baseURL = process.env.VITE_BASE_URL;
+const baseURL = process.env.VUE_APP_BASE_URL;
 const excelUpload = ref(null);
 const filter = ref("");
 const fixed = ref(false);

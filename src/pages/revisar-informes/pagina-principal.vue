@@ -807,7 +807,7 @@ function devolverEstado(estado) {
 }
 
 async function desacargarPDF(base) {
-  const url = process.env.VITE_API_URL + "/uploads/" + base;
+  const url = process.env.VUE_APP_API_URL + "/uploads/" + base;
   window.open(url, "_blank");
 }
 
