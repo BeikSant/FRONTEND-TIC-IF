@@ -58,7 +58,7 @@ module.exports = configure(function (/* ctx */) {
         node: 'node16',
       },
       env: {
-        VUE_APP_API_URL: 'http://181.233.51.129:8118'
+        VUE_APP_API_URL: 'https://nodo.com.ec/if'
       },
       vueRouterMode: 'history', // available values: 'hash', 'history'
       // vueRouterBase,
